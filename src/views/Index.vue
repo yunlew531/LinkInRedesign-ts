@@ -1,3 +1,9 @@
+<script lang="ts" setup>
+import Navigation from '@/components/Index/Navigation.vue';
+import Footer from '@/components/Index/Footer.vue';
+import Offcanvas from '@/components/Index/Offcanvas.vue';
+</script>
+
 <template>
   <div class="index-container">
     <Navigation />
@@ -5,15 +11,9 @@
       <router-view />
     </div>
     <Footer />
-    <!-- <Offcanvas /> -->
+    <Offcanvas />
   </div>
 </template>
-
-<script lang="ts" setup>
-import Navigation from '@/components/Index/Navigation.vue';
-import Footer from '@/components/Index/Footer.vue';
-// import Offcanvas from '@/components/Index/Offcanvas.vue';
-</script>
 
 <style lang="scss" scoped>
 .index-container{

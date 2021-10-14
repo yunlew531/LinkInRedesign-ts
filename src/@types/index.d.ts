@@ -11,12 +11,12 @@ interface ImportMetaEnv {
   VITE_APP_URL: string,
 }
 
-interface ISignInForm {
+interface SignInForm {
   email: string;
   password: string;
 }
 
-interface IRegisterForm {
+interface RegisterForm {
   name: string;
   phone: string;
   email: string;
@@ -24,7 +24,7 @@ interface IRegisterForm {
   city: string;
 }
 
-interface IProject {
+interface Project {
   title: 'string';
   content: any;
 }
@@ -37,11 +37,17 @@ declare module '@/api' {
   export function apiUpdateAbout(about: Object): Promise<any>;
   export function apiGetPhoto(): Promise<any>;
   export function apiCheckLogin(): Promise<any>;
-  export function apiRegister(registerObject: IRegisterForm): Promise<any>;
-  export function apiSignIn(signInForm: ISignInForm): Promise<any>;
-  export function apiCreateProject(project: IProject, id: string): Promise<any>;
-  export function apiUpdateProject(project: IProject, id: string): Promise<any>;
+  export function apiRegister(registerObject: RegisterForm): Promise<any>;
+  export function apiSignIn(signInForm: SignInForm): Promise<any>;
+  export function apiCreateProject(project: Project, id: string): Promise<any>;
+  export function apiUpdateProject(project: Project, id: string): Promise<any>;
   export function apiDeleteProject(id: string): Promise<any>;
+  export function apiLogout(): Promise<any>;
+}
+
+interface User {
+  name?: string;
+  phone?: number;
 }
 
 declare module '@/composition/store' {
@@ -49,8 +55,8 @@ declare module '@/composition/store' {
   export function getProfile(): Object;
   export function setOffcanvasDisplay(display: boolean): void;
   export function setLogin(status?: boolean): void;
-  export function setUser(): void;
-  export function updateUserProfile(profile: object): void;
+  export function setUserProfile(profile: User): void;
+  export function updateUserProfile(profile: User): void;
 }
 
 declare module '@/api/user_req' {

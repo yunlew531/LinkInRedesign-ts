@@ -11,6 +11,7 @@ const jobs = ref([
     company: 'Upwork',
     note: 'Remote only',
     img: 'Rectangle 2.2-1',
+    id: 'fefef'
   },
   {
     title: 'Product designer',
@@ -18,6 +19,7 @@ const jobs = ref([
     company: 'Facebook',
     note: 'CA, USA',
     img: 'Rectangle 2.2',
+    id: 'e4ffe'
   },
 ]);
 
@@ -39,14 +41,14 @@ const searches = ref([
   },
 ]);
 
-const deleteSearchHistory = (id) => {
-  console.log('delete:',id);
+const deleteSearchHistory = (id: string) => {
+  console.log('delete:', id);
 }
 
 const editSearchHistory = ref(false);
 const editSearches = () => editSearchHistory.value = !editSearchHistory.value;
 
-const searchTheHistory = (id) => {
+const searchTheHistory = (id: string) => {
   console.log('search:', id);
 };
 </script>

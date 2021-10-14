@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { ref, computed, defineAsyncComponent, Ref } from 'vue';
+import { ref, computed, defineAsyncComponent } from 'vue';
 import getImageUrl from '@/mixins/getImageUrl';
 import dayjs from '@/mixins/dayjs';
 
@@ -41,7 +41,7 @@ const currentComponent =  computed(() => {
 })
 
 let elHeight = 0;
-const fillHeightEl: Ref<null | HTMLElement> = ref(null);
+const fillHeightEl = ref<null | HTMLElement>(null);
 const handleComponent = (payload: Element | string | null) => {
   if(!payload) {
     elHeight = 0;

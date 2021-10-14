@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { ref, inject, computed, Ref } from 'vue';
+import { ref, inject, computed } from 'vue';
 import { apiUpdateAbout } from '@/api';
 import dayjs from '@/mixins/dayjs';
 import store from '@/composition/store';

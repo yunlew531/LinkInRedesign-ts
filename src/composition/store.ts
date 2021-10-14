@@ -3,7 +3,7 @@ import { apiGetProfile } from '@/api';
 
 const state = ref({
   isLogin: false,
-  user: {} as IUser,
+  user: {} as User,
   isOffcanvasShow: false,
 });
 
@@ -14,14 +14,9 @@ const getProfile = async () => {
   } catch(err) {}
 };
 
-interface IUser {
-  name: string;
-  phone: number;
-}
-
 const setOffcanvasDisplay = (boolean = true) => state.value.isOffcanvasShow = boolean;
 const setLogin = (boolean = true) => state.value.isLogin = boolean;
-const setUser = (payload: IUser) => state.value.user = payload;
+const setUserProfile = (payload: User) => state.value.user = payload;
 const updateUserProfile = (options: any) => {
   const optionsKeys = Object.keys(options);
   const optionsValues: Array<string> = Object.values(options);
@@ -33,6 +28,6 @@ export default {
   getProfile,
   setOffcanvasDisplay,
   setLogin,
-  setUser,
+  setUserProfile,
   updateUserProfile,
 };

@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { ref, Ref } from 'vue';
+import { ref } from 'vue';
 import { apiRegister, apiSignIn } from '@/api';
 import authReq from '@/api/auth_req';
 import Footer from '@/components/Index/Footer.vue';
@@ -22,7 +22,7 @@ const handleStatus = ($event: Event | Element, newPanel: string = '') => {
 
 const isRegisterBtnDisable = ref(false);
 
-const registerForm: Ref<IRegisterForm> = ref({
+const registerForm = ref<RegisterForm>({
   name: '',
   phone: '',
   email: '',
@@ -47,7 +47,7 @@ const register = async () => {
 };
 
 const isSignInBtnDisable = ref(false);
-const signinForm: Ref<ISignInForm> = ref({
+const signinForm = ref<SignInForm>({
   email: 'test@gmail.com',
   password: '000000',
 });

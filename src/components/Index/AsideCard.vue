@@ -1,4 +1,11 @@
-<script setup>
+<script lang="ts" setup>
+import { PropType } from 'vue';
+
+interface AsideCard {
+  title: string;
+  path: string;
+}
+
 defineProps({
   title: {
     type: String,
@@ -6,8 +13,8 @@ defineProps({
     required: true,
   },
   headLink: {
-    type: Object,
-    validator: (prop) => {
+    type: Object as PropType<AsideCard>,
+    validator: (prop: any) => {
       const isTitleValid = typeof prop.title === 'string';
       const isPathValid = prop.path && prop.path[0] === '/';
       return isTitleValid && isPathValid;

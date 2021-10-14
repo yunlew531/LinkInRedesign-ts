@@ -2,7 +2,7 @@
 import { ref, computed, provide } from 'vue';
 import { apiGetUser } from '@/api';
 import { useRoute, useRouter, onBeforeRouteUpdate } from 'vue-router';
-import getImageUrl from '@/mixins/getImageUrl.js';
+import getImageUrl from '@/mixins/getImageUrl';
 import ProfileNav from '@/components/Index/Profile/ProfileNav.vue';
 import MiniDashboard from '@/components/Index/MiniDashboard.vue';
 import AsideCard from '@/components/Index/AsideCard.vue';

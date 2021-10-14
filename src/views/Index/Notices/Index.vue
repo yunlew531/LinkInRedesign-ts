@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { ref, Ref } from 'vue';
+import { ref } from 'vue';
 import getImageUrl from '@/mixins/getImageUrl';
 
 const recentNotices = ref([
@@ -36,7 +36,7 @@ const openSearchHistory = () => {
   console.log('open history');
 };
 
-const activeBtnsList: Ref<string[]> = ref([]);
+const activeBtnsList = ref<string[]>([]);
 const showBtnsList = (noticeId: string, event: Event) => {
   if(event.type === 'mouseenter') 
     activeBtnsList.value.push(noticeId);

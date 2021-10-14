@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { ref, onMounted, Ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import getImageUrl from '@/mixins/getImageUrl';
 import handleTextLength from '@/mixins/handleTextLength';
 import Quill from 'quill';
@@ -52,7 +52,7 @@ onMounted(() => {
   });
 });
 
-const activeBtnsList: Ref<string[]> = ref([]);
+const activeBtnsList = ref<string[]>([]);
 const showBtnsList = (feedId: string, event: Event) => {
   if(event.type === 'mouseenter') 
     activeBtnsList.value.push(feedId);

@@ -1,13 +1,13 @@
-<script setup>
+<script lang="ts" setup>
 import { inject, computed } from 'vue';
 import { useRouter } from 'vue-router';
-import store from '@/composition/store.js';
+import store from '@/composition/store';
 import { apiLogout } from '@/api';
 
 const router = useRouter();
-const { setLogin, setOffcanvasDisplay, setUser } = store;
+const { setLogin, setOffcanvasDisplay, setUserProfile } = store;
 
-const state = inject('state');
+const state: any = inject('state');
 
 const isOffcanvasShow = computed(() => {
   const { isOffcanvasShow } = state.value;
@@ -25,10 +25,10 @@ const logout = async () => {
     await apiLogout();
     setLogin(false);
     closeOffcanvas();
-    setUser({});
+    setUserProfile({});
     document.cookie = `LinkInRe=;expires=Thu, 01 Jan 1970 00:00:00 UTC;`;
     router.push('/login');
-  } catch (err) {
+  } catch (err: any) {
     console.dir(err.response.data.message);
   }
 };
