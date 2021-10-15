@@ -88,7 +88,7 @@ const updateDescription = async () => {
 const cancelEditDescription = () => isEditDescription.value = false;
 
 const uploadPhoto = async (e: Event) => {
-  const file = (<any>e.target).files[0];
+  const file = (<HTMLInputElement>e.target).files![0];
   const formData = new FormData();
   formData.append('img-file', file);
   try {
@@ -101,7 +101,7 @@ const uploadPhoto = async (e: Event) => {
 };
 
 const uploadBackgroundImg = async (e: Event) => {
-  const file = (<any>e.target).files[0];
+  const file = (<HTMLInputElement>e.target).files![0];
   const formData = new FormData();
   formData.append('img-file', file);
   try {

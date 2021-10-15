@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { ref, watch, computed, defineAsyncComponent, Ref, Component } from 'vue';
+import { ref, watch, computed, defineAsyncComponent, PropType } from 'vue';
 import { apiCreateProject, apiUpdateProject, apiDeleteProject } from '@/api';
 import { QuillDeltaToHtmlConverter } from 'quill-delta-to-html'; 
 import store from '@/composition/store';
@@ -23,7 +23,7 @@ const props = defineProps({
     required: true,
   },
   currentProjectIdx: {
-    type: Number,
+    type: Number as PropType<number>,
     default: 0,
     required: true,
   }
@@ -39,7 +39,7 @@ watch(isModalShow, (value) => {
   const { body } = document;
   if (value) {
     body.style.overflow = 'hidden';
-  } else if (titleEditorEl.value) {
+  } else {
     body.style.overflow = 'auto';
     isProjectEdit.value = false;
     emits('setCurrentProject', {});
@@ -68,11 +68,12 @@ const handleCurrentProject = (num: number) => {
   emits('setCurrentIdx', idx);
 };
 
-const titleEditorEl: Ref<any> = ref(null);
-const contentEditorEl: Ref<any> = ref(null);
+type ModalStatus = 'update' | 'create';
+
+const titleEditorEl = ref<any>(null);
+const contentEditorEl = ref<any>(null);
 const isProjectEdit = ref(false);
-// status: update | create
-const modalStatus = ref('update');
+const modalStatus = ref<ModalStatus>('update');
 const isShowDeleteBtn = computed(() => modalStatus.value === 'update' ? true : false);
 const editProject = () => {
   modalStatus.value = 'update';
@@ -87,7 +88,7 @@ const createProject = () => {
   showModal();
 };
 
-const setModalStatus = (status: string) => modalStatus.value = status;
+const setModalStatus = (status: ModalStatus) => modalStatus.value = status;
 
 const method = computed(() => modalStatus.value === 'update' ? apiUpdateProject : apiCreateProject);
 const postProject = async () => {
@@ -145,17 +146,6 @@ const contentEditorOptions = ref({
     ],
   },
 });
-
-// const contentEditorOptions = ref({
-//   modules: {
-//     toolbar: {
-//       container: [['image']],
-//       handlers: {
-//         image: imageHandler
-//       },
-//     }
-//   },
-// });
 
 defineExpose({
   currentProjectIdx,

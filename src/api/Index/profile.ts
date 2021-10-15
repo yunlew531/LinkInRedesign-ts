@@ -9,3 +9,7 @@ export const updateAbout = (about: Object) => authReq.put('/self/about/update', 
 export const createProject = (project: Project) => authReq.post('/self/project/create', { project });
 export const updateProject = (project: Project, id: string) => authReq.put(`/self/project/${id}`, { project });
 export const deleteProject = (id: string) => authReq.delete(`/self/project/${id}`);
+export const updateExperienceImg = (formData: FormData) => authReq.post(`/self/experience/image`, formData);
+export const createExperience = (experience: Experience) => authReq.post(`/self/experience/create`, experience);
+export const updateExperience = (id: string, experience: Experience) => authReq.put(`/self/experience/${id}`, experience);
+export const deleteExperience = (id: string) => authReq.delete(`/self/experience/${id}`);

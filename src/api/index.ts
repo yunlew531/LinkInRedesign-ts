@@ -3,11 +3,10 @@ import { getUser } from './Index/user_profile';
 
 // auth
 import { logout, checkLogin, register, signIn } from './Index/login';
-// import { register, signIn, logout, checkLogin } from './Index/login';
-import { getProfile, createProject, updateProject, deleteProject,
-  getPhoto, uploadPhoto, uploadBackgroundImg, updateDescription, updateAbout } from './Index/profile';
-// import { getProfile,
-//    createProject, updateProject, deleteProject } from './Index/profile';
+import { getProfile, createProject, updateProject, deleteProject, getPhoto, uploadPhoto,
+  uploadBackgroundImg, updateDescription, updateAbout, createExperience, updateExperience,
+  updateExperienceImg, deleteExperience
+} from './Index/profile';
 
 // normal
 export const apiGetUser = getUser;
@@ -26,3 +25,7 @@ export const apiGetPhoto = getPhoto;
 export const apiCreateProject = createProject;
 export const apiUpdateProject = updateProject;
 export const apiDeleteProject = deleteProject;
+export const apiCreateExperience = createExperience;
+export const apiUpdateExperience = updateExperience;
+export const apiUploadExperienceImg = updateExperienceImg;
+export const apiDeleteExperience = deleteExperience;

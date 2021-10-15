@@ -43,11 +43,21 @@ declare module '@/api' {
   export function apiUpdateProject(project: Project, id: string): Promise<any>;
   export function apiDeleteProject(id: string): Promise<any>;
   export function apiLogout(): Promise<any>;
+  export function apiCreateExperience(experience: Experience): Promise<any>;
+  export function apiUpdateExperience(id: string, experience: Experience): Promise<any>;
+  export function apiUploadExperienceImg(formData: FormData): Promise<any>;
+  export function apiDeleteExperience(id: string): Promise<any>;
 }
 
 interface User {
   name?: string;
   phone?: number;
+  description?: string;
+  about?: string;
+  photo?: string;
+  background_cover?: string;
+  projects?: object;
+  experience?: Array<object>;
 }
 
 declare module '@/composition/store' {
@@ -89,3 +99,13 @@ declare module '@/mixins/dayjs' {
 
 declare module 'quill';
 declare module 'quill-delta-to-html';
+
+interface Experience {
+  id?: string,
+  title?: string;
+  place?: string;
+  start_time?: number;
+  end_time?: number;
+  content?: string;
+  image_url?: string;
+}

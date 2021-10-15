@@ -48,7 +48,7 @@ const deleteArticle = () => emits('delete');
 
 const getText = () => quill.getText().trim();
 const setText = (text = '') => quill.setText(text);
-const getContents = (content: any) => quill.getContents(content);
+const getContents = () => quill.getContents();
 const setContents = (content: any) => quill.setContents(content);
 
 defineExpose({

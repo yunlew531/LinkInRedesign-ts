@@ -6,7 +6,7 @@ import store from '@/composition/store';
 import getImageUrl from '@/mixins/getImageUrl';
 import Editor from '@/components/Editor.vue';
 import ProjectModal from '@/components/Index/ProjectModal.vue';
-// import FormModal from '@/components/Index/FormModal.vue';
+import ExperienceModal from '@/components/Index/ExperienceModal.vue';
 
 const { updateUserProfile } = store;
 
@@ -70,34 +70,13 @@ const skillsList = ref([
   },
 ]);
 
-const experienceList = ref([
-  {
-    title: 'Freelance UX/UI designer',
-    mode: 'Self Employed',
-    place: 'Around the world',
-    time: 'Jun 2016 — Present',
-    experienceTime: '3 yrs 3 mos',
-    content: 'Work with clients and web studios as freelancer. Work in next areas: eCommerce web projects; creative landing pages; iOs and Android apps; corporate web sites and corporate identity sometimes.',
-    fileName: 'Group',
-  },
-   {
-    title: 'UX/UI designer',
-    mode: 'Upwork',
-    place: 'International',
-    time: 'Jun 2019 — Present',
-    experienceTime: '3 mos',
-    content: 'New experience with Upwork system. Work in next areas: UX/UI design, graphic design, interaction design, UX research.',
-    fileName: 'Rectangle 2.2-1',
-  },
-])
-
 const editorOptions = ref({ placeholder: 'input about' });
 
-interface ISkillListUser {
+interface SkillListUser {
   fileName: string;
 }
 
-const filterFivePerson = (users: Array<ISkillListUser>) => users.filter((user, key) => key < 5);
+const filterFivePerson = (users: Array<SkillListUser>) => users.filter((user, key) => key < 5);
 
 const editorEl: any = ref(null);
 const isEditAbout = ref(false);
@@ -123,7 +102,7 @@ const cancelEdit = () => isEditAbout.value = false;
 
 const currentProject = ref({});
 const currentProjectIdx = ref(0);
-const projectModalEl: any = ref(null);
+const projectModalEl = ref<any>(null);
 const showProjectModal = (project: object, key: number) => {
   currentProject.value = project;
   currentProjectIdx.value = key;
@@ -137,16 +116,44 @@ const setCurrentIdx = (idx: number) => {
 };
 const createProject = () => projectModalEl.value.createProject();
 
-interface IOp {
+interface Op {
   insert: {
     image: string;
   }
 }
 
 const handleProjectImg = (project: any) => {
-  const hasImage = project.content.ops.filter((op: IOp) => op.insert.image)[0];
+  const hasImage = project.content.ops.filter((op: Op) => op.insert.image)[0];
   return hasImage ? hasImage.insert.image : getImageUrl('image');
 };
+
+const experienceModalEl = ref<any>(null);
+const createExperience = () => {
+  experienceModalEl.value.setStatus('create');
+  experienceModalEl.value.showModal();
+};
+
+const tempEeperience = ref<Experience>({});
+const editExperience = (experience: Experience) => {
+  tempEeperience.value = experience;
+  experienceModalEl.value.setStatus('update');
+  experienceModalEl.value.showModal();
+};
+
+const handleRelativeTime = (experience: Experience) => {
+  const { start_time, end_time } = experience;
+  if (!start_time || !end_time) return;
+  return dayjs(start_time * 1000).to(dayjs(end_time * 1000), true);
+}
+
+const handleExpImg = (experience: Experience) => {
+  if (experience && experience.image_url)
+    return experience.image_url;
+  else
+    return getImageUrl('upload_cloud');
+};
+
+const setTempExperience = (experience: Experience) => tempEeperience.value = experience;
 </script>
 
 <template>
@@ -154,7 +161,8 @@ const handleProjectImg = (project: any) => {
     <ProjectModal ref="projectModalEl" :projects="user.projects"
       :currentProject="currentProject" :currentProjectIdx="currentProjectIdx"
       @setCurrentProject="setCurrentProject" @setCurrentIdx="setCurrentIdx" />
-    <!-- <FormModal /> -->
+    <ExperienceModal ref="experienceModalEl" :experience="tempEeperience"
+      @setTempExperience="setTempExperience" />
     <h2 class="card-title">About</h2>
     <Editor v-show="isEditAbout" ref="editorEl" :options="editorOptions"
       @update="updateAbout" @cancel="cancelEdit" />
@@ -174,13 +182,11 @@ const handleProjectImg = (project: any) => {
     <ul v-if="user.projects?.length" class="project-list">
       <li v-for="(project, key) in user.projects" :key="project.id" class="project-card"
         @click="showProjectModal(project, key)">
-        <router-link to="/">
-          <img :src="handleProjectImg(project)" :alt="project.title" class="project-img">
-          <h3 class="project-card-title">{{ project.title }}</h3>
-          <span class="project-card-subtitle">
-            {{ dayjs(project.create_time * 1000).format('YYYY/MM/DD') }}
-          </span>
-        </router-link>
+        <img :src="handleProjectImg(project)" :alt="project.title" class="project-img">
+        <h3 class="project-card-title">{{ project.title }}</h3>
+        <span class="project-card-subtitle">
+          {{ dayjs(project.create_time * 1000).format('YYYY/MM/DD') }}
+        </span>
       </li>
     </ul>
     <div v-else class="project-list-empty">empty. please click create button</div>
@@ -208,22 +214,32 @@ const handleProjectImg = (project: any) => {
   <section class="profile-card">
     <div class="experience-header">
       <h2 class="card-title experience-section-title">Experience</h2>
-      <button type="button" class="create-experience-btn">create</button>
+      <button type="button" class="create-experience-btn"
+        @click="createExperience">create</button>
     </div>
-    <ul>
-      <li v-for="experience in experienceList" :key="experience.title" class="experience-card">
-        <img class="experience-card-img" :src="getImageUrl(experience.fileName)" alt="experience.title">
-        <div class="experience-card-body">
-          <h3 class="experience-card-title">{{ experience.title }}</h3>
-          <h4>{{ experience.mode }}</h4><span>{{ experience.place }}</span>
+    <ul v-if="user.experience?.length">
+      <li v-for="experience in user.experience" :key="experience.title" class="experience-card">
+        <img class="experience-card-img" :src="handleExpImg(experience)" :alt="experience.title">
+        <div class="experience-card-content">
+          <div class="experience-card-header">
+            <div>
+              <h3 class="experience-card-title">{{ experience.title }}</h3>
+              <h4>{{ experience.place }}</h4>
+            </div>
+            <button type="button" class="experience-edit-btn" @click="editExperience(experience)">edit</button>
+          </div>
           <p>
-            <span>{{ experience.time }}</span>
-            <span  class="experience-card-experience-time">{{ experience.experienceTime }}</span>
+            <span>{{ dayjs(experience.start_time * 1000).format('D MMMM YYYY') }}</span> - 
+            <span>{{ dayjs(experience.end_time * 1000).format('D MMMM YYYY') }}</span>
+            <span class="experience-card-experience-time">{{ handleRelativeTime(experience) }}</span>
           </p>
           <p class="experience-card-paragraph">{{ experience.content }}</p>
         </div>
       </li>
     </ul>
+    <div v-else class="experience-empty-notice">
+      empty
+    </div>
   </section>
   <section class="profile-card">
     <h2 class="card-title">Education</h2>
@@ -326,8 +342,9 @@ const handleProjectImg = (project: any) => {
 }
 .project-card {
   width: 31.333333%;
-  margin: 0 2% 20px 0;
   transition: transform 0.2s, color 0.2s;
+  cursor: pointer;
+  margin: 0 2% 20px 0;
   > a {
     display: block;
     color: inherit;
@@ -450,14 +467,12 @@ const handleProjectImg = (project: any) => {
   height: 54px;
   margin-right: 15px;
 }
-.experience-card-body {
-  > h4, span {
+.experience-card-content {
+  flex-grow: 1;
+  h4 {
     font-size: $fs-6;
-    color: rgba($dark-100, 0.7)
-  }
-  > h4 {
-    display: inline-block;
-    margin-right: 10px;
+    color: rgba($dark-100, 0.7);
+    font-weight: lighter;
   }
   > p {
     margin-top: 10px;
@@ -468,8 +483,25 @@ const handleProjectImg = (project: any) => {
     font-weight: bold;
   }
 }
+.experience-card-header {
+  display: flex;
+}
+.experience-edit-btn {
+  @include button;
+  align-self: center;
+  width: auto;
+  background: transparent;
+  color: $blue-200;
+  padding: 5px 10px;
+  margin-left: auto;
+  transition: color 0.2s, background-color 0.2s;
+  &:hover {
+    background: $blue-200;
+    color: $white;
+  }
+}
 .experience-card-title {
-  margin-bottom: 15px;
+  margin-bottom: 10px;
 }
 .experience-card-paragraph {
   line-height: 1.5;
@@ -491,5 +523,12 @@ const handleProjectImg = (project: any) => {
 .education-time {
   font-size: $fs-6;
   color: rgba($dark-100, 0.7)
+}
+.experience-empty-notice {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: $fs-3;
+  min-height: 100px;
 }
 </style>
