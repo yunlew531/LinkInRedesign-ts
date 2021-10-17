@@ -1,10 +1,10 @@
 <script lang="ts" setup>
-import { ref, inject, computed } from 'vue';
+import { ref, inject, computed, Ref } from 'vue';
 import store from '@/composition/store';
 import { apiGetPhoto } from '@/api';
 import getImageUrl from '@/mixins/getImageUrl';
 
-const state: any = inject('state');
+const state: Ref<State> = inject('state')!;
 const { setOffcanvasDisplay, updateUserProfile } = store;
 
 const isLogin = computed(() => state.value.isLogin);
@@ -43,6 +43,7 @@ const getPhoto = async () => {
   try {
     const { data } = await apiGetPhoto();
     const { photo, name } = data.user;
+   
     updateUserProfile({ photo, name });
   } catch (err) {}
 };

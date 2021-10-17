@@ -1,38 +1,19 @@
 <script lang="ts" setup>
-import { ref, inject, computed } from 'vue';
+import { ref, inject, computed, defineAsyncComponent, Ref } from 'vue';
 import { apiUpdateAbout } from '@/api';
 import dayjs from '@/mixins/dayjs';
 import store from '@/composition/store';
 import getImageUrl from '@/mixins/getImageUrl';
-import Editor from '@/components/Editor.vue';
-import ProjectModal from '@/components/Index/ProjectModal.vue';
-import ExperienceModal from '@/components/Index/ExperienceModal.vue';
+
+const Editor = defineAsyncComponent(() => import('@/components/Editor.vue'));
+const ProjectModal = defineAsyncComponent(() => import('@/components/Index/ProjectModal.vue'));
+const ExperienceModal = defineAsyncComponent(() => import('@/components/Index/Profile/ExperienceModal.vue'));
+const EducationModal = defineAsyncComponent(() => import('@/components/Index/Profile/EducationModal.vue'));
 
 const { updateUserProfile } = store;
 
-const state: any = inject('state');
+const state: Ref<State> = inject('state')!;
 const user = computed(() => state.value.user);
-
-// const projects = ref([
-//   {
-//     title: 'Zara redesign concept',
-//     subtitle: 'UX/UI design, 15.07.2019',
-//     fileName: 'Projects-1',
-//     content: 'lorem lorem lorem',
-//   },
-//   {
-//     title: 'SCTHON event brand identity',
-//     subtitle: 'Graphic design, 03.31.2019',
-//     fileName: 'Projects-2',
-//     update_time: 1632871052060,
-//     create_time: 1632611847362,
-//   },
-//   {
-//     title: 'Drozd. Brand identity. 2016',
-//     subtitle: 'Graphic design, 03.04.2016',
-//     fileName: 'Projects-3',
-//   },
-// ]);
 
 const skillsList = ref([
   {
@@ -112,6 +93,7 @@ const showProjectModal = (project: object, key: number) => {
 const setCurrentProject = (project: any) => currentProject.value = project;
 const setCurrentIdx = (idx: number) => {
   currentProjectIdx.value = idx;
+  if(!user.value.projects) return;
   currentProject.value = user.value.projects[idx];
 };
 const createProject = () => projectModalEl.value.createProject();
@@ -140,11 +122,16 @@ const editExperience = (experience: Experience) => {
   experienceModalEl.value.showModal();
 };
 
-const handleRelativeTime = (experience: Experience) => {
-  const { start_time, end_time } = experience;
-  if (!start_time || !end_time) return;
-  return dayjs(start_time * 1000).to(dayjs(end_time * 1000), true);
-}
+const handleRelativeTime = (startTime: number | undefined, endTime: number | undefined) => {
+  if (startTime && endTime) return dayjs(startTime * 1000).to(dayjs(endTime * 1000), true);
+  else return '';
+};
+
+const handleStartTime = (startTime: number | undefined) => 
+  startTime ? dayjs(startTime * 1000).format('D MMMM YYYY'): '';
+
+const handleEndTime = (endTime: number | undefined) => 
+  endTime ? dayjs(endTime * 1000).format('D MMMM YYYY'): '';
 
 const handleExpImg = (experience: Experience) => {
   if (experience && experience.image_url)
@@ -163,6 +150,7 @@ const setTempExperience = (experience: Experience) => tempEeperience.value = exp
       @setCurrentProject="setCurrentProject" @setCurrentIdx="setCurrentIdx" />
     <ExperienceModal ref="experienceModalEl" :experience="tempEeperience"
       @setTempExperience="setTempExperience" />
+    <EducationModal />
     <h2 class="card-title">About</h2>
     <Editor v-show="isEditAbout" ref="editorEl" :options="editorOptions"
       @update="updateAbout" @cancel="cancelEdit" />
@@ -229,16 +217,17 @@ const setTempExperience = (experience: Experience) => tempEeperience.value = exp
             <button type="button" class="experience-edit-btn" @click="editExperience(experience)">edit</button>
           </div>
           <p>
-            <span>{{ dayjs(experience.start_time * 1000).format('D MMMM YYYY') }}</span> - 
-            <span>{{ dayjs(experience.end_time * 1000).format('D MMMM YYYY') }}</span>
-            <span class="experience-card-experience-time">{{ handleRelativeTime(experience) }}</span>
+            <span>{{ handleStartTime(experience.start_time) }}</span> - 
+            <span>{{ handleEndTime(experience.end_time) }}</span>
+            <span class="experience-card-experience-time">
+              {{ handleRelativeTime(experience.start_time, experience.end_time) }}</span>
           </p>
           <p class="experience-card-paragraph">{{ experience.content }}</p>
         </div>
       </li>
     </ul>
     <div v-else class="experience-empty-notice">
-      empty
+      empty. please click create button
     </div>
   </section>
   <section class="profile-card">

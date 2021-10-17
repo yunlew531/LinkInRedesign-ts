@@ -1,5 +1,7 @@
 <script lang="ts" setup>
-import MiniDashboard from '@/components/Index/MiniDashboard.vue';
+import { defineAsyncComponent } from 'vue';
+
+const MiniDashboard = defineAsyncComponent(() => import('@/components/Index/MiniDashboard.vue'));
 
 </script>
 

@@ -1,9 +1,9 @@
-import { ref, readonly } from 'vue';
+import { ref, readonly, Ref } from 'vue';
 import { apiGetProfile } from '@/api';
 
-const state = ref({
+const state = ref<State>({
   isLogin: false,
-  user: {} as User,
+  user: {},
   isOffcanvasShow: false,
 });
 
@@ -24,7 +24,7 @@ const updateUserProfile = (options: any) => {
 };
 
 export default {
-  state: readonly(state),
+  state: readonly(state) as Ref<State>,
   getProfile,
   setOffcanvasDisplay,
   setLogin,

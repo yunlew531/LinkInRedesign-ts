@@ -92,11 +92,12 @@ const setModalStatus = (status: ModalStatus) => modalStatus.value = status;
 
 const method = computed(() => modalStatus.value === 'update' ? apiUpdateProject : apiCreateProject);
 const postProject = async () => {
-  const project = {
+  const { id } = currentProject.value;
+  const project: Project = {
+    id,
     title: titleEditorEl.value.getText(),
     content: contentEditorEl.value.getContents(),
   };
-  const { id } = currentProject.value;
 
   try {
     const { data } = await method.value(project, id);
@@ -163,7 +164,7 @@ defineExpose({
     <button class="close-modal-btn" @click="hideModal">
       <span class="material-icons close-modal-btn-icon">close</span>
     </button>
-    <button type="button" class="left-arrow" :disabled="currentProjectIdx === 0"
+    <button v-show="!isProjectEdit" type="button" class="left-arrow" :disabled="currentProjectIdx === 0"
       @click="handleCurrentProject(-1)">
       <span class="material-icons">arrow_back_ios</span>
     </button>
@@ -197,7 +198,7 @@ defineExpose({
         <div v-show="!isProjectEdit" class="project-content" v-html="currentContent"></div>
       </div>
     </div>
-    <button type="button" class="right-arrow" :disabled="currentProjectIdx === projects.length - 1"
+    <button v-show="!isProjectEdit" type="button" class="right-arrow" :disabled="currentProjectIdx === projects.length - 1"
       @click="handleCurrentProject(1)">
       <span class="material-icons">arrow_forward_ios</span>
     </button>

@@ -1,10 +1,11 @@
 <script lang="ts" setup>
-import { ref } from 'vue';
+import { ref, defineAsyncComponent } from 'vue';
 import { apiRegister, apiSignIn } from '@/api';
 import authReq from '@/api/auth_req';
-import Footer from '@/components/Index/Footer.vue';
 import store from '@/composition/store';
 import { useRouter } from 'vue-router';
+
+const Footer = defineAsyncComponent(() => import('@/components/Index/Footer.vue'));
 
 const router = useRouter();
 const { setLogin } = store;

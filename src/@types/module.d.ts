@@ -7,28 +7,6 @@ declare module '*.vue' {
   export default component
 }
 
-interface ImportMetaEnv {
-  VITE_APP_URL: string,
-}
-
-interface SignInForm {
-  email: string;
-  password: string;
-}
-
-interface RegisterForm {
-  name: string;
-  phone: string;
-  email: string;
-  password: string;
-  city: string;
-}
-
-interface Project {
-  title: 'string';
-  content: any;
-}
-
 declare module '@/api' {
   export function apiGetProfile(): Promise<any>;
   export function apiUploadPhoto(formData: FormData): Promise<any>;
@@ -49,19 +27,9 @@ declare module '@/api' {
   export function apiDeleteExperience(id: string): Promise<any>;
 }
 
-interface User {
-  name?: string;
-  phone?: number;
-  description?: string;
-  about?: string;
-  photo?: string;
-  background_cover?: string;
-  projects?: object;
-  experience?: Array<object>;
-}
-
 declare module '@/composition/store' {
-  export const state: Object;
+  import { Ref } from 'vue';
+  export const state: Ref<State>;
   export function getProfile(): Object;
   export function setOffcanvasDisplay(display: boolean): void;
   export function setLogin(status?: boolean): void;
@@ -99,13 +67,3 @@ declare module '@/mixins/dayjs' {
 
 declare module 'quill';
 declare module 'quill-delta-to-html';
-
-interface Experience {
-  id?: string,
-  title?: string;
-  place?: string;
-  start_time?: number;
-  end_time?: number;
-  content?: string;
-  image_url?: string;
-}

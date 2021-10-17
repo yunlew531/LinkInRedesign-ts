@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { inject, computed } from 'vue';
+import { inject, computed, Ref } from 'vue';
 import { useRouter } from 'vue-router';
 import store from '@/composition/store';
 import { apiLogout } from '@/api';
@@ -7,7 +7,7 @@ import { apiLogout } from '@/api';
 const router = useRouter();
 const { setLogin, setOffcanvasDisplay, setUserProfile } = store;
 
-const state: any = inject('state');
+const state: Ref<State> = inject('state')!;
 
 const isOffcanvasShow = computed(() => {
   const { isOffcanvasShow } = state.value;

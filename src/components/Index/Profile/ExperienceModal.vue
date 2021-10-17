@@ -1,11 +1,12 @@
 <script lang="ts" setup>
-import { PropType, ref, watch, computed } from 'vue';
+import { PropType, ref, watch, computed, defineAsyncComponent } from 'vue';
 import { apiCreateExperience, apiUpdateExperience, apiUploadExperienceImg, apiDeleteExperience
 } from '@/api';
 import getImageUrl from '@/mixins/getImageUrl';
 import dayjs from '@/mixins/dayjs';
-import Editor from '@/components/Editor.vue';
 import store from '@/composition/store';
+
+const Editor = defineAsyncComponent(() => import('@/components/Editor.vue'));
 
 const { updateUserProfile } = store;
 
@@ -46,9 +47,16 @@ const hideModal = () => isModalShow.value = false;
 type Status = 'create' | 'update';
 const status = ref<Status>('create');
 
+const isDeleteBtnShow = computed(() => {
+  if (status.value === 'create') return false;
+  else if (status.value === 'update') return true;
+});
+
 const handlePost = () => {
-  if (status.value === 'create') createExperience();
-  else if (status.value === 'update') updateExperience();
+  if (status.value === 'create')
+    createExperience();
+  else if (status.value === 'update')
+    updateExperience();
 };
 
 const createExperience = async () => {
@@ -173,7 +181,7 @@ defineExpose({
       </label>
       <label>
         <span class="content">content</span>
-        <Editor ref="editorEl" :deleteBtn="true"
+        <Editor ref="editorEl" :deleteBtn="isDeleteBtnShow"
           @cancel="hideModal" @update="handlePost" @delete="deleteExperience" />
       </label>
     </div>

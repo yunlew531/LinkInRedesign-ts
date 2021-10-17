@@ -5,7 +5,7 @@ import { apiCheckLogin } from '@/api';
 import store from '@/composition/store';
 import Index from '@/views/Index.vue';
 
-const { state }: any = store,
+const { state } = store,
   { setLogin } = store;
 
 const history = createWebHashHistory('/LinkInRedesignTypeScript/');

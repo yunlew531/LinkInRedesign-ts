@@ -1,15 +1,16 @@
 <script lang="ts" setup>
-import { ref, inject, computed } from 'vue';
+import { ref, inject, computed, Ref, defineAsyncComponent } from 'vue';
 import { apiUploadPhoto, apiUploadBackgroundImg, apiUpdateDescription } from '@/api';
 import store from '@/composition/store';
 import getImageUrl from '@/mixins/getImageUrl';
-import ProfileNav from '@/components/Index/Profile/ProfileNav.vue';
-import MiniDashboard from '@/components/Index/MiniDashboard.vue';
-import AsideCard from '@/components/Index/AsideCard.vue';
-import Editor from '@/components/Editor.vue';
+
+const ProfileNav = defineAsyncComponent(() => import('@/components/Index/Profile/ProfileNav.vue'));
+const MiniDashboard = defineAsyncComponent(() => import('@/components/Index/MiniDashboard.vue'));
+const AsideCard = defineAsyncComponent(() => import('@/components/Index/AsideCard.vue'));
+const Editor = defineAsyncComponent(() => import('@/components/Editor.vue'));
 
 const { getProfile, updateUserProfile } = store;
-const state: any = inject('state');
+const state: Ref<State> = inject('state')!;
 
 getProfile();
 const user = computed(() => state.value.user);

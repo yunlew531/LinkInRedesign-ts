@@ -29,7 +29,7 @@ const props = defineProps({
   }
 });
 const { options, theme, height, toolbar, marginY } = props;
-const deleteBtnStyle = computed(() => props.deleteBtn ? 'visible' : 'hidden');
+const deleteBtnStyle = computed(() => props.deleteBtn ? 'inline-block' : 'none');
 
 const editorEl = ref(null);
 let quill: any = null;
@@ -120,7 +120,7 @@ defineExpose({
   }
 }
 .delete-btn {
-  visibility: v-bind(deleteBtnStyle);
+  display: v-bind(deleteBtnStyle);
   background: $red-100;
   color: $white;
   border: none;
@@ -141,6 +141,7 @@ defineExpose({
 .cancel-edit-btn {
   background: $white;
   color: $blue-200;
+  margin-left: auto;
    &:hover {
     background: $blue-200;
     color: $white;
