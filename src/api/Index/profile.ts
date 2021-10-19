@@ -13,3 +13,4 @@ export const updateExperienceImg = (formData: FormData) => authReq.post(`/self/e
 export const createExperience = (experience: Experience) => authReq.post(`/self/experience/create`, experience);
 export const updateExperience = (id: string, experience: Experience) => authReq.put(`/self/experience/${id}`, experience);
 export const deleteExperience = (id: string) => authReq.delete(`/self/experience/${id}`);
+export const updateEducation = (education: Education) => authReq.post('/self/education', education);

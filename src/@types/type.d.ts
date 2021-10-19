@@ -41,6 +41,14 @@ interface User {
   profile_views_today?: number;
   profile_views?: number;
   connections_qty?: number;
+  education?: Education;
+}
+
+interface Education {
+  school?: string;
+  major?: string;
+  content?: string;
+  time?: string;
 }
 
 interface Experience {

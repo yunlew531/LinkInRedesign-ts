@@ -11,6 +11,13 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
       '~': path.resolve(__dirname, './node_modules'),
     },
+    mainFields: [
+      'browser',
+      'module',
+      'main',
+      'jsnext:main',
+      'jsnext'
+    ]
   },
   base: '/LinkInRedesignTypeScript/'
 })

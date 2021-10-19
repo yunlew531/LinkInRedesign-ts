@@ -25,6 +25,7 @@ declare module '@/api' {
   export function apiUpdateExperience(id: string, experience: Experience): Promise<any>;
   export function apiUploadExperienceImg(formData: FormData): Promise<any>;
   export function apiDeleteExperience(id: string): Promise<any>;
+  export function apiUpdateEducation(education: Education): Promise<any>;
 }
 
 declare module '@/composition/store' {
@@ -64,6 +65,8 @@ declare module '@/mixins/dayjs' {
   function dayjs(day?: ConfigType): Dayjs;
   export default dayjs;
 }
+
+declare module 'vue3-persian-datetime-picker';
 
 declare module 'quill';
 declare module 'quill-delta-to-html';

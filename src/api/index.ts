@@ -5,7 +5,7 @@ import { getUser } from './Index/user_profile';
 import { logout, checkLogin, register, signIn } from './Index/login';
 import { getProfile, createProject, updateProject, deleteProject, getPhoto, uploadPhoto,
   uploadBackgroundImg, updateDescription, updateAbout, createExperience, updateExperience,
-  updateExperienceImg, deleteExperience
+  updateExperienceImg, deleteExperience, updateEducation
 } from './Index/profile';
 
 // normal
@@ -29,3 +29,4 @@ export const apiCreateExperience = createExperience;
 export const apiUpdateExperience = updateExperience;
 export const apiUploadExperienceImg = updateExperienceImg;
 export const apiDeleteExperience = deleteExperience;
+export const apiUpdateEducation = updateEducation;

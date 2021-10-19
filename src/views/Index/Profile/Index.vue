@@ -8,7 +8,7 @@ import getImageUrl from '@/mixins/getImageUrl';
 const Editor = defineAsyncComponent(() => import('@/components/Editor.vue'));
 const ProjectModal = defineAsyncComponent(() => import('@/components/Index/ProjectModal.vue'));
 const ExperienceModal = defineAsyncComponent(() => import('@/components/Index/Profile/ExperienceModal.vue'));
-const EducationModal = defineAsyncComponent(() => import('@/components/Index/Profile/EducationModal.vue'));
+const Education = defineAsyncComponent(() => import('@/components/Index/Profile/Education.vue'));
 
 const { updateUserProfile } = store;
 
@@ -150,7 +150,6 @@ const setTempExperience = (experience: Experience) => tempEeperience.value = exp
       @setCurrentProject="setCurrentProject" @setCurrentIdx="setCurrentIdx" />
     <ExperienceModal ref="experienceModalEl" :experience="tempEeperience"
       @setTempExperience="setTempExperience" />
-    <EducationModal />
     <h2 class="card-title">About</h2>
     <Editor v-show="isEditAbout" ref="editorEl" :options="editorOptions"
       @update="updateAbout" @cancel="cancelEdit" />
@@ -162,7 +161,7 @@ const setTempExperience = (experience: Experience) => tempEeperience.value = exp
     <button type="button" class="more-btn">see more</button>
   </section>
   <section class="profile-card">
-    <div class="projects-header">
+    <div class="card-header">
       <h2 class="projects-title card-title">Projects</h2>
       <span class="projects-subtitle">3 of 12</span>
       <button type="button" class="projects-create-btn" @click="createProject">Create</button>
@@ -173,7 +172,7 @@ const setTempExperience = (experience: Experience) => tempEeperience.value = exp
         <img :src="handleProjectImg(project)" :alt="project.title" class="project-img">
         <h3 class="project-card-title">{{ project.title }}</h3>
         <span class="project-card-subtitle">
-          {{ dayjs(project.create_time * 1000).format('YYYY/MM/DD') }}
+          {{ project.create_time ? dayjs(project.create_time * 1000).format('YYYY/MM/DD') : '' }}
         </span>
       </li>
     </ul>
@@ -200,7 +199,7 @@ const setTempExperience = (experience: Experience) => tempEeperience.value = exp
     </ul>
   </section>
   <section class="profile-card">
-    <div class="experience-header">
+    <div class="card-header">
       <h2 class="card-title experience-section-title">Experience</h2>
       <button type="button" class="create-experience-btn"
         @click="createExperience">create</button>
@@ -230,18 +229,7 @@ const setTempExperience = (experience: Experience) => tempEeperience.value = exp
       empty. please click create button
     </div>
   </section>
-  <section class="profile-card">
-    <h2 class="card-title">Education</h2>
-    <div class="education-container">
-      <img class="education-img" src="@/assets/images/education.png" alt="Moscow State Linguistic University">
-      <div>
-        <h3 class="education-title">Moscow State Linguistic University</h3>
-        <p class="education-paragraph">Bachelor's degree Field Of StudyComputer and Information Systems Security/Information Assurance</p>
-        <p class="education-time">2013 — 2017</p>
-        <p>Additional English classes and UX profile courses​.</p>
-      </div>
-    </div>
-  </section>
+  <Education />
 </template>
 
 <style lang="scss" scoped>
@@ -249,16 +237,13 @@ const setTempExperience = (experience: Experience) => tempEeperience.value = exp
 @import '@/assets/styleSheets/mixins';
 
 .profile-card {
-  padding: 30px;
-  background: #FFFFFF;
-  box-shadow: 0px 20px 60px #f1f4f880;
-  border-radius: 4px;
-  margin-bottom: 20px;
+  @include profile-card;
 }
-.projects-header {
+.card-header {
   display: flex;
+  justify-content: space-between;
   align-items: center;
-  margin-bottom: 25px;
+  margin-bottom: 20px;
 }
 .card-title {
   text-transform: uppercase;
@@ -435,10 +420,6 @@ const setTempExperience = (experience: Experience) => tempEeperience.value = exp
     padding-bottom: 0;
   }
 }
-.experience-header {
-  display: flex;
-  justify-content: space-between
-}
 .experience-section-title {
   margin: 0; 
 }
@@ -494,24 +475,6 @@ const setTempExperience = (experience: Experience) => tempEeperience.value = exp
 }
 .experience-card-paragraph {
   line-height: 1.5;
-}
-.education-img {
-  width: 54px;
-  height: 54px;
-  margin-right: 15px;
-}
-.education-container {
-  display: flex;
-}
-.education-title, .education-time, .education-paragraph {
-  margin-bottom: 15px;
-}
-.education-paragraph {
-  line-height: 1.5;
-}
-.education-time {
-  font-size: $fs-6;
-  color: rgba($dark-100, 0.7)
 }
 .experience-empty-notice {
   display: flex;
