@@ -26,12 +26,13 @@ declare module '@/api' {
   export function apiUploadExperienceImg(formData: FormData): Promise<any>;
   export function apiDeleteExperience(id: string): Promise<any>;
   export function apiUpdateEducation(education: Education): Promise<any>;
+  export function apiCreateArticle(article: Article): Promise<any>;
 }
 
 declare module '@/composition/store' {
   import { Ref } from 'vue';
   export const state: Ref<State>;
-  export function getProfile(): Object;
+  export function getProfile(): void;
   export function setOffcanvasDisplay(display: boolean): void;
   export function setLogin(status?: boolean): void;
   export function setUserProfile(profile: User): void;

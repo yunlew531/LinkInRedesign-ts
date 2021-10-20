@@ -32,6 +32,7 @@ interface User {
   name?: string;
   phone?: number;
   city?: string;
+  jobs?: string;
   description?: string;
   about?: string;
   photo?: string;
@@ -59,4 +60,11 @@ interface Experience {
   end_time?: number;
   content?: string;
   image_url?: string;
+}
+
+interface Article {
+  id?: string;
+  username?: string;
+  create_time?: string;
+  content?: Object;
 }

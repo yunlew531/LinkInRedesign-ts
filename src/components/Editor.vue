@@ -1,10 +1,17 @@
 <script lang="ts" setup>
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, computed, PropType } from 'vue';
 import Quill from 'quill';
+
+interface Options {
+  modules?: {
+    toolbar?: any[];
+  };
+  placeholder: string;
+}
 
 const props = defineProps({
   options: {
-    type: Object,
+    type: Object as PropType<Options>,
     default: () => ({}),
   },
   theme: {

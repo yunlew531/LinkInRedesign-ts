@@ -3,11 +3,13 @@ import { inject, ref, watch, Ref, defineAsyncComponent } from 'vue';
 import { apiUpdateEducation } from '@/api';
 import DatePicker from 'vue3-persian-datetime-picker';
 import store from '@/composition/store';
+const Editor = defineAsyncComponent(() => import('@/components/Editor.vue'));
 
 const { updateUserProfile } = store;
 
 const state: Ref<State> = inject('state')!;
-const Editor = defineAsyncComponent(() => import('@/components/Editor.vue'));
+
+const editorOptions = ref({ placeholder: 'input education content' });
 
 const education = ref<Education>({
 
@@ -105,7 +107,7 @@ const updateEdit = async () => {
           <DatePicker ref="graduateTimePicker" v-model="yearPicker.graduate_time" locale="en"
             type="year" format="YYYY" :showNowBtn="false" />
         </div>
-        <Editor ref="editorEl" @update="updateEdit" @cancel="cancelEdit" />
+        <Editor ref="editorEl" :options="editorOptions" @update="updateEdit" @cancel="cancelEdit"  />
       </div>
     </div>
   </section>
