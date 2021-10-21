@@ -1,10 +1,11 @@
 import { ref, readonly, Ref } from 'vue';
-import { apiGetProfile } from '@/api';
+import { apiGetProfile, apiGetArticles } from '@/api';
 
 const state = ref<State>({
   isLogin: false,
   user: {},
   isOffcanvasShow: false,
+  articles: [],
 });
 
 const getProfile = async () => {
@@ -14,9 +15,18 @@ const getProfile = async () => {
   } catch(err) {}
 };
 
+const getArticles = async (page: number = 1) => {
+  try {
+    const { data } = await apiGetArticles(page);
+    const { articles } = data;
+    setArticles(articles);
+  } catch (err) {}
+};
+
 const setOffcanvasDisplay = (boolean = true) => state.value.isOffcanvasShow = boolean;
 const setLogin = (boolean = true) => state.value.isLogin = boolean;
 const setUserProfile = (payload: User) => state.value.user = payload;
+const setArticles = (articles: Article[]) => state.value.articles = articles;
 const updateUserProfile = (options: any) => {
   const optionsKeys = Object.keys(options);
   const optionsValues: Array<string> = Object.values(options);
@@ -30,4 +40,6 @@ export default {
   setLogin,
   setUserProfile,
   updateUserProfile,
+  setArticles,
+  getArticles,
 };

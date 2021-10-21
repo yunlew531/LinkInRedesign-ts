@@ -15,3 +15,4 @@ export const updateExperience = (id: string, experience: Experience) => authReq.
 export const deleteExperience = (id: string) => authReq.delete(`/self/experience/${id}`);
 export const updateEducation = (education: Education) => authReq.post('/self/education', education);
 export const createArticle = (article: Article) => authReq.post('/self/article/create', article);
+export const getArticles = (page: number = 1) => authReq.get(`/self/articles/${page}`);

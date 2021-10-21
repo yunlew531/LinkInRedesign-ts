@@ -6,7 +6,7 @@ import getImageUrl from '@/mixins/getImageUrl';
 
 const ProfileNav = defineAsyncComponent(() => import('@/components/Index/Profile/ProfileNav.vue'));
 const MiniDashboard = defineAsyncComponent(() => import('@/components/Index/MiniDashboard.vue'));
-const AsideCard = defineAsyncComponent(() => import('@/components/Index/AsideCard.vue'));
+const AsideCard = defineAsyncComponent(() => import('../../components/Index/AsideCard.vue'));
 const Editor = defineAsyncComponent(() => import('@/components/Editor.vue'));
 
 const { getProfile, updateUserProfile } = store;

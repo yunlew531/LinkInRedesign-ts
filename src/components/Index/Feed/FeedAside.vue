@@ -6,6 +6,9 @@ import handleTextLength from '@/mixins/handleTextLength';
 const state: Ref<State> = inject('state')!;
 
 const user = computed(() => state.value.user);
+
+const emits = defineEmits(['focus']);
+const focusEditor = () => emits('focus');
 </script>
 
 <template>
@@ -24,7 +27,7 @@ const user = computed(() => state.value.user);
         </div>
       </li>
       <li class="aside-card">
-        <button type="button" class="write-article-btn">write new article</button>
+        <button type="button" class="write-article-btn" @click="focusEditor">write new article</button>
       </li>
       <li class="aside-card">
         <div class="aside-card-header">

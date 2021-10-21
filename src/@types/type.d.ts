@@ -26,6 +26,7 @@ interface State {
   isLogin: boolean;
   user: User;
   isOffcanvasShow: boolean;
+  articles: Article[];
 }
 
 interface User {
@@ -64,7 +65,12 @@ interface Experience {
 
 interface Article {
   id?: string;
-  username?: string;
-  create_time?: string;
+  uid?: string;
+  photo?: string;
+  job?: string;
+  name?: string;
+  create_time?: number;
   content?: Object;
+  likes?: { username: string; uid: string; }[];
+  comments?: { username: string; uid: string; content: string }[];
 }

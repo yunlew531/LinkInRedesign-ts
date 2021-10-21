@@ -27,6 +27,7 @@ declare module '@/api' {
   export function apiDeleteExperience(id: string): Promise<any>;
   export function apiUpdateEducation(education: Education): Promise<any>;
   export function apiCreateArticle(article: Article): Promise<any>;
+  export function apiGetArticles(page: number): Promise<any>;
 }
 
 declare module '@/composition/store' {
@@ -37,6 +38,8 @@ declare module '@/composition/store' {
   export function setLogin(status?: boolean): void;
   export function setUserProfile(profile: User): void;
   export function updateUserProfile(profile: User): void;
+  export function setArticles(articles: Article[]): void;
+  export function getArticles(page: number): void;  
 }
 
 declare module '@/api/user_req' {

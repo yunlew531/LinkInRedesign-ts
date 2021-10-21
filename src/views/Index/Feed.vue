@@ -1,18 +1,21 @@
 <script lang="ts" setup>
 import { ref, defineAsyncComponent, computed, inject, Ref } from 'vue';
 import { apiCreateArticle } from '@/api';
+import dayjs from '@/mixins/dayjs';
 import getImageUrl from '@/mixins/getImageUrl';
+import { QuillDeltaToHtmlConverter } from 'quill-delta-to-html';
 import store from '@/composition/store';
 
-const { getProfile } = store;
+const { getProfile, getArticles, setArticles } = store;
 
 getProfile();
+getArticles(2);
 
 const FeedAside = defineAsyncComponent(() => import('@/components/Index/Feed/FeedAside.vue'));
-const Editor = defineAsyncComponent(() => import('@/components/Editor.vue'));
+const Editor = defineAsyncComponent(() => import('../../components/Editor.vue'));
 
 const state: Ref<State> = inject('state')!;
-const user = computed(() => state.value.user);
+const articles = computed(() => state.value.articles);
 
 const editorOptions = {
   placeholder: 'input content',
@@ -69,8 +72,6 @@ const showBtnsList = (feedId: string, event: Event) => {
   }
 };
 
-const articles = ref<Article[]>();
-
 const createArticle = async () => {
   const article = {
     content: editorEl.value.getContents(),
@@ -78,13 +79,20 @@ const createArticle = async () => {
   
   try {
     const { data } = await apiCreateArticle(article);
-    console.log('data log => ', data);
     const { articles } = data;
-    articles.value = articles;
+    setArticles(articles);
+    editorEl.value.setText();
   } catch (err) {
     console.dir(err);
   }
 };
+
+const convertArticle = (content: any) => {
+  const converter = new QuillDeltaToHtmlConverter(content.ops);
+  return converter.convert();
+};
+
+const focusEditor = () => editorEl.value.focus();
 </script>
 
 <template>
@@ -100,7 +108,6 @@ const createArticle = async () => {
         <Editor ref="editorEl" :options="editorOptions" :toolbar="true">
           <template v-slot:buttons><div></div></template>
         </Editor>
-        {{ articles }}
       </section>
       <div class="divide">
         <span class="divide-text">
@@ -108,24 +115,24 @@ const createArticle = async () => {
         </span>
       </div>
       <ul class="feeds-list">
-        <li v-for="feed in feeds" class="feed-card">
+        <li v-for="article in articles" class="feed-card">
           <div class="feed-card-header">
             <ul class="liked-list">
-              <li v-for="(user, userKey) in feed.likes" :key="user.uid">
-                {{ (userKey === feed.likes.length - 1) && (userKey > 0) ?  '&nbsp and ' : '' }}
-                <router-link :to="`@${user.uid}`">{{ user.name }}</router-link>
-                {{ userKey < feed.likes.length - 2 ?  ',&nbsp' : '' }}
-                {{ userKey === feed.likes.length - 1 ?  ' liked this' : '' }}
+              <li v-for="(user, userKey) in article.likes" :key="user.uid">
+                {{ article.likes && (userKey === article.likes.length - 1) && (userKey > 0) ?  '&nbsp and ' : '' }}
+                <router-link :to="`@${user.uid}`">{{ user.username }}</router-link>
+                {{ article.likes && userKey < article.likes.length - 2 ?  ',&nbsp' : '' }}
+                {{ article.likes && userKey === article.likes.length - 1 ?  ' liked this' : '' }}
               </li>
             </ul>
-            <div class="card-btns-group" :class="{ show: activeBtnsList.includes(feed.id) }"
-              @mouseleave="showBtnsList(feed.id ,$event)"
-              @mouseenter="showBtnsList(feed.id, $event)">
+            <div class="card-btns-group" :class="{ show: activeBtnsList.includes(article.id!) }"
+              @mouseleave="showBtnsList(article.id! ,$event)"
+              @mouseenter="showBtnsList(article.id!, $event)">
               <button type="button"
                 class="feed-card-more-btn">
-                <img v-show="!activeBtnsList.includes(feed.id)"
+                <img v-show="!activeBtnsList.includes(article.id!)"
                   src="@/assets/images/Other.png" alt="more button">
-                <img v-show="activeBtnsList.includes(feed.id)"
+                <img v-show="activeBtnsList.includes(article.id!)"
                   src="@/assets/images/chevron-down.png" alt="more button">
               </button>
               <ul>
@@ -140,35 +147,39 @@ const createArticle = async () => {
           </div>
           <div class="feed-card-body">
             <div class="feed-card-user">
-              <router-link :to="`/@${feed.uid}`" class="user-link">
-                <img :src="getImageUrl(feed.user_photo)" :alt="feed.name">
+              <router-link :to="`/@${article.uid}`" class="user-link">
+                <img :src="article.photo || getImageUrl('user')" :alt="article.name">
               </router-link>
               <div>
-                <router-link :to="`/@${feed.uid}`" class="user-link">{{ feed.name }}</router-link>
-                <h4>{{ feed.profession }}</h4>
+                <router-link :to="`/@${article.uid}`" class="user-link">{{ article.name }}</router-link>
+                <h4>{{ article.job }}</h4>
+              </div>
+              <div class="article-time">
+                <span class="article-create-time"> create: 
+                  {{ dayjs(article.create_time! * 1000).format('YYYY/MM/DD HH:mm:ss') }}</span>
               </div>
             </div>
-            <p>{{ feed.content }}</p>
+            <div v-html="convertArticle(article.content)"></div>
           </div>
           <ul class="feed-card-footer">
             <li>
               <button type="button" class="feed-card-footer-btn">
-                <img v-if="feed.likes.length"
+                <img v-if="article.likes?.length"
                   src="@/assets/images/thumbs-up-active.png" alt="thumbs-up button">
                 <img v-else src="@/assets/images/thumbs-up.png"
                   alt="thumbs-up button">
-                <span>{{ feed.likes.length }}</span>
+                <span>{{ article.likes?.length }}</span>
               </button>
             </li>
             <li>
               <button type="button" class="feed-card-footer-btn">
                 <img src="@/assets/images/message-circle.png" alt="comments button">
-                <span>{{ feed.comments.length }}</span>
+                <span>{{ article.comments?.length }}</span>
               </button>
             </li>
             <li>
               <button type="button" class="feed-card-footer-btn">
-                <img src="@/assets/images/share-2.png" alt="share button">
+                <img src="@/assets/images/share-2.png" alt="share button" class="share-img">
                 <span>share</span>
               </button>
             </li>
@@ -176,7 +187,7 @@ const createArticle = async () => {
         </li>
       </ul>
     </main>
-    <FeedAside />
+    <FeedAside @focus="focusEditor" />
   </div>
 </template>
 
@@ -344,6 +355,10 @@ const createArticle = async () => {
     color: inherit;
     margin: 0 15px 5px 0;
     transition: color  0.2s, filter 0.2s;
+    > img {
+      width: 50px;
+      height: 50px;
+    }
     &:hover {
       color: $blue-200;
       filter: brightness(0.8);
@@ -353,6 +368,13 @@ const createArticle = async () => {
     font-size: $fs-6;
     font-weight: lighter;
   }
+}
+.article-time {
+  margin-left: auto;
+  color: rgba($dark-100, 0.9);
+}
+.article-create-time {
+  margin-bottom: 5px;
 }
 .feed-card-footer {
   display: flex;
@@ -377,7 +399,6 @@ const createArticle = async () => {
   transition: background-color 0.2s;
   > img {
     width: 15px;
-    margin-right: 5px;
   }
   &:hover {
     background: $white-100;
@@ -385,5 +406,8 @@ const createArticle = async () => {
   &:active {
     background: $white-400;
   }
+}
+.share-img {
+  margin-right: 5px;
 }
 </style>

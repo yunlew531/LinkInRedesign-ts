@@ -6,7 +6,7 @@ interface Options {
   modules?: {
     toolbar?: any[];
   };
-  placeholder: string;
+  placeholder?: string;
 }
 
 const props = defineProps({
@@ -58,17 +58,25 @@ const setText = (text = '') => quill.setText(text);
 const getContents = () => quill.getContents();
 const setContents = (content: any) => quill.setContents(content);
 
+const isFocusAnimeInProgress = ref(false);
+const focus = () => {
+  quill.focus();
+  isFocusAnimeInProgress.value = true;
+};
+
 defineExpose({
   getText,
   setText,
   getContents,
   setContents,
+  focus,
 });
 </script>
 
 <template>
   <div class="editor-container">
-    <div class="editor" :class="{ 'toolbar-show' : toolbar }">
+    <div class="editor" :class="{ 'toolbar-show' : toolbar, focus: isFocusAnimeInProgress }"
+      @transitionend="isFocusAnimeInProgress = false">
       <div ref="editorEl"></div>
     </div>
     <slot name="buttons">
@@ -90,6 +98,9 @@ defineExpose({
 .editor {
   white-space: pre-wrap;
   margin: v-bind(marginY) 0;
+  border-radius: 5px;
+  border: 1px solid transparent;
+  transition: border-color 0.5s;
   &.toolbar-show {
     ::v-deep(.ql-toolbar.ql-snow) {
       display: block;
@@ -100,7 +111,11 @@ defineExpose({
     }
     ::v-deep(.ql-toolbar.ql-snow) {
       border-radius: 5px 5px 0 0;
+      border-bottom: #ccc 1px solid;
     }
+  }
+  &.focus {
+    border: 1px solid rgb(255, 73, 73);
   }
 }
 ::v-deep(.ql-toolbar.ql-snow + .ql-container.ql-snow) {
