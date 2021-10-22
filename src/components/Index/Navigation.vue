@@ -3,8 +3,9 @@ import { ref, inject, computed, Ref } from 'vue';
 import store from '@/composition/store';
 import { apiGetPhoto } from '@/api';
 import getImageUrl from '@/mixins/getImageUrl';
+import { stateSymbol } from '@/Symbol';
 
-const state: Ref<State> = inject('state')!;
+const state: Ref<State> = inject(stateSymbol)!;
 const { setOffcanvasDisplay, updateUserProfile } = store;
 
 const isLogin = computed(() => state.value.isLogin);

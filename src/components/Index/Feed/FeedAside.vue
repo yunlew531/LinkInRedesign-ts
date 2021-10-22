@@ -2,8 +2,9 @@
 import { computed, inject, Ref } from 'vue';
 import getImageUrl from '@/mixins/getImageUrl';
 import handleTextLength from '@/mixins/handleTextLength';
+import { stateSymbol } from '@/Symbol';
 
-const state: Ref<State> = inject('state')!;
+const state: Ref<State> = inject(stateSymbol)!;
 
 const user = computed(() => state.value.user);
 

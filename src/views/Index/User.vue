@@ -1,18 +1,34 @@
 <script lang="ts" setup>
-import { ref, computed, provide } from 'vue';
+import { ref, watch, computed, defineAsyncComponent, provide } from 'vue';
+import { useRoute } from 'vue-router';
 import { apiGetUser } from '@/api';
-import { useRoute, useRouter, onBeforeRouteUpdate } from 'vue-router';
 import getImageUrl from '@/mixins/getImageUrl';
-import ProfileNav from '@/components/Index/Profile/ProfileNav.vue';
-import MiniDashboard from '@/components/Index/MiniDashboard.vue';
-import AsideCard from '@/components/Index/AsideCard.vue';
+import { userSymbol } from '@/Symbol';
+
+const ProfileNav = defineAsyncComponent(() => import('@/components/Index/Profile/ProfileNav.vue'));
+const MiniDashboard = defineAsyncComponent(() => import('@/components/Index/MiniDashboard.vue'));
+const AsideCard = defineAsyncComponent(() => import('../../components/Index/AsideCard.vue'));
 
 const route = useRoute();
-const router = useRouter();
 
-onBeforeRouteUpdate((to, from) => {
-  if (to.name === from.name) router.go();
-});
+const user = ref<User>();
+provide(userSymbol, user);
+
+const getUser = async (uid: string) => {
+  try {
+    const { data } = await apiGetUser(uid);
+    user.value = data.user;
+  } catch (err) { console.dir(err); }
+};
+
+watch(() => route.params.uid, (v) => {
+  const inUserRoute = route.matched.some((match) => match.name === 'User');
+  if (inUserRoute) getUser(<string>v);
+}, { immediate: true });
+
+
+const bgCover = computed(() =>
+  `url(${user.value?.background_cover || getImageUrl('Rectangle 3')})`);
 
 const visitors = ref([
   {
@@ -59,23 +75,6 @@ const courses = ref([
     viewers: '13858',
   },
 ]);
-
-const uid = computed(() => route.params.uid);
-const user = ref({});
-const getUser = async () => {
-  try {
-    const { data } = await apiGetUser(uid.value);
-    user.value = data.user;
-  } catch (err) {
-    router.push('/notFound');
-  }
-}
-getUser();
-
-provide('otherUser', user);
-
-const bgCover = computed(() => user.value.background_cover ?
-  `url(${user.value.background_cover})` : `url(${getImageUrl('Rectangle 3')})`);
 </script>
 
 <template>
@@ -85,23 +84,26 @@ const bgCover = computed(() => user.value.background_cover ?
         <div class="profile-cover"></div>
         <div class="profile-header-content">
           <div class="user-photo">
-            <img :src="user.photo" alt="head portrait">
+            <img :src="user?.photo || getImageUrl('user')" alt="user photo">
           </div>
           <div class="user-content-container">
             <p class="user-content">
               <span class="user-name-group">
-                <span class="user-name">{{ user.name }}</span>
+                <span class="user-name">{{ user?.name }}</span>
                 <img class="user-name-logo" src="@/assets/images/in-logo.png" alt="LinkIned logo">
               </span>
-              <router-link to="/" class="user-position-group">
+              <router-link :to="`/${user?.city}`"
+                class="user-position-group">
                 <img src="@/assets/images/Vector.png" alt="position mark">
-                <span>{{ user.city }}</span>
+                <span>{{ user?.city }}</span>
               </router-link>
             </p>
-            <p class="user-description">{{ user.description }}</p>
+            <p class="user-description">
+              {{ user?.description || 'This user did not write anything.' }}</p>
             <div class="btns-group">
               <button class="contact-btn" type="button">Contact info</button>
-              <button class="connections-btn" type="button">1,043 connections</button>
+              <button class="connections-btn" type="button">
+                {{ user?.connections_qty || 0 }} connections</button>
             </div>
           </div>
         </div>
@@ -112,7 +114,7 @@ const bgCover = computed(() => user.value.background_cover ?
     <aside class="aside">
       <ul>
         <li class="aside-card">
-          <MiniDashboard :profileViews="user.profile_views" title="dashboard"/>
+          <MiniDashboard :profileViews="user?.profile_views" />
         </li>
         <li class="aside-card">
           <AsideCard title="visitors" :headLink="{ title: 'view all', path: '/' }">
@@ -132,7 +134,7 @@ const bgCover = computed(() => user.value.background_cover ?
           <AsideCard title="You may like these courses">
             <template v-slot:card-body>
               <ul class="course-cards-list">
-                <li v-for="course in courses" :key="courses.fileName" class="course-card">
+                <li v-for="course in courses" :key="course.fileName" class="course-card">
                   <router-link to="/" class="course-link">
                     <div class="course-img-group">
                       <img src="@/assets/images/play.png" alt="play video" class="play-video-btn">
@@ -159,6 +161,7 @@ const bgCover = computed(() => user.value.background_cover ?
 
 .profile-container {
   display: flex;
+  position: relative;
 }
 .profile-main {
   flex-grow: 1;
@@ -180,29 +183,85 @@ const bgCover = computed(() => user.value.background_cover ?
   background-size: cover;
   padding: 20px 30px;
 }
+.upload-photo-btn {
+  background: $blue-100;
+  padding: 10px;
+  border: none;
+  box-shadow: 0px 10px 30px rgba(113, 123, 133, 0.05);
+  border-radius: 4px;
+  cursor: pointer;
+  animation: heart 2s infinite;
+  position: absolute;
+  right: 10px;
+  bottom: 0;
+}
+@keyframes heart {
+  0%   {
+    transform: translateY(0px);
+  }
+  50%  {
+    transform: translateY(-10px);
+  }
+  100% {
+    transform: translateY(0px);
+  }
+}
 .user-photo {
   flex-shrink: 0;
   width: 200px;
   height: 200px;
-  border: 10px solid $white;
-  border-radius: 100%;
-  background: $white;
   transform: translateY(-50px);
   margin: 0 30px -50px 0;
   position: relative;
   cursor: pointer;
   overflow: hidden;
-  transition: border-radius 0.2s, border-width 0.2s;
   > img {
     height: 100%;
+    border: 10px solid $white;
+    background: $white;
+    border-radius: 100%;
+    transition: border-radius 0.2s, border-width 0.2s;
   }
   &:hover {
-    border-radius: 5px;
-    border: 0px solid $white;
+    > .user-photo-hover {
+      opacity: 0.5;
+      border-radius: 5px;
+    }
+    > img {
+      border-radius: 5px;
+      border: 0px solid $white;
+    }
+  }
+}
+.upload-photo-input {
+  cursor: pointer;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border: 1px dashed blue;
+  z-index: 1;
+  opacity: 0;
+}
+.user-photo-hover {
+  opacity: 0;
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  border-radius: 100%;
+  top: 0;
+  left: 0;
+  background: $dark-100;
+  transition: opacity 0.2s, border-radius 0.2s;
+  > img {
+    height: 50px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translateX(-50%) translateY(-50%);
   }
 }
 .user-content-container {
-  width: 100%;
+  flex-grow: 1;
   display: flex;
   flex-direction: column;
 }
@@ -245,13 +304,13 @@ const bgCover = computed(() => user.value.background_cover ?
   }
 }
 .user-description {
-  flex-grow: 1;
-  white-space: pre-wrap;
-  margin-top: 10px;
+  margin: 10px 0 auto;
   line-height: 1.5;
+  white-space: pre-wrap;
 }
 .btns-group {
-  margin-top: 15px;
+  margin-top: 20px;
+  display: flex;
 }
 .contact-btn, .connections-btn {
   @include button;

@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { inject, ref, watch, Ref, defineAsyncComponent } from 'vue';
+import { ref, watch, defineAsyncComponent, PropType } from 'vue';
 import { apiUpdateEducation } from '@/api';
 import DatePicker from 'vue3-persian-datetime-picker';
 import store from '@/composition/store';
@@ -7,16 +7,19 @@ const Editor = defineAsyncComponent(() => import('@/components/Editor.vue'));
 
 const { updateUserProfile } = store;
 
-const state: Ref<State> = inject('state')!;
+const props = defineProps({
+  education: {
+    type: Object as PropType<Education>,
+    default: () => ({}),
+  }
+});
 
 const editorOptions = ref({ placeholder: 'input education content' });
 
-const education = ref<Education>({
-
-});
-watch(() => state.value.user.education, (value) =>{
+const education = ref<Education>({});
+watch(() => props.education, (value) =>{
   education.value = { ...value };
-}, { immediate: true });
+});
 
 const isEdit = ref(false);
 const editEducation = () => {
@@ -83,7 +86,9 @@ const updateEdit = async () => {
   <section class="profile-card">
     <div class="card-header">
       <h2 class="card-title education-title">Education</h2>
-      <button v-show="!isEdit" type="button" class="education-edit-btn" @click="editEducation">edit</button>
+      <slot name="header-right">
+        <button v-show="!isEdit" type="button" class="education-edit-btn" @click="editEducation">edit</button>
+      </slot>
     </div>
     <div v-if="Object.keys(education).length && !isEdit" class="education-container">
       <img class="education-img" src="@/assets/images/education.png" alt="Moscow State Linguistic University">
@@ -95,7 +100,7 @@ const updateEdit = async () => {
       </div>
     </div>
     <div v-if="!Object.keys(education).length && !isEdit" class="education-empty-notice">
-      empty. please click edit button
+      <slot name="empty-content">empty. please click edit button</slot>
     </div>
     <div v-show="isEdit" class="education-container">
       <div v-show="isEdit" class="education-content">
@@ -124,7 +129,6 @@ const updateEdit = async () => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
 }
 .card-title {
   text-transform: uppercase;

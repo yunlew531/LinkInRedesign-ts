@@ -3,11 +3,12 @@ import { inject, computed, Ref } from 'vue';
 import { useRouter } from 'vue-router';
 import store from '@/composition/store';
 import { apiLogout } from '@/api';
+import { stateSymbol } from '@/Symbol';
 
 const router = useRouter();
 const { setLogin, setOffcanvasDisplay, setUserProfile } = store;
 
-const state: Ref<State> = inject('state')!;
+const state: Ref<State> = inject(stateSymbol)!;
 
 const isOffcanvasShow = computed(() => {
   const { isOffcanvasShow } = state.value;

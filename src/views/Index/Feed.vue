@@ -5,16 +5,17 @@ import dayjs from '@/mixins/dayjs';
 import getImageUrl from '@/mixins/getImageUrl';
 import { QuillDeltaToHtmlConverter } from 'quill-delta-to-html';
 import store from '@/composition/store';
+import { stateSymbol } from '@/Symbol';
 
 const { getProfile, getArticles, setArticles } = store;
 
 getProfile();
-getArticles(2);
+getArticles(1);
 
 const FeedAside = defineAsyncComponent(() => import('@/components/Index/Feed/FeedAside.vue'));
 const Editor = defineAsyncComponent(() => import('../../components/Editor.vue'));
 
-const state: Ref<State> = inject('state')!;
+const state: Ref<State> = inject(stateSymbol)!;
 const articles = computed(() => state.value.articles);
 
 const editorOptions = {

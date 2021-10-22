@@ -1,26 +1,14 @@
-<script setup>
-import { ref, inject } from 'vue';
-import getImageUrl from '@/mixins/getImageUrl.js';
+<script lang="ts" setup>
+import { ref, defineAsyncComponent, inject, Ref } from 'vue';
+import dayjs from '@/mixins/dayjs';
+import getImageUrl from '@/mixins/getImageUrl';
+import { userSymbol } from '@/Symbol';
 
-const user = inject('otherUser');
+const ProjectModal = defineAsyncComponent(() => import('../../../components/Index/ProjectModal.vue'));
+const ExperienceModal = defineAsyncComponent(() => import('@/components/Index/Profile/ExperienceModal.vue'));
+const Education = defineAsyncComponent(() => import('../../../components/Index/Profile/Education.vue'));
 
-const projectsList = ref([
-  {
-    title: 'Zara redesign concept',
-    subtitle: 'UX/UI design, 15.07.2019',
-    fileName: 'Projects-1',
-  },
-  {
-    title: 'SCTHON event brand identity',
-    subtitle: 'Graphic design, 03.31.2019',
-    fileName: 'Projects-2',
-  },
-  {
-    title: 'Drozd. Brand identity. 2016',
-    subtitle: 'Graphic design, 03.04.2016',
-    fileName: 'Projects-3',
-  },
-]);
+const user: Ref<User> = inject(userSymbol)!;
 
 const skillsList = ref([
   {
@@ -58,48 +46,104 @@ const skillsList = ref([
   },
 ]);
 
-const experienceList = ref([
-  {
-    title: 'Freelance UX/UI designer',
-    mode: 'Self Employed',
-    place: 'Around the world',
-    time: 'Jun 2016 — Present',
-    experienceTime: '3 yrs 3 mos',
-    content: 'Work with clients and web studios as freelancer. Work in next areas: eCommerce web projects; creative landing pages; iOs and Android apps; corporate web sites and corporate identity sometimes.',
-    fileName: 'Group',
-  },
-   {
-    title: 'UX/UI designer',
-    mode: 'Upwork',
-    place: 'International',
-    time: 'Jun 2019 — Present',
-    experienceTime: '3 mos',
-    content: 'New experience with Upwork system. Work in next areas: UX/UI design, graphic design, interaction design, UX research.',
-    fileName: 'Rectangle 2.2-1',
-  },
-])
+interface SkillListUser {
+  fileName: string;
+}
 
-const filterFivePerson = (users) => users.filter((user, key) => key < 5);
+const filterFivePerson = (users: Array<SkillListUser>) => users.filter((user, key) => key < 5);
+
+const currentProject = ref({});
+const currentProjectIdx = ref(0);
+const projectModalEl = ref<any>(null);
+const showProjectModal = (project: object, key: number) => {
+  currentProject.value = project;
+  currentProjectIdx.value = key;
+  projectModalEl.value.setModalStatus('update');
+  projectModalEl.value.showModal();
+};
+const setCurrentProject = (project: any) => currentProject.value = project;
+const setCurrentIdx = (idx: number) => {
+  currentProjectIdx.value = idx;
+  if(!user.value?.projects) return;
+  currentProject.value = user.value.projects[idx];
+};
+
+interface Op {
+  insert: {
+    image: string;
+  }
+}
+
+const handleProjectImg = (project: any) => {
+  const hasImage = project.content.ops.filter((op: Op) => op.insert.image)[0];
+  return hasImage ? hasImage.insert.image : getImageUrl('image');
+};
+
+const experienceModalEl = ref<any>(null);
+const createExperience = () => {
+  experienceModalEl.value.setStatus('create');
+  experienceModalEl.value.showModal();
+};
+
+const tempEeperience = ref<Experience>({});
+const editExperience = (experience: Experience) => {
+  tempEeperience.value = experience;
+  experienceModalEl.value.setStatus('update');
+  experienceModalEl.value.showModal();
+};
+
+const handleRelativeTime = (startTime: number | undefined, endTime: number | undefined) => {
+  if (startTime && endTime) return dayjs(startTime * 1000).to(dayjs(endTime * 1000), true);
+  else return '';
+};
+
+const handleStartTime = (startTime: number | undefined) => 
+  startTime ? dayjs(startTime * 1000).format('D MMMM YYYY'): '';
+
+const handleEndTime = (endTime: number | undefined) => 
+  endTime ? dayjs(endTime * 1000).format('D MMMM YYYY'): '';
+
+const handleExpImg = (experience: Experience) => {
+  if (experience && experience.image_url)
+    return experience.image_url;
+  else
+    return getImageUrl('upload_cloud');
+};
+
+const setTempExperience = (experience: Experience) => tempEeperience.value = experience;
 </script>
 
 <template>
   <section class="profile-card">
+    <ProjectModal ref="projectModalEl" :projects="user?.projects"
+      :currentProject="currentProject" :currentProjectIdx="currentProjectIdx"
+      @setCurrentProject="setCurrentProject" @setCurrentIdx="setCurrentIdx">
+      <template v-slot:project-body-header><div></div></template>  
+    </ProjectModal>
+    <ExperienceModal ref="experienceModalEl" :experience="tempEeperience"
+      @setTempExperience="setTempExperience" />
     <h2 class="card-title">About</h2>
-    <p class="card-paragraph">{{ user.about || 'empty' }}</p>
+    <p v-if="user?.about" class="card-paragraph">
+      {{ user?.about || 'This user did not write anything.' }}</p>
+    <div v-else class="about-list-empty">This user did not write anything.</div>
     <button type="button" class="more-btn">see more</button>
   </section>
   <section class="profile-card">
-    <h2 class="projects-section-title card-title">Projects</h2>
-    <span class="projects-section-subtitle">3 of 12</span>
-    <ul class="project-list">
-      <li v-for="project in projectsList" :key="project.title" class="project-card">
-        <router-link to="/">
-          <img :src="getImageUrl(project.fileName)" alt="project.title" class="project-img">
-          <h3 class="project-card-title">{{ project.title }}</h3>
-          <h4 class="project-card-subtitle">{{ project.subtitle }}</h4>
-        </router-link>
+    <div class="card-header">
+      <h2 class="projects-title card-title">Projects</h2>
+      <span class="projects-subtitle">3 of 12</span>
+    </div>
+    <ul v-if="user?.projects?.length" class="project-list">
+      <li v-for="(project, key) in user?.projects" :key="project.id" class="project-card"
+        @click="showProjectModal(project, key)">
+        <img :src="handleProjectImg(project)" :alt="project.title" class="project-img">
+        <h3 class="project-card-title">{{ project.title }}</h3>
+        <span class="project-card-subtitle">
+          {{ project.create_time ? dayjs(project.create_time * 1000).format('YYYY/MM/DD') : '' }}
+        </span>
       </li>
     </ul>
+    <div v-else class="project-list-empty">This user did not write anything.</div>
     <button type="button" class="more-btn">show all (12)</button>
   </section>
   <section class="profile-card">
@@ -122,44 +166,51 @@ const filterFivePerson = (users) => users.filter((user, key) => key < 5);
     </ul>
   </section>
   <section class="profile-card">
-    <h2 class="card-title">Experience</h2>
-    <ul>
-      <li v-for="experience in experienceList" :key="experience.title" class="experience-card">
-        <img class="experience-card-img" :src="getImageUrl(experience.fileName)" alt="experience.title">
-        <div class="experience-card-body">
-          <h3 class="experience-card-title">{{ experience.title }}</h3>
-          <h4>{{ experience.mode }}</h4><span>{{ experience.place }}</span>
+    <div class="card-header">
+      <h2 class="card-title experience-section-title">Experience</h2>
+    </div>
+    <ul v-if="user?.experience?.length">
+      <li v-for="experience in user?.experience" :key="experience.title" class="experience-card">
+        <img class="experience-card-img" :src="handleExpImg(experience)" :alt="experience.title">
+        <div class="experience-card-content">
+          <div class="experience-card-header">
+            <div>
+              <h3 class="experience-card-title">{{ experience.title }}</h3>
+              <h4>{{ experience.place }}</h4>
+            </div>
+            <button type="button" class="experience-edit-btn" @click="editExperience(experience)">edit</button>
+          </div>
           <p>
-            <span>{{ experience.time }}</span>
-            <span  class="experience-card-experience-time">{{ experience.experienceTime }}</span>
+            <span>{{ handleStartTime(experience.start_time) }}</span> - 
+            <span>{{ handleEndTime(experience.end_time) }}</span>
+            <span class="experience-card-experience-time">
+              {{ handleRelativeTime(experience.start_time, experience.end_time) }}</span>
           </p>
           <p class="experience-card-paragraph">{{ experience.content }}</p>
         </div>
       </li>
     </ul>
-  </section>
-  <section class="profile-card">
-    <h2 class="card-title">Education</h2>
-    <div class="education-container">
-      <img class="education-img" src="@/assets/images/education.png" alt="Moscow State Linguistic University">
-      <div>
-        <h3 class="education-title">Moscow State Linguistic University</h3>
-        <p class="education-paragraph">Bachelor's degree Field Of StudyComputer and Information Systems Security/Information Assurance</p>
-        <p class="education-time">2013 — 2017</p>
-        <p>Additional English classes and UX profile courses​.</p>
-      </div>
+    <div v-else class="experience-empty-notice">
+      This user did not write anything.
     </div>
   </section>
+  <Education >
+    <template v-slot:empty-content>This user did not write anything.</template>
+    <template v-slot:header-right><div></div></template>
+  </Education>
 </template>
 
 <style lang="scss" scoped>
 @import '@/assets/styleSheets/variables';
+@import '@/assets/styleSheets/mixins';
 
 .profile-card {
-  padding: 30px;
-  background: #FFFFFF;
-  box-shadow: 0px 20px 60px #f1f4f880;
-  border-radius: 4px;
+  @include profile-card;
+}
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   margin-bottom: 20px;
 }
 .card-title {
@@ -168,16 +219,35 @@ const filterFivePerson = (users) => users.filter((user, key) => key < 5);
   font-weight: bold;
   margin: 0 10px 25px 0;
 }
-.projects-section-title {
+.projects-title {
   display: inline-block;
+  margin: 0;
 }
-.projects-section-subtitle {
+.projects-subtitle {
   color: $gray-100;
+  margin-left: 10px;
+}
+.projects-create-btn {
+  @include button;
+  background: $blue-200;
+  color: $white;
+  margin-left: auto;
+  &:hover {
+    color: $blue-200;
+    background: $white;
+  }
 }
 .card-paragraph {
   white-space: pre-wrap;
   line-height: 1.5;
   margin-bottom: 20px;
+}
+.about-empty-paragraph {
+  min-height: 100px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: $fs-3;
 }
 .more-btn {
   display: block;
@@ -191,6 +261,7 @@ const filterFivePerson = (users) => users.filter((user, key) => key < 5);
   filter: brightness(1);
   transform: translateX(0);
   transition: filter 0.2s, transform 0.2s;
+  margin-top: 25px;
   &:hover{
     filter: brightness(1.3);
     transform: translateX(10px);
@@ -206,12 +277,13 @@ const filterFivePerson = (users) => users.filter((user, key) => key < 5);
 .project-list {
   display: flex;
   flex-wrap: wrap;
-  margin: 0 -2% 25px 0;
+  margin: 0 -2% -20px 0;
 }
 .project-card {
   width: 31.333333%;
-  margin-right: 2%;
   transition: transform 0.2s, color 0.2s;
+  cursor: pointer;
+  margin: 0 2% 20px 0;
   > a {
     display: block;
     color: inherit;
@@ -224,7 +296,16 @@ const filterFivePerson = (users) => users.filter((user, key) => key < 5);
 }
 .project-img {
   width: 100%;
+  height: 200px;
+  border-radius: 10px;
   margin-bottom: 15px;
+}
+.project-list-empty, .about-list-empty {
+  min-height: 100px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: $fs-3;
 }
 .skills-list {
   display: flex;
@@ -304,19 +385,29 @@ const filterFivePerson = (users) => users.filter((user, key) => key < 5);
     padding-bottom: 0;
   }
 }
+.experience-section-title {
+  margin: 0; 
+}
+.create-experience-btn {
+  @include button;
+  background: $blue-200;
+  color: $white;
+  &:hover {
+    background: white;
+    color: $blue-200;
+  }
+}
 .experience-card-img {
   width: 54px;
   height: 54px;
   margin-right: 15px;
 }
-.experience-card-body {
-  > h4, span {
+.experience-card-content {
+  flex-grow: 1;
+  h4 {
     font-size: $fs-6;
-    color: rgba($dark-100, 0.7)
-  }
-  > h4 {
-    display: inline-block;
-    margin-right: 10px;
+    color: rgba($dark-100, 0.7);
+    font-weight: lighter;
   }
   > p {
     margin-top: 10px;
@@ -327,28 +418,34 @@ const filterFivePerson = (users) => users.filter((user, key) => key < 5);
     font-weight: bold;
   }
 }
+.experience-card-header {
+  display: flex;
+}
+.experience-edit-btn {
+  @include button;
+  align-self: center;
+  width: auto;
+  background: transparent;
+  color: $blue-200;
+  padding: 5px 10px;
+  margin-left: auto;
+  transition: color 0.2s, background-color 0.2s;
+  &:hover {
+    background: $blue-200;
+    color: $white;
+  }
+}
 .experience-card-title {
-  margin-bottom: 15px;
+  margin-bottom: 10px;
 }
 .experience-card-paragraph {
   line-height: 1.5;
 }
-.education-img {
-  width: 54px;
-  height: 54px;
-  margin-right: 15px;
-}
-.education-container {
+.experience-empty-notice {
   display: flex;
-}
-.education-title, .education-time, .education-paragraph {
-  margin-bottom: 15px;
-}
-.education-paragraph {
-  line-height: 1.5;
-}
-.education-time {
-  font-size: $fs-6;
-  color: rgba($dark-100, 0.7)
+  justify-content: center;
+  align-items: center;
+  font-size: $fs-3;
+  min-height: 100px;
 }
 </style>

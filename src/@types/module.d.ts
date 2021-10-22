@@ -8,6 +8,7 @@ declare module '*.vue' {
 }
 
 declare module '@/api' {
+  export function apiGetUser(id: string): Promise<any>;
   export function apiGetProfile(): Promise<any>;
   export function apiUploadPhoto(formData: FormData): Promise<any>;
   export function apiUploadBackgroundImg(formData: FormData): Promise<any>;
@@ -74,3 +75,8 @@ declare module 'vue3-persian-datetime-picker';
 
 declare module 'quill';
 declare module 'quill-delta-to-html';
+
+declare module '@/Symbol' {
+  export const stateSymbol: Symbol;
+  export const userSymbol: Symbol;
+}

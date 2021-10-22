@@ -39,29 +39,29 @@ const routes = [
           }
         ],
       },
-    //   {
-    //     path: '@:uid',
-    //     name: 'User',
-    //     redirect: (to) => `/@${to.params.uid}/profile`,
-    //     component: () => import('@/views/Index/User.vue'),
-    //     children: [
-    //       {
-    //         path: 'profile',
-    //         name: 'UserProfileIndex',
-    //         component: () => import('@/views/Index/User/Index.vue'),
-    //       },
-    //       {
-    //         path: 'profile/interests',
-    //         name: 'UserProfileInterests',
-    //         component:  () => import('@/views/Index/User/ProfileInterests.vue'),
-    //       },
-    //       {
-    //         path: 'profile/articles',
-    //         name: 'UserProfileArticles',
-    //         component:  () => import('@/views/Index/User/ProfileArticles.vue'),
-    //       }
-    //     ],
-    //   },
+      {
+        path: '@:uid',
+        name: 'User',
+        redirect: (to: RouteLocationNormalized) => `/@${to.params.uid}/profile`,
+        component: () => import('@/views/Index/User.vue'),
+        children: [
+          {
+            path: 'profile',
+            name: 'UserProfileIndex',
+            component: () => import('@/views/Index/User/Index.vue'),
+          },
+          {
+            path: 'profile/interests',
+            name: 'UserProfileInterests',
+            component:  () => import('@/views/Index/User/ProfileInterests.vue'),
+          },
+          {
+            path: 'profile/articles',
+            name: 'UserProfileArticles',
+            component:  () => import('@/views/Index/User/ProfileArticles.vue'),
+          }
+        ],
+      },
       {
         path: 'feed',
         name: 'Feed',

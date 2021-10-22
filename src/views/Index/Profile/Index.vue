@@ -4,6 +4,7 @@ import { apiUpdateAbout } from '@/api';
 import dayjs from '@/mixins/dayjs';
 import store from '@/composition/store';
 import getImageUrl from '@/mixins/getImageUrl';
+import { stateSymbol } from '@/Symbol';
 
 const Editor = defineAsyncComponent(() => import('@/components/Editor.vue'));
 const ProjectModal = defineAsyncComponent(() => import('@/components/Index/ProjectModal.vue'));
@@ -12,7 +13,7 @@ const Education = defineAsyncComponent(() => import('@/components/Index/Profile/
 
 const { updateUserProfile } = store;
 
-const state: Ref<State> = inject('state')!;
+const state: Ref<State> = inject(stateSymbol)!;
 const user = computed(() => state.value.user);
 
 const skillsList = ref([
@@ -229,7 +230,7 @@ const setTempExperience = (experience: Experience) => tempEeperience.value = exp
       empty. please click create button
     </div>
   </section>
-  <Education />
+  <Education :education="user.education" />
 </template>
 
 <style lang="scss" scoped>

@@ -3,6 +3,7 @@ import { ref, inject, computed, Ref, defineAsyncComponent } from 'vue';
 import { apiUploadPhoto, apiUploadBackgroundImg, apiUpdateDescription } from '@/api';
 import store from '@/composition/store';
 import getImageUrl from '@/mixins/getImageUrl';
+import { stateSymbol } from '@/Symbol';
 
 const ProfileNav = defineAsyncComponent(() => import('@/components/Index/Profile/ProfileNav.vue'));
 const MiniDashboard = defineAsyncComponent(() => import('@/components/Index/MiniDashboard.vue'));
@@ -10,7 +11,7 @@ const AsideCard = defineAsyncComponent(() => import('../../components/Index/Asid
 const Editor = defineAsyncComponent(() => import('@/components/Editor.vue'));
 
 const { getProfile, updateUserProfile } = store;
-const state: Ref<State> = inject('state')!;
+const state: Ref<State> = inject(stateSymbol)!;
 
 getProfile();
 const user = computed(() => state.value.user);

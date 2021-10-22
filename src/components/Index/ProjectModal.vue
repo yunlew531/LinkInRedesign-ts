@@ -190,8 +190,10 @@ defineExpose({
         </div>
       </div>
       <div class="project-body">
-        <button v-show="!isProjectEdit" type="button" class="edit-project-btn"
+        <slot name="project-body-header">
+          <button v-show="!isProjectEdit" type="button" class="edit-project-btn"
           @click="editProject">edit</button>
+        </slot>
         <Editor v-show="isProjectEdit" ref="contentEditorEl" :toolbar="true" height="100%"
           :options="contentEditorOptions" :deleteBtn="isShowDeleteBtn"
           @cancel="cancelEditProject" @update="postProject" @delete="deleteProject" />

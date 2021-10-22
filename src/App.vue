@@ -1,9 +1,10 @@
 <script lang="ts" setup>
 import { provide } from 'vue';
 import store from '@/composition/store';
+import { stateSymbol } from '@/Symbol';
 
 const { state } = store;
-provide('state', state);
+provide(stateSymbol, state);
 </script>
 
 <template>
