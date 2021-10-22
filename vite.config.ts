@@ -19,5 +19,5 @@ export default defineConfig({
       'jsnext'
     ]
   },
-  base: '/LinkInRedesignTypeScript/'
+  base: '/LinkInRedesign-ts/'
 })
