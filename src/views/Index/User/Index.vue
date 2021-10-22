@@ -80,10 +80,6 @@ const handleProjectImg = (project: any) => {
 };
 
 const experienceModalEl = ref<any>(null);
-const createExperience = () => {
-  experienceModalEl.value.setStatus('create');
-  experienceModalEl.value.showModal();
-};
 
 const tempEeperience = ref<Experience>({});
 const editExperience = (experience: Experience) => {
@@ -194,7 +190,7 @@ const setTempExperience = (experience: Experience) => tempEeperience.value = exp
       This user did not write anything.
     </div>
   </section>
-  <Education >
+  <Education :education="user?.education">
     <template v-slot:empty-content>This user did not write anything.</template>
     <template v-slot:header-right><div></div></template>
   </Education>

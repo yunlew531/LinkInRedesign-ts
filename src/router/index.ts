@@ -143,7 +143,8 @@ const checkLogin = () => new Promise<void>(async (resolve, reject) => {
     await apiCheckLogin();
     setLogin();
     resolve();
-  } catch (err) {
+  } catch (err: any) {
+    if (!err.response) alert('伺服器未開啟');
     setLogin(false);
     reject();
   }

@@ -1,11 +1,12 @@
 <script lang="ts" setup>
 import { inject, computed, Ref } from 'vue';
-import { useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
 import store from '@/composition/store';
 import { apiLogout } from '@/api';
 import { stateSymbol } from '@/Symbol';
 
 const router = useRouter();
+const route = useRoute();
 const { setLogin, setOffcanvasDisplay, setUserProfile } = store;
 
 const state: Ref<State> = inject(stateSymbol)!;
@@ -28,7 +29,9 @@ const logout = async () => {
     closeOffcanvas();
     setUserProfile({});
     document.cookie = `LinkInRe=;expires=Thu, 01 Jan 1970 00:00:00 UTC;`;
-    router.push('/login');
+    if (route.meta.requiresAuth) {
+      router.push('/login');
+    }
   } catch (err: any) {
     console.dir(err.response.data.message);
   }
