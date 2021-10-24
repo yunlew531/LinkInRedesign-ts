@@ -30,6 +30,7 @@ interface State {
 }
 
 interface User {
+  uid?: string;
   name?: string;
   phone?: number;
   city?: string;
@@ -63,6 +64,8 @@ interface Experience {
   image_url?: string;
 }
 
+type ArticleLikes = { name: string; uid: string; }[];
+
 interface Article {
   id?: string;
   uid?: string;
@@ -71,6 +74,6 @@ interface Article {
   name?: string;
   create_time?: number;
   content?: Object;
-  likes?: { username: string; uid: string; }[];
-  comments?: { username: string; uid: string; content: string }[];
+  likes?: ArticleLikes;
+  comments?: { name: string; uid: string; content: string }[];
 }

@@ -14,6 +14,7 @@ const { getProfile, updateUserProfile } = store;
 const state: Ref<State> = inject(stateSymbol)!;
 
 getProfile();
+
 const user = computed(() => state.value.user);
 const bgCover = computed(() =>
   `url(${user.value.background_cover || getImageUrl('Rectangle 3')})`);

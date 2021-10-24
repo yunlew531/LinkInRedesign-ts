@@ -27,6 +27,8 @@ const setOffcanvasDisplay = (boolean = true) => state.value.isOffcanvasShow = bo
 const setLogin = (boolean = true) => state.value.isLogin = boolean;
 const setUserProfile = (payload: User) => state.value.user = payload;
 const setArticles = (articles: Article[]) => state.value.articles = articles;
+const setArticle = (articleIdx: number, articleData: Article) =>
+  state.value.articles[articleIdx] = articleData;
 const updateUserProfile = (options: any) => {
   const optionsKeys = Object.keys(options);
   const optionsValues: Array<string> = Object.values(options);
@@ -41,5 +43,6 @@ export default {
   setUserProfile,
   updateUserProfile,
   setArticles,
+  setArticle,
   getArticles,
 };

@@ -1,13 +1,13 @@
 <script lang="ts" setup>
-import { ref, defineAsyncComponent, computed, inject, Ref } from 'vue';
-import { apiCreateArticle } from '@/api';
+import { ref, defineAsyncComponent, computed, Ref, inject } from 'vue';
+import { apiCreateArticle, apiThumbsUpArticle, apiCancelThumbsUpArticle } from '@/api';
 import dayjs from '@/mixins/dayjs';
 import getImageUrl from '@/mixins/getImageUrl';
 import { QuillDeltaToHtmlConverter } from 'quill-delta-to-html';
 import store from '@/composition/store';
 import { stateSymbol } from '@/Symbol';
 
-const { getProfile, getArticles, setArticles } = store;
+const { getProfile, getArticles, setArticles, setArticle } = store;
 
 getProfile();
 getArticles(1);
@@ -17,6 +17,7 @@ const Editor = defineAsyncComponent(() => import('../../components/Editor.vue'))
 
 const state: Ref<State> = inject(stateSymbol)!;
 const articles = computed(() => state.value.articles);
+const user = computed(() => state.value.user);
 
 const editorOptions = {
   placeholder: 'input content',
@@ -94,6 +95,45 @@ const convertArticle = (content: any) => {
 };
 
 const focusEditor = () => editorEl.value.focus();
+
+const thumbsUpArticle = async (articleId: string, idx: number) => {
+  const userData = {
+    name: user.value.name,
+    photo: user.value.photo,
+    jobs: user.value.jobs,
+  };
+
+  try {
+    const { data } = await apiThumbsUpArticle(userData, articleId);
+    const { article } = data;
+    setArticle(idx, article);
+  } catch (err) {
+    console.dir(err);
+  }
+};
+
+const cancelThumbsUpArticle = async (articleId: string, idx: number) => {
+  try {
+    const { data } = await apiCancelThumbsUpArticle(articleId);
+    const { article } = data;
+    setArticle(idx, article);
+  } catch (err) {
+    console.dir(err);
+  }
+};
+
+const checkAiticleThumbsUp = (article: Article): boolean => {
+  if (!article.likes?.length) return false;
+
+  const isThumbsUpSelf = article.likes.some((like) => like.uid === user.value.uid);
+  return isThumbsUpSelf;
+};
+
+const handleLikes = (articleLikes: ArticleLikes) => {
+  if (!articleLikes || articleLikes && !articleLikes.length) return;
+
+  return articleLikes.filter((like, idx) => idx < 5);
+};
 </script>
 
 <template>
@@ -116,15 +156,18 @@ const focusEditor = () => editorEl.value.focus();
         </span>
       </div>
       <ul class="feeds-list">
-        <li v-for="article in articles" class="feed-card">
+        <li v-for="(article, key) in articles" class="feed-card">
           <div class="feed-card-header">
             <ul class="liked-list">
-              <li v-for="(user, userKey) in article.likes" :key="user.uid">
-                {{ article.likes && (userKey === article.likes.length - 1) && (userKey > 0) ?  '&nbsp and ' : '' }}
-                <router-link :to="`@${user.uid}`">{{ user.username }}</router-link>
+              <li v-for="(user, userKey) in handleLikes(article.likes!)" :key="user.uid">
+                {{ article.likes && (userKey === article.likes.length - 1) && (userKey !== 0) ?  '&nbspand' : '' }}
+                <router-link :to="`@${user.uid}`">{{ user.name }}</router-link>
                 {{ article.likes && userKey < article.likes.length - 2 ?  ',&nbsp' : '' }}
-                {{ article.likes && userKey === article.likes.length - 1 ?  ' liked this' : '' }}
               </li>
+              <li v-if="article.likes && article.likes.length" class="like-this-text">
+                ... 
+                <button class="people-like-btn">{{ article.likes.length }}</button>
+                people liked this</li>
             </ul>
             <div class="card-btns-group" :class="{ show: activeBtnsList.includes(article.id!) }"
               @mouseleave="showBtnsList(article.id! ,$event)"
@@ -156,35 +199,28 @@ const focusEditor = () => editorEl.value.focus();
                 <h4>{{ article.job }}</h4>
               </div>
               <div class="article-time">
-                <span class="article-create-time"> create: 
+                <span class="article-create-time"> create time: 
                   {{ dayjs(article.create_time! * 1000).format('YYYY/MM/DD HH:mm:ss') }}</span>
               </div>
             </div>
             <div v-html="convertArticle(article.content)"></div>
           </div>
-          <ul class="feed-card-footer">
-            <li>
-              <button type="button" class="feed-card-footer-btn">
-                <img v-if="article.likes?.length"
-                  src="@/assets/images/thumbs-up-active.png" alt="thumbs-up button">
-                <img v-else src="@/assets/images/thumbs-up.png"
-                  alt="thumbs-up button">
-                <span>{{ article.likes?.length }}</span>
-              </button>
-            </li>
-            <li>
-              <button type="button" class="feed-card-footer-btn">
-                <img src="@/assets/images/message-circle.png" alt="comments button">
-                <span>{{ article.comments?.length }}</span>
-              </button>
-            </li>
-            <li>
-              <button type="button" class="feed-card-footer-btn">
-                <img src="@/assets/images/share-2.png" alt="share button" class="share-img">
-                <span>share</span>
-              </button>
-            </li>
-          </ul>
+          <div class="feed-card-footer">
+            <button v-if="checkAiticleThumbsUp(article)" type="button" @click="cancelThumbsUpArticle(article.id!, key)"
+              class="feed-card-footer-btn active">
+              <img src="@/assets/images/thumbs-up-active.png" alt="thumbs-up button">
+            </button>
+            <button v-else type="button" class="feed-card-footer-btn" @click="thumbsUpArticle(article.id!, key)">
+              <img src="@/assets/images/thumbs-up.png" alt="thumbs-up button">
+            </button>
+            <button type="button" class="feed-card-footer-btn">
+              <img src="@/assets/images/message-circle.png" alt="comments button">
+            </button>
+            <button type="button" class="feed-card-footer-btn">
+              <img src="@/assets/images/share-2.png" alt="share button" class="share-img">
+              <span>share</span>
+            </button>
+          </div>
         </li>
       </ul>
     </main>
@@ -267,6 +303,9 @@ const focusEditor = () => editorEl.value.focus();
 .liked-list {
   display: flex;
   margin-right: auto;
+  li {
+    line-height: 20px;
+  }
   > li > a {
     text-decoration: none;
     color: $blue-400;
@@ -275,6 +314,19 @@ const focusEditor = () => editorEl.value.focus();
       filter: brightness(1.3);
     }
   }
+}
+.people-like-btn {
+  border: none;
+  background: transparent;
+  color: $blue-200;
+  cursor: pointer;
+  font-size: 16px;
+  &:hover {
+    filter: brightness(1.3);
+  }
+}
+.like-this-text {
+  margin-left: 5px;
 }
 .card-btns-group {
   position: relative;
@@ -381,10 +433,10 @@ const focusEditor = () => editorEl.value.focus();
   display: flex;
   align-items: center;
   padding: 0 30px;
-  li:last-child {
+  button:last-child {
     margin-left: auto;
   }
-  > li {
+  button {
     margin-left: -1px;
     border-right: 1px solid $white-100;
     border-left: 1px solid $white-100;
@@ -406,6 +458,9 @@ const focusEditor = () => editorEl.value.focus();
   }
   &:active {
     background: $white-400;
+  }
+  &.active {
+    filter: brightness(0.95);
   }
 }
 .share-img {
