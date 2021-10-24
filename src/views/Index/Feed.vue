@@ -3,6 +3,7 @@ import { ref, defineAsyncComponent, computed, Ref, inject } from 'vue';
 import { apiCreateArticle, apiThumbsUpArticle, apiCancelThumbsUpArticle } from '@/api';
 import dayjs from '@/mixins/dayjs';
 import getImageUrl from '@/mixins/getImageUrl';
+import getSrcFolder from '@/mixins/getSrcFolder';
 import { QuillDeltaToHtmlConverter } from 'quill-delta-to-html';
 import store from '@/composition/store';
 import { stateSymbol } from '@/Symbol';
@@ -13,7 +14,7 @@ getProfile();
 getArticles(1);
 
 const FeedAside = defineAsyncComponent(() => import('@/components/Index/Feed/FeedAside.vue'));
-const Editor = defineAsyncComponent(() => import('../../components/Editor.vue'));
+const Editor = defineAsyncComponent(() => import(`${getSrcFolder()}/components/Editor.vue`));
 
 const state: Ref<State> = inject(stateSymbol)!;
 const articles = computed(() => state.value.articles);
@@ -100,7 +101,7 @@ const thumbsUpArticle = async (articleId: string, idx: number) => {
   const userData = {
     name: user.value.name,
     photo: user.value.photo,
-    jobs: user.value.jobs,
+    job: user.value.job,
   };
 
   try {
@@ -221,6 +222,26 @@ const handleLikes = (articleLikes: ArticleLikes) => {
               <span>share</span>
             </button>
           </div>
+          <ul class="article-messages">
+            <li v-for="comment in article.comments" :key="comment.id">
+              <img src="https://images.unsplash.com/photo-1634985491284-5a9dd93068a5?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=735&q=80" alt="comment.name">
+              <div class="comment-body">
+                <div class="comment-header">
+                  <h4>{{ comment.name || 'mike' }}</h4>
+                  <span>{{ comment.create_time || '2018/10/21 10:05' }}</span>
+                </div>
+                <p>{{ comment.content || 'fefef5085484' }}</p>
+              </div>
+              <button type="button" class="comment-delete-btn">
+                <span class="material-icons">delete_outline</span>
+              </button>
+            </li>
+            <li class="comment-input-group">
+              <img src="https://images.unsplash.com/photo-1634985491284-5a9dd93068a5?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=735&q=80" alt="comment.name">
+              <input type="text" >
+              <button type="button"><span class="material-icons">send</span></button>
+            </li>
+          </ul>
         </li>
       </ul>
     </main>
@@ -411,6 +432,7 @@ const handleLikes = (articleLikes: ArticleLikes) => {
     > img {
       width: 50px;
       height: 50px;
+      border-radius: 100%;
     }
     &:hover {
       color: $blue-200;
@@ -452,6 +474,7 @@ const handleLikes = (articleLikes: ArticleLikes) => {
   transition: background-color 0.2s;
   > img {
     width: 15px;
+
   }
   &:hover {
     background: $white-100;
@@ -465,5 +488,84 @@ const handleLikes = (articleLikes: ArticleLikes) => {
 }
 .share-img {
   margin-right: 5px;
+}
+.article-messages {
+  padding: 0 30px;
+  border-top: 1px solid $white-100;
+  > li {
+    display: flex;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid $white-100;
+    &:last-child {
+      border-bottom: none;
+      padding-bottom: 30px
+    }
+    > img {
+      width: 50px;
+      height: 50px;
+      border-radius: 100%;
+      margin-right: 10px;
+    }
+  }
+}
+.comment-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 5px;
+  > h4 {
+    margin-right: 5px;
+  }
+  > span {
+    font-size: $fs-6;
+    color: rgba($dark-100, 0.6);
+  }
+}
+.comment-body {
+  flex-grow: 1;
+}
+.comment-delete-btn {
+  text-transform: uppercase;
+  font-weight: bold;
+  border-radius: 5px;
+  background: $red-100;
+  color: $white;
+  border: none;
+  padding: 5px 10px;
+  cursor: pointer;
+  &:hover {
+    filter: brightness(0.9)
+  }
+  &:active {
+    filter: brightness(0.8)
+  }
+}
+.comment-input-group {
+  > img {
+    width: 50px;
+    height: 50px;
+    border-radius: 100%;
+    margin-right: 10px;
+  }
+  > input {
+    flex-grow: 1;
+    padding: 5px 10px;
+    font-size: $fs-4;
+    margin-right: 10px;
+  }
+  > button {
+    @include button;
+    width: auto;
+    height: 37px;
+    color: $white;
+    background: $blue-400;
+    padding: 0 10px;
+    &:hover {
+      filter: brightness(1.3);
+    }
+    &:active {
+      filter: brightness(0.8);
+    }
+  }
 }
 </style>

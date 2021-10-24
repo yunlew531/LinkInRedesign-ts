@@ -83,3 +83,7 @@ declare module '@/Symbol' {
   export const stateSymbol: Symbol;
   export const userSymbol: Symbol;
 }
+
+declare module '@/mixins/getSrcFolder' {
+  export default function(): string;
+}

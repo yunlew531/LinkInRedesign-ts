@@ -1,5 +1,5 @@
 interface ImportMetaEnv {
-  VITE_APP_URL: string,
+  VITE_APP_URL: string;
 }
 
 interface SignInForm {
@@ -34,7 +34,7 @@ interface User {
   name?: string;
   phone?: number;
   city?: string;
-  jobs?: string;
+  job?: string;
   description?: string;
   about?: string;
   photo?: string;
@@ -65,6 +65,7 @@ interface Experience {
 }
 
 type ArticleLikes = { name: string; uid: string; }[];
+type ArticleComment = { id: string, name: string; uid: string; content: string, create_time: number; }
 
 interface Article {
   id?: string;
@@ -75,5 +76,5 @@ interface Article {
   create_time?: number;
   content?: Object;
   likes?: ArticleLikes;
-  comments?: { name: string; uid: string; content: string }[];
+  comments?: ArticleComment[];
 }

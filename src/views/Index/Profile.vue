@@ -3,11 +3,12 @@ import { ref, inject, computed, Ref, defineAsyncComponent } from 'vue';
 import { apiUploadPhoto, apiUploadBackgroundImg, apiUpdateDescription } from '@/api';
 import store from '@/composition/store';
 import getImageUrl from '@/mixins/getImageUrl';
+import getSrcFolder from '@/mixins/getSrcFolder';
 import { stateSymbol } from '@/Symbol';
 
 const ProfileNav = defineAsyncComponent(() => import('@/components/Index/Profile/ProfileNav.vue'));
 const MiniDashboard = defineAsyncComponent(() => import('@/components/Index/MiniDashboard.vue'));
-const AsideCard = defineAsyncComponent(() => import('../../components/Index/AsideCard.vue'));
+const AsideCard = defineAsyncComponent(() => import(`${getSrcFolder()}/components/Index/AsideCard.vue`));
 const Editor = defineAsyncComponent(() => import('@/components/Editor.vue'));
 
 const { getProfile, updateUserProfile } = store;
@@ -230,9 +231,10 @@ const uploadBackgroundImg = async (e: Event) => {
   margin-right: 40px;
 }
 .profile-header {
+  overflow: hidden;
   flex-grow: 1;
   border-radius: 4px;
-  overflow: hidden;
+  box-shadow: 3px 3px 20px rgba($blue-400, 0.05);
 }
 .profile-header-content {
   display: flex;
@@ -534,5 +536,6 @@ const uploadBackgroundImg = async (e: Event) => {
 }
 .aside-card {
   margin-bottom: 20px;
+  box-shadow: 3px 3px 20px rgba($blue-400, 0.05);
 }
 </style>

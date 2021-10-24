@@ -1,9 +1,10 @@
 <script lang="ts" setup>
 import { ref, defineAsyncComponent } from 'vue';
 import getImageUrl from '@/mixins/getImageUrl';
+import getSrcFolder from '@/mixins/getSrcFolder';
 import dayjs from '@/mixins/dayjs';
 
-const AsideCard = defineAsyncComponent(() => import('../../components/Index/AsideCard.vue'));
+const AsideCard = defineAsyncComponent(() => import(`${getSrcFolder()}/components/Index/AsideCard.vue`));
 
 const jobs = ref([
   {

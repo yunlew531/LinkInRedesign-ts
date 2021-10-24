@@ -2,11 +2,12 @@
 import { ref, defineAsyncComponent, inject, Ref } from 'vue';
 import dayjs from '@/mixins/dayjs';
 import getImageUrl from '@/mixins/getImageUrl';
+import getSrcFolder from '@/mixins/getSrcFolder';
 import { userSymbol } from '@/Symbol';
 
-const ProjectModal = defineAsyncComponent(() => import('../../../components/Index/ProjectModal.vue'));
+const ProjectModal = defineAsyncComponent(() => import(`${getSrcFolder()}/components/Index/ProjectModal.vue`));
 const ExperienceModal = defineAsyncComponent(() => import('@/components/Index/Profile/ExperienceModal.vue'));
-const Education = defineAsyncComponent(() => import('../../../components/Index/Profile/Education.vue'));
+const Education = defineAsyncComponent(() => import(`${getSrcFolder()}/components/Index/Profile/Education.vue`));
 
 const user: Ref<User> = inject(userSymbol)!;
 
