@@ -161,14 +161,18 @@ const handleLikes = (articleLikes: ArticleLikes) => {
           <div class="feed-card-header">
             <ul class="liked-list">
               <li v-for="(user, userKey) in handleLikes(article.likes!)" :key="user.uid">
-                {{ article.likes && (userKey === article.likes.length - 1) && (userKey !== 0) ?  '&nbspand' : '' }}
+                <span v-if="userKey !== 0 && (handleLikes(article.likes!)?.length! - 1) === userKey &&
+                  article.likes && article.likes?.length <= 5">&nbspand&nbsp</span>
                 <router-link :to="`@${user.uid}`">{{ user.name }}</router-link>
-                {{ article.likes && userKey < article.likes.length - 2 ?  ',&nbsp' : '' }}
+                <span v-if="
+                  userKey < 4 && article.likes && 
+                  ((handleLikes(article.likes)?.length! - 2) !== userKey || article.likes.length > 5) &&
+                  (handleLikes(article.likes!)?.length! - 1) !== userKey">,&nbsp</span>
               </li>
-              <li v-if="article.likes && article.likes.length" class="like-this-text">
-                ... 
-                <button class="people-like-btn">{{ article.likes.length }}</button>
-                people liked this</li>
+              <li v-if="article.likes && article.likes.length > 5" class="like-this-text">
+                and<button class="people-like-btn">more</button>people
+              </li>
+              <li v-if="article.likes?.length">&nbspliked this</li>
             </ul>
             <div class="card-btns-group" :class="{ show: activeBtnsList.includes(article.id!) }"
               @mouseleave="showBtnsList(article.id! ,$event)"
@@ -209,10 +213,13 @@ const handleLikes = (articleLikes: ArticleLikes) => {
           <div class="feed-card-footer">
             <button v-if="checkAiticleThumbsUp(article)" type="button" @click="cancelThumbsUpArticle(article.id!, key)"
               class="feed-card-footer-btn active">
-              <img src="@/assets/images/thumbs-up-active.png" alt="thumbs-up button">
+              <img src="@/assets/images/thumbs-up-active.png" alt="thumbs-up button"
+                class="thumbs-up-img">
+              <span class="feed-card-likes-qty">{{ article.likes?.length }}</span>
             </button>
             <button v-else type="button" class="feed-card-footer-btn" @click="thumbsUpArticle(article.id!, key)">
-              <img src="@/assets/images/thumbs-up.png" alt="thumbs-up button">
+              <img src="@/assets/images/thumbs-up.png" alt="thumbs-up button" class="thumbs-up-img">
+              <span class="feed-card-likes-qty">{{ article.likes?.length }}</span>
             </button>
             <button type="button" class="feed-card-footer-btn">
               <img src="@/assets/images/message-circle.png" alt="comments button">
@@ -485,6 +492,12 @@ const handleLikes = (articleLikes: ArticleLikes) => {
   &.active {
     filter: brightness(0.95);
   }
+}
+.feed-card-likes-qty {
+  color: $blue-200;
+}
+.thumbs-up-img {
+  margin-right: 5px;
 }
 .share-img {
   margin-right: 5px;
