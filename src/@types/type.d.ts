@@ -65,7 +65,14 @@ interface Experience {
 }
 
 type ArticleLikes = { name: string; uid: string; }[];
-type ArticleComment = { id: string, name: string; uid: string; content: string, create_time: number; }
+type ArticleComment = {
+  id: string;
+  name: string;
+  uid: string;
+  comment: string,
+  create_time: number;
+  photo: string;
+}
 
 interface Article {
   id?: string;
@@ -77,4 +84,10 @@ interface Article {
   content?: Object;
   likes?: ArticleLikes;
   comments?: ArticleComment[];
+}
+
+interface CommentData {
+  name: string;
+  photo: string;
+  comment: string;
 }

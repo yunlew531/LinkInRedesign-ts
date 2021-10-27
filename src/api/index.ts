@@ -6,7 +6,7 @@ import { logout, checkLogin, register, signIn } from './Index/login';
 import { getProfile, createProject, updateProject, deleteProject, getPhoto, uploadPhoto,
   uploadBackgroundImg, updateDescription, updateAbout, createExperience, updateExperience,
   updateExperienceImg, deleteExperience, updateEducation, createArticle, getArticles,
-  thumbsUpArticle, cancelThumbsUpArticle
+  thumbsUpArticle, cancelThumbsUpArticle, postComment, deleteComment
 } from './Index/profile';
 
 // normal
@@ -35,3 +35,5 @@ export const apiCreateArticle = createArticle;
 export const apiGetArticles = getArticles;
 export const apiThumbsUpArticle = thumbsUpArticle;
 export const apiCancelThumbsUpArticle = cancelThumbsUpArticle;
+export const apiPostComment = postComment;
+export const apiDeleteComment = deleteComment;

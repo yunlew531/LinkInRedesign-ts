@@ -29,6 +29,8 @@ const setUserProfile = (payload: User) => state.value.user = payload;
 const setArticles = (articles: Article[]) => state.value.articles = articles;
 const setArticle = (articleIdx: number, articleData: Article) =>
   state.value.articles[articleIdx] = articleData;
+const setArticleComments = (comments: ArticleComment[], idx: number) =>
+  state.value.articles[idx].comments = comments;
 const updateUserProfile = (options: any) => {
   const optionsKeys = Object.keys(options);
   const optionsValues: Array<string> = Object.values(options);
@@ -45,4 +47,5 @@ export default {
   setArticles,
   setArticle,
   getArticles,
+  setArticleComments,
 };

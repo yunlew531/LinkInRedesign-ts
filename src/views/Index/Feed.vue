@@ -1,6 +1,8 @@
 <script lang="ts" setup>
 import { ref, defineAsyncComponent, computed, Ref, inject } from 'vue';
-import { apiCreateArticle, apiThumbsUpArticle, apiCancelThumbsUpArticle } from '@/api';
+import { apiCreateArticle, apiThumbsUpArticle, apiCancelThumbsUpArticle, apiPostComment,
+  apiDeleteComment
+} from '@/api';
 import dayjs from '@/mixins/dayjs';
 import getImageUrl from '@/mixins/getImageUrl';
 import getSrcFolder from '@/mixins/getSrcFolder';
@@ -8,7 +10,7 @@ import { QuillDeltaToHtmlConverter } from 'quill-delta-to-html';
 import store from '@/composition/store';
 import { stateSymbol } from '@/Symbol';
 
-const { getProfile, getArticles, setArticles, setArticle } = store;
+const { getProfile, getArticles, setArticles, setArticle, setArticleComments } = store;
 
 getProfile();
 getArticles(1);
@@ -85,9 +87,7 @@ const createArticle = async () => {
     const { articles } = data;
     setArticles(articles);
     editorEl.value.setText();
-  } catch (err) {
-    console.dir(err);
-  }
+  } catch (err) { console.dir(err); }
 };
 
 const convertArticle = (content: any) => {
@@ -97,7 +97,8 @@ const convertArticle = (content: any) => {
 
 const focusEditor = () => editorEl.value.focus();
 
-const thumbsUpArticle = async (articleId: string, idx: number) => {
+const thumbsUpArticle = async (article: Article, idx: number) => {
+  const tempArticle: Article = JSON.parse(JSON.stringify(article));
   const userData = {
     name: user.value.name,
     photo: user.value.photo,
@@ -105,35 +106,65 @@ const thumbsUpArticle = async (articleId: string, idx: number) => {
   };
 
   try {
-    const { data } = await apiThumbsUpArticle(userData, articleId);
-    const { article } = data;
-    setArticle(idx, article);
-  } catch (err) {
-    console.dir(err);
-  }
+    const { data } = await apiThumbsUpArticle(userData, article.id!);
+    const { likes } = data.article;
+    tempArticle.likes = likes;
+    setArticle(idx, tempArticle);
+  } catch (err) { console.dir(err); }
 };
 
-const cancelThumbsUpArticle = async (articleId: string, idx: number) => {
+const cancelThumbsUpArticle = async (article: Article, idx: number) => {
+  const tempArticle: Article = JSON.parse(JSON.stringify(article));
+
   try {
-    const { data } = await apiCancelThumbsUpArticle(articleId);
-    const { article } = data;
-    setArticle(idx, article);
-  } catch (err) {
-    console.dir(err);
-  }
+    const { data } = await apiCancelThumbsUpArticle(article.id!);
+    const { likes } = data.article;
+    tempArticle.likes = likes;
+    setArticle(idx, tempArticle);
+  } catch (err) { console.dir(err); }
 };
 
 const checkAiticleThumbsUp = (article: Article): boolean => {
   if (!article.likes?.length) return false;
 
-  const isThumbsUpSelf = article.likes.some((like) => like.uid === user.value.uid);
-  return isThumbsUpSelf;
+  const isThumbsUpActive = article.likes.some((like) => like.uid === user.value.uid);
+  return isThumbsUpActive;
 };
 
 const handleLikes = (articleLikes: ArticleLikes) => {
   if (!articleLikes || articleLikes && !articleLikes.length) return;
 
   return articleLikes.filter((like, idx) => idx < 5);
+};
+
+const articleInputs = ref<string[]>([]);
+const submitComment = async (articleId: string, key: number) => {
+  const comment = articleInputs.value[key];
+
+  if (!comment) alert('comment required');
+
+  const commentData: CommentData = {
+    name: user.value.name!,
+    photo: user.value.photo || '',
+    comment,
+  };
+  try {
+    const { data } = await apiPostComment(commentData, articleId);
+    const { comments } = data;
+    setArticleComments(comments, key);
+    articleInputs.value[key] = '';
+  } catch (err) { console.dir(err); }
+};
+
+const deleteComment = async (articleIdx: number , article: Article, commentId: string) => {
+  const tempArticle: Article = JSON.parse(JSON.stringify(article));
+  
+  try {
+    const { data } = await apiDeleteComment(article.id!, commentId);
+    const { comments } = data;
+    tempArticle.comments = comments;
+    setArticle(articleIdx, tempArticle);
+  } catch (err) { console.dir(err); }
 };
 </script>
 
@@ -211,13 +242,13 @@ const handleLikes = (articleLikes: ArticleLikes) => {
             <div v-html="convertArticle(article.content)"></div>
           </div>
           <div class="feed-card-footer">
-            <button v-if="checkAiticleThumbsUp(article)" type="button" @click="cancelThumbsUpArticle(article.id!, key)"
+            <button v-if="checkAiticleThumbsUp(article)" type="button" @click="cancelThumbsUpArticle(article, key)"
               class="feed-card-footer-btn active">
               <img src="@/assets/images/thumbs-up-active.png" alt="thumbs-up button"
                 class="thumbs-up-img">
               <span class="feed-card-likes-qty">{{ article.likes?.length }}</span>
             </button>
-            <button v-else type="button" class="feed-card-footer-btn" @click="thumbsUpArticle(article.id!, key)">
+            <button v-else type="button" class="feed-card-footer-btn" @click="thumbsUpArticle(article, key)">
               <img src="@/assets/images/thumbs-up.png" alt="thumbs-up button" class="thumbs-up-img">
               <span class="feed-card-likes-qty">{{ article.likes?.length }}</span>
             </button>
@@ -231,22 +262,22 @@ const handleLikes = (articleLikes: ArticleLikes) => {
           </div>
           <ul class="article-messages">
             <li v-for="comment in article.comments" :key="comment.id">
-              <img src="https://images.unsplash.com/photo-1634985491284-5a9dd93068a5?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=735&q=80" alt="comment.name">
+              <img :src="comment.photo" alt="comment.name">
               <div class="comment-body">
                 <div class="comment-header">
                   <h4>{{ comment.name || 'mike' }}</h4>
-                  <span>{{ comment.create_time || '2018/10/21 10:05' }}</span>
+                  <span>{{ dayjs(comment.create_time * 1000).format('YYYY/MM/DD HH:mm:ss') || '2018/10/21 10:05' }}</span>
                 </div>
-                <p>{{ comment.content || 'fefef5085484' }}</p>
+                <p>{{ comment.comment || 'fefef5085484' }}</p>
               </div>
-              <button type="button" class="comment-delete-btn">
+              <button v-if="comment.uid === user.uid" type="button" class="comment-delete-btn" @click="deleteComment(key, article, comment.id)">
                 <span class="material-icons">delete_outline</span>
               </button>
             </li>
             <li class="comment-input-group">
               <img src="https://images.unsplash.com/photo-1634985491284-5a9dd93068a5?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=735&q=80" alt="comment.name">
-              <input type="text" >
-              <button type="button"><span class="material-icons">send</span></button>
+              <input type="text" v-model="articleInputs[key]" @keyup.enter="submitComment(article.id!, key)">
+              <button type="button" @click="submitComment(article.id!, key)"><span class="material-icons">send</span></button>
             </li>
           </ul>
         </li>

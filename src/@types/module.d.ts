@@ -31,6 +31,8 @@ declare module '@/api' {
   export function apiGetArticles(page: number): Promise<any>;
   export function apiThumbsUpArticle(user: User, articleId: string): Promise<any>;
   export function apiCancelThumbsUpArticle(articleId: string): Promise<any>;
+  export function apiPostComment(commentData: CommentData, articleId: string): Promise<any>;
+  export function apiDeleteComment(articleId: string, commentId: string): Promise<any>;
 }
 
 declare module '@/composition/store' {
@@ -44,6 +46,7 @@ declare module '@/composition/store' {
   export function setArticles(articles: Article[]): void;
   export function getArticles(page: number): void;
   export function setArticle(articleIdx: number, article: Article): void;
+  export function setArticleComments(comments: ArticleComment[], idx: number): void;
 }
 
 declare module '@/api/user_req' {
