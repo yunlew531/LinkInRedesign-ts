@@ -74,6 +74,7 @@ type ArticleComment = {
   photo: string;
 }
 
+type Favorite = { uid: string }
 interface Article {
   id?: string;
   uid?: string;
@@ -84,6 +85,7 @@ interface Article {
   content?: Object;
   likes?: ArticleLikes;
   comments?: ArticleComment[];
+  favorites?: Favorite[];
 }
 
 interface CommentData {

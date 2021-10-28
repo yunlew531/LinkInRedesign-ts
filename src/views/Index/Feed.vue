@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { ref, defineAsyncComponent, computed, Ref, inject } from 'vue';
 import { apiCreateArticle, apiThumbsUpArticle, apiCancelThumbsUpArticle, apiPostComment,
-  apiDeleteComment
+  apiDeleteComment, apiAddArticleFavorite, apiRemoveArticleFavorite, apiDeleteArticle
 } from '@/api';
 import dayjs from '@/mixins/dayjs';
 import getImageUrl from '@/mixins/getImageUrl';
@@ -67,14 +67,12 @@ const feeds = ref(
 );
 
 const activeBtnsList = ref<string[]>([]);
-const showBtnsList = (feedId: string, event: Event) => {
-  if(event.type === 'mouseenter') 
-    activeBtnsList.value.push(feedId);
-  else if(event.type === 'mouseleave') {
-    const idx = activeBtnsList.value.indexOf(feedId);
-    if(idx === -1) return;
-    activeBtnsList.value.splice(idx, 1)
-  }
+const showBtnsList = (event: Event) => {
+  const target = event.target as Element;
+  if(event.type === 'mouseenter')
+    target.classList.add('show');
+  else if(event.type === 'mouseleave')
+    target.classList.remove('show');
 };
 
 const createArticle = async () => {
@@ -93,6 +91,14 @@ const createArticle = async () => {
 const convertArticle = (content: any) => {
   const converter = new QuillDeltaToHtmlConverter(content.ops);
   return converter.convert();
+};
+
+const deleteArticle = async (articleId: string) => {
+  try {
+    const { data } = await apiDeleteArticle(articleId);
+    console.log('data log => ', data);
+    getArticles(1);
+  } catch (err) { console.dir(err); }
 };
 
 const focusEditor = () => editorEl.value.focus();
@@ -137,8 +143,14 @@ const handleLikes = (articleLikes: ArticleLikes) => {
   return articleLikes.filter((like, idx) => idx < 5);
 };
 
+const isCommentLimit = ref(false);
 const articleInputs = ref<string[]>([]);
 const submitComment = async (articleId: string, key: number) => {
+  if (isCommentLimit.value) {
+    alert('Please wait 30 seconds for each message')
+    return;
+  }
+  isCommentLimit.value = true;
   const comment = articleInputs.value[key];
 
   if (!comment) alert('comment required');
@@ -154,6 +166,9 @@ const submitComment = async (articleId: string, key: number) => {
     setArticleComments(comments, key);
     articleInputs.value[key] = '';
   } catch (err) { console.dir(err); }
+  setTimeout(() => {
+    isCommentLimit.value = false;
+  }, 30 * 1000);
 };
 
 const deleteComment = async (articleIdx: number , article: Article, commentId: string) => {
@@ -166,6 +181,35 @@ const deleteComment = async (articleIdx: number , article: Article, commentId: s
     setArticle(articleIdx, tempArticle);
   } catch (err) { console.dir(err); }
 };
+
+const addArticleFavorite =  async (articleIdx: number, article: Article) => {
+  const tempArticle = JSON.parse(JSON.stringify(article));
+
+  try {
+    const { data } = await apiAddArticleFavorite(article.id!);
+    const { favorites } = data;
+    tempArticle.favorites = favorites;
+    setArticle(articleIdx, tempArticle);
+    alert('add success')
+  } catch (err) { console.log(err); }
+};
+
+const removeAriticleFavorite = async (articleIdx: number, article: Article) => {
+  const tempArticle = JSON.parse(JSON.stringify(article));
+
+  try {
+    const { data } = await apiRemoveArticleFavorite(article.id!);
+    const { favorites } = data;
+    tempArticle.favorites = favorites;
+    setArticle(articleIdx, tempArticle);
+    alert('remove success');
+  } catch (err) { console.dir(err); }
+};
+
+const checkFavorite = (favorites: Favorite[] | undefined) => {
+  if (!favorites) return;
+  return favorites.some((favorite) => favorite.uid === user.value.uid);
+}
 </script>
 
 <template>
@@ -206,8 +250,8 @@ const deleteComment = async (articleIdx: number , article: Article, commentId: s
               <li v-if="article.likes?.length">&nbspliked this</li>
             </ul>
             <div class="card-btns-group" :class="{ show: activeBtnsList.includes(article.id!) }"
-              @mouseleave="showBtnsList(article.id! ,$event)"
-              @mouseenter="showBtnsList(article.id!, $event)">
+              @mouseleave="showBtnsList($event)"
+              @mouseenter="showBtnsList($event)">
               <button type="button"
                 class="feed-card-more-btn">
                 <img v-show="!activeBtnsList.includes(article.id!)"
@@ -216,11 +260,14 @@ const deleteComment = async (articleIdx: number , article: Article, commentId: s
                   src="@/assets/images/chevron-down.png" alt="more button">
               </button>
               <ul>
-                <li>
-                  <button type="button">delete</button>
+                <li v-if="user.uid === article.uid">
+                  <button type="button" @click="deleteArticle(article.id!)">delete</button>
                 </li>
-                <li>
-                  <button type="button">收藏</button>
+                <li v-if="!checkFavorite(article.favorites)">
+                  <button type="button" @click="addArticleFavorite(key, article)">favorite</button>
+                </li>
+                 <li v-else>
+                  <button type="button" class="un-favorite-btn" @click="removeAriticleFavorite(key, article)">UnFavorite</button>
                 </li>
               </ul>
             </div>
@@ -232,6 +279,7 @@ const deleteComment = async (articleIdx: number , article: Article, commentId: s
               </router-link>
               <div>
                 <router-link :to="`/@${article.uid}`" class="user-link">{{ article.name }}</router-link>
+                <span v-if="user.uid === article.uid" class="user-link-notice">You</span>
                 <h4>{{ article.job }}</h4>
               </div>
               <div class="article-time">
@@ -253,7 +301,8 @@ const deleteComment = async (articleIdx: number , article: Article, commentId: s
               <span class="feed-card-likes-qty">{{ article.likes?.length }}</span>
             </button>
             <button type="button" class="feed-card-footer-btn">
-              <img src="@/assets/images/message-circle.png" alt="comments button">
+              <img src="@/assets/images/message-circle.png" alt="comments" class="comments-img">
+              <span class="feed-card-comments-qty">{{ article.comments?.length }}</span>
             </button>
             <button type="button" class="feed-card-footer-btn">
               <img src="@/assets/images/share-2.png" alt="share button" class="share-img">
@@ -275,7 +324,7 @@ const deleteComment = async (articleIdx: number , article: Article, commentId: s
               </button>
             </li>
             <li class="comment-input-group">
-              <img src="https://images.unsplash.com/photo-1634985491284-5a9dd93068a5?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=735&q=80" alt="comment.name">
+              <img :src="user.photo" alt="comment.name">
               <input type="text" v-model="articleInputs[key]" @keyup.enter="submitComment(article.id!, key)">
               <button type="button" @click="submitComment(article.id!, key)"><span class="material-icons">send</span></button>
             </li>
@@ -391,7 +440,7 @@ const deleteComment = async (articleIdx: number , article: Article, commentId: s
   position: relative;
   text-align: center;
   > ul {
-    background: transparent !important;
+    background: $blue-100;
     visibility: hidden;
     opacity: 0;
     position: absolute;
@@ -405,6 +454,7 @@ const deleteComment = async (articleIdx: number , article: Article, commentId: s
       background: rgba($blue-200, 0.9);
       cursor: pointer;
       border-bottom: $white-400 1px solid;
+      overflow: hidden;
       &:hover {
         background: rgba($blue-200, 0.8);
       }
@@ -422,6 +472,7 @@ const deleteComment = async (articleIdx: number , article: Article, commentId: s
         border-bottom: none;
       }
       > button {
+        width: 125px;
         font-weight: bold;
         text-transform: uppercase;
         color: $white;
@@ -429,6 +480,15 @@ const deleteComment = async (articleIdx: number , article: Article, commentId: s
         background: transparent;
         border: none;
         padding: 10px 20px;
+      }
+      .un-favorite-btn {
+        background: $blue-600;
+        &:hover {
+          filter: brightness(0.9);
+        }
+        &:active {
+          filter: brightness(0.8);
+        }
       }
     }
   }
@@ -465,7 +525,7 @@ const deleteComment = async (articleIdx: number , article: Article, commentId: s
     font-weight: bold;
     text-decoration: none;
     color: inherit;
-    margin: 0 15px 5px 0;
+    margin: 0 10px 5px 0;
     transition: color  0.2s, filter 0.2s;
     > img {
       width: 50px;
@@ -476,6 +536,10 @@ const deleteComment = async (articleIdx: number , article: Article, commentId: s
       color: $blue-200;
       filter: brightness(0.8);
     }
+  }
+  .user-link-notice {
+    color: $gray-400;
+    font-size: $fs-7;
   }
   h4 {
     font-size: $fs-6;
@@ -524,10 +588,10 @@ const deleteComment = async (articleIdx: number , article: Article, commentId: s
     filter: brightness(0.95);
   }
 }
-.feed-card-likes-qty {
+.feed-card-likes-qty, feed-card-comments-qty {
   color: $blue-200;
 }
-.thumbs-up-img {
+.thumbs-up-img, .comments-img {
   margin-right: 5px;
 }
 .share-img {

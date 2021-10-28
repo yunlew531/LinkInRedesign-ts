@@ -21,4 +21,4 @@ export const cancelThumbsUpArticle = (articleId: string) => authReq.post(`/self/
 export const postComment = (commentData: CommentData, articleId: string) =>
   authReq.post(`/self/article/comment/${articleId}`, commentData);
 export const deleteComment = (articleId: string, commentId: string) =>
-  authReq.delete(`/self/article/${articleId}/${commentId}`);
+  authReq.delete(`/self/article/${articleId}/comment/${commentId}`);

@@ -9,6 +9,8 @@ import { getProfile, createProject, updateProject, deleteProject, getPhoto, uplo
   thumbsUpArticle, cancelThumbsUpArticle, postComment, deleteComment
 } from './Index/profile';
 
+import { addArticleFavorite, removeArticleFavorite, deleteArticle } from './Index/feed';
+
 // normal
 export const apiGetUser = getUser;
 
@@ -37,3 +39,6 @@ export const apiThumbsUpArticle = thumbsUpArticle;
 export const apiCancelThumbsUpArticle = cancelThumbsUpArticle;
 export const apiPostComment = postComment;
 export const apiDeleteComment = deleteComment;
+export const apiAddArticleFavorite = addArticleFavorite;
+export const apiRemoveArticleFavorite = removeArticleFavorite;
+export const apiDeleteArticle = deleteArticle;
