@@ -10,7 +10,8 @@ import 'simplebar-vue/dist/simplebar.min.css';
 
 const { updateUserProfile } = store;
 
-const Editor = defineAsyncComponent(() => import(`${getSrcFolder()}/components/Editor.vue`));
+const Editor = defineAsyncComponent(() => import('../Editor.vue'));
+// const Editor = defineAsyncComponent(() => import(`${getSrcFolder()}/components/Editor.vue`));
 
 const props = defineProps({
   projects: {

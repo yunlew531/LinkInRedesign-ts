@@ -5,9 +5,10 @@ import getImageUrl from '@/mixins/getImageUrl';
 import getSrcFolder from '@/mixins/getSrcFolder';
 import { userSymbol } from '@/Symbol';
 
-const ProjectModal = defineAsyncComponent(() => import(`${getSrcFolder()}/components/Index/ProjectModal.vue`));
-const ExperienceModal = defineAsyncComponent(() => import('@/components/Index/Profile/ExperienceModal.vue'));
-const Education = defineAsyncComponent(() => import(`${getSrcFolder()}/components/Index/Profile/Education.vue`));
+const ProjectModal = defineAsyncComponent(() => import('../../../components/Index/ProjectModal.vue'));
+// const ProjectModal = defineAsyncComponent(() => import(`${getSrcFolder()}/components/Index/ProjectModal.vue`));
+const Education = defineAsyncComponent(() => import('../../../components/Index/Profile/Education.vue'));
+// const Education = defineAsyncComponent(() => import(`${getSrcFolder()}/components/Index/Profile/Education.vue`));
 
 const user: Ref<User> = inject(userSymbol)!;
 
@@ -80,15 +81,6 @@ const handleProjectImg = (project: any) => {
   return hasImage ? hasImage.insert.image : getImageUrl('image');
 };
 
-const experienceModalEl = ref<any>(null);
-
-const tempEeperience = ref<Experience>({});
-const editExperience = (experience: Experience) => {
-  tempEeperience.value = experience;
-  experienceModalEl.value.setStatus('update');
-  experienceModalEl.value.showModal();
-};
-
 const handleRelativeTime = (startTime: number | undefined, endTime: number | undefined) => {
   if (startTime && endTime) return dayjs(startTime * 1000).to(dayjs(endTime * 1000), true);
   else return '';
@@ -106,8 +98,6 @@ const handleExpImg = (experience: Experience) => {
   else
     return getImageUrl('upload_cloud');
 };
-
-const setTempExperience = (experience: Experience) => tempEeperience.value = experience;
 </script>
 
 <template>
@@ -117,8 +107,6 @@ const setTempExperience = (experience: Experience) => tempEeperience.value = exp
       @setCurrentProject="setCurrentProject" @setCurrentIdx="setCurrentIdx">
       <template v-slot:project-body-header><div></div></template>  
     </ProjectModal>
-    <ExperienceModal ref="experienceModalEl" :experience="tempEeperience"
-      @setTempExperience="setTempExperience" />
     <h2 class="card-title">About</h2>
     <p v-if="user?.about" class="card-paragraph">
       {{ user?.about || 'This user did not write anything.' }}</p>
@@ -175,7 +163,6 @@ const setTempExperience = (experience: Experience) => tempEeperience.value = exp
               <h3 class="experience-card-title">{{ experience.title }}</h3>
               <h4>{{ experience.place }}</h4>
             </div>
-            <button type="button" class="experience-edit-btn" @click="editExperience(experience)">edit</button>
           </div>
           <p>
             <span>{{ handleStartTime(experience.start_time) }}</span> - 
@@ -398,6 +385,7 @@ const setTempExperience = (experience: Experience) => tempEeperience.value = exp
   width: 54px;
   height: 54px;
   margin-right: 15px;
+  border-radius: 5px;
 }
 .experience-card-content {
   flex-grow: 1;

@@ -9,6 +9,7 @@ import getSrcFolder from '@/mixins/getSrcFolder';
 import { QuillDeltaToHtmlConverter } from 'quill-delta-to-html';
 import store from '@/composition/store';
 import { stateSymbol } from '@/Symbol';
+import router from '../../router';
 
 const { getProfile, getArticles, setArticles, setArticle, setArticleComments } = store;
 
@@ -16,7 +17,8 @@ getProfile();
 getArticles(1);
 
 const FeedAside = defineAsyncComponent(() => import('@/components/Index/Feed/FeedAside.vue'));
-const Editor = defineAsyncComponent(() => import(`${getSrcFolder()}/components/Editor.vue`));
+const Editor = defineAsyncComponent(() => import('../../components/Editor.vue'));
+// const Editor = defineAsyncComponent(() => import(`${getSrcFolder()}/components/Editor.vue`));
 
 const state: Ref<State> = inject(stateSymbol)!;
 const articles = computed(() => state.value.articles);
@@ -137,7 +139,7 @@ const checkAiticleThumbsUp = (article: Article): boolean => {
   return isThumbsUpActive;
 };
 
-const handleLikes = (articleLikes: ArticleLikes) => {
+const handleLikes = (articleLikes: ArticleLike[]) => {
   if (!articleLikes || articleLikes && !articleLikes.length) return;
 
   return articleLikes.filter((like, idx) => idx < 5);
@@ -207,9 +209,19 @@ const removeAriticleFavorite = async (articleIdx: number, article: Article) => {
 };
 
 const checkFavorite = (favorites: Favorite[] | undefined) => {
-  if (!favorites) return;
+  if (!favorites?.length) return;
   return favorites.some((favorite) => favorite.uid === user.value.uid);
 }
+
+const handleLikedUserModalShow = (e: Event) => {
+  const target = e.target as Element;
+  const isShow = Array.from(target.classList).includes('show');
+
+  if (isShow) target.classList.remove('show');
+  else target.classList.add('show');
+};
+
+const changePage = (uid: string) => router.push(`/@${uid}/profile`);
 </script>
 
 <template>
@@ -235,10 +247,22 @@ const checkFavorite = (favorites: Favorite[] | undefined) => {
         <li v-for="(article, key) in articles" class="feed-card">
           <div class="feed-card-header">
             <ul class="liked-list">
-              <li v-for="(user, userKey) in handleLikes(article.likes!)" :key="user.uid">
+              <li v-for="(likedUser, userKey) in handleLikes(article.likes!)" :key="likedUser.uid"
+                @mouseenter="handleLikedUserModalShow($event)" @mouseleave="handleLikedUserModalShow($event)"
+                @click="changePage(likedUser.uid)"  class="liked-item">
+                <div class="liked-item-modal-container">
+                  <div class="liked-item-triangle-dicoration"></div>
+                  <div class="liked-item-modal">
+                    <img :src="likedUser.photo" :alt="likedUser.name">
+                    <div class="liked-item-modal-content">
+                      <h3>{{ likedUser.name }}</h3>
+                      <h4>{{ likedUser.job }}</h4>
+                    </div>
+                  </div>
+                </div>
                 <span v-if="userKey !== 0 && (handleLikes(article.likes!)?.length! - 1) === userKey &&
                   article.likes && article.likes?.length <= 5">&nbspand&nbsp</span>
-                <router-link :to="`@${user.uid}`">{{ user.name }}</router-link>
+                <router-link :to="`@${likedUser.uid}`">{{ likedUser.name }}</router-link>
                 <span v-if="
                   userKey < 4 && article.likes && 
                   ((handleLikes(article.likes)?.length! - 2) !== userKey || article.likes.length > 5) &&
@@ -311,10 +335,10 @@ const checkFavorite = (favorites: Favorite[] | undefined) => {
           </div>
           <ul class="article-messages">
             <li v-for="comment in article.comments" :key="comment.id">
-              <img :src="comment.photo" alt="comment.name">
+              <img :src="comment.photo" alt="comment.name" @click="changePage(comment.uid)">
               <div class="comment-body">
                 <div class="comment-header">
-                  <h4>{{ comment.name || 'mike' }}</h4>
+                  <router-link :to="`/@${comment.uid}`">{{ comment.name }}</router-link>
                   <span>{{ dayjs(comment.create_time * 1000).format('YYYY/MM/DD HH:mm:ss') || '2018/10/21 10:05' }}</span>
                 </div>
                 <p>{{ comment.comment || 'fefef5085484' }}</p>
@@ -413,6 +437,7 @@ const checkFavorite = (favorites: Favorite[] | undefined) => {
   margin-right: auto;
   li {
     line-height: 20px;
+    cursor: pointer;
   }
   > li > a {
     text-decoration: none;
@@ -421,6 +446,66 @@ const checkFavorite = (favorites: Favorite[] | undefined) => {
     &:hover {
       filter: brightness(1.3);
     }
+  }
+}
+.liked-item {
+  position: relative;
+  &.show {
+    .liked-item-modal-container {
+      visibility: visible;
+      opacity: 1;
+    }
+  }
+}
+.liked-item-modal-container {
+  visibility: hidden;
+  opacity: 0;
+  transition: 0.3s opacity, 0.3s visibility;
+}
+.liked-item-modal {
+  width: 250px;
+  display: flex;
+  align-items: center;
+  border: 1px solid $blue-100;
+  padding: 10px;
+  border-radius: 5px;
+  position: absolute;
+  bottom: 35px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: $white;
+  transition: 0.3s box-shadow;
+  box-shadow: 20px 20px 20px rgba($blue-400, 0.1);
+  > img {
+    width: 50px;
+    height: 50px;
+    border-radius: 100%;
+    margin-right: 10px;
+  }
+  &:hover {
+    box-shadow: 5px 5px 5px rgba($blue-400, 0.1);
+  }
+}
+.liked-item-triangle-dicoration {
+  position: absolute;
+  bottom: 21px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 16px;
+  height: 16px;
+  border-bottom: 2px solid $blue-100;
+  border-right: 2px solid $blue-100;
+  box-shadow: 20px 20px 20px rgba($blue-400, 0.1);
+  background: $white;
+  transform: rotate(45deg) translateX(-50%);
+  z-index: 10;
+}
+.liked-item-modal-content {
+  flex-shrink: 0;
+  > h4 {
+    font-weight: normal;
+    color: rgba($dark-100, 0.7);
+    font-size: $fs-6;
   }
 }
 .people-like-btn {
@@ -588,7 +673,7 @@ const checkFavorite = (favorites: Favorite[] | undefined) => {
     filter: brightness(0.95);
   }
 }
-.feed-card-likes-qty, feed-card-comments-qty {
+.feed-card-likes-qty, .feed-card-comments-qty {
   color: $blue-200;
 }
 .thumbs-up-img, .comments-img {
@@ -614,6 +699,11 @@ const checkFavorite = (favorites: Favorite[] | undefined) => {
       height: 50px;
       border-radius: 100%;
       margin-right: 10px;
+      transition: 0.3s filter;
+      cursor: pointer;
+      &:hover {
+        filter: brightness(0.8);
+      }
     }
   }
 }
@@ -621,8 +711,13 @@ const checkFavorite = (favorites: Favorite[] | undefined) => {
   display: flex;
   align-items: center;
   margin-bottom: 5px;
-  > h4 {
+  > a {
     margin-right: 5px;
+    color: $blue-200;
+    transition: 0.3s filter;
+    &:hover {
+      filter: brightness(1.2);
+    }
   }
   > span {
     font-size: $fs-6;

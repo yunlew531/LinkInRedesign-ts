@@ -64,7 +64,13 @@ interface Experience {
   image_url?: string;
 }
 
-type ArticleLikes = { name: string; uid: string; }[];
+type ArticleLike = {
+  uid: string;
+  name: string;
+  photo: string;
+  job: string;
+};
+
 type ArticleComment = {
   id: string;
   name: string;
@@ -83,7 +89,7 @@ interface Article {
   name?: string;
   create_time?: number;
   content?: Object;
-  likes?: ArticleLikes;
+  likes?: ArticleLike[];
   comments?: ArticleComment[];
   favorites?: Favorite[];
 }
