@@ -19,7 +19,7 @@ const editorOptions = ref({ placeholder: 'input education content' });
 const education = ref<Education>({});
 watch(() => props.education, (value) =>{
   education.value = { ...value };
-});
+}, { immediate: true });
 
 const isEdit = ref(false);
 const editEducation = () => {

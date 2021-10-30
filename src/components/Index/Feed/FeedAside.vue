@@ -9,7 +9,10 @@ const state: Ref<State> = inject(stateSymbol)!;
 const user = computed(() => state.value.user);
 
 const emits = defineEmits(['focus']);
-const focusEditor = () => emits('focus');
+const focusEditor = () => {
+  window.scrollTo(0, 0);
+  emits('focus');
+};
 </script>
 
 <template>
@@ -120,7 +123,7 @@ const focusEditor = () => emits('focus');
   width: 290px;
 }
 .aside-card {
-  @include feed-card;
+  @include article-card;
   overflow: hidden;
   margin-bottom: 20px;
   &:first-of-type {

@@ -26,7 +26,7 @@
   padding: 30px;
   margin-bottom: 20px;
 }
-@mixin feed-card {
+@mixin article-card {
   background: $white;
   box-shadow: 3px 3px 20px rgba($blue-400, 0.05);
   border-radius: 4px;

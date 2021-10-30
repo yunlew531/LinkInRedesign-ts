@@ -78,6 +78,12 @@ const showBtnsList = (event: Event) => {
 };
 
 const createArticle = async () => {
+  const empty = editorEl.value.checkEmpty();
+  if (empty) {
+    alert('content required');
+    return;
+  };
+
   const article = {
     content: editorEl.value.getContents(),
   };
@@ -97,8 +103,7 @@ const convertArticle = (content: any) => {
 
 const deleteArticle = async (articleId: string) => {
   try {
-    const { data } = await apiDeleteArticle(articleId);
-    console.log('data log => ', data);
+    await apiDeleteArticle(articleId);
     getArticles(1);
   } catch (err) { console.dir(err); }
 };
@@ -192,7 +197,7 @@ const addArticleFavorite =  async (articleIdx: number, article: Article) => {
     const { favorites } = data;
     tempArticle.favorites = favorites;
     setArticle(articleIdx, tempArticle);
-    alert('add success')
+    alert('add success');
   } catch (err) { console.log(err); }
 };
 
@@ -215,13 +220,18 @@ const checkFavorite = (favorites: Favorite[] | undefined) => {
 
 const handleLikedUserModalShow = (e: Event) => {
   const target = e.target as Element;
-  const isShow = Array.from(target.classList).includes('show');
 
-  if (isShow) target.classList.remove('show');
-  else target.classList.add('show');
+  if (e.type === 'mouseenter') target.classList.add('show');
+  else target.classList.remove('show');
 };
 
-const changePage = (uid: string) => router.push(`/@${uid}/profile`);
+const goProfilePage = (uid: string) => router.push(`/@${uid}/profile`);
+
+const handleCommentsDisplay = (e: Event) => {
+  const target = (<Element>e.target).closest('li')!;
+
+  target.classList.toggle('show');
+};
 </script>
 
 <template>
@@ -244,12 +254,12 @@ const changePage = (uid: string) => router.push(`/@${uid}/profile`);
         </span>
       </div>
       <ul class="feeds-list">
-        <li v-for="(article, key) in articles" class="feed-card">
-          <div class="feed-card-header">
+        <li v-for="(article, key) in articles" class="article-card">
+          <div class="article-card-header">
             <ul class="liked-list">
               <li v-for="(likedUser, userKey) in handleLikes(article.likes!)" :key="likedUser.uid"
                 @mouseenter="handleLikedUserModalShow($event)" @mouseleave="handleLikedUserModalShow($event)"
-                @click="changePage(likedUser.uid)"  class="liked-item">
+                  class="liked-item">
                 <div class="liked-item-modal-container">
                   <div class="liked-item-triangle-dicoration"></div>
                   <div class="liked-item-modal">
@@ -257,6 +267,10 @@ const changePage = (uid: string) => router.push(`/@${uid}/profile`);
                     <div class="liked-item-modal-content">
                       <h3>{{ likedUser.name }}</h3>
                       <h4>{{ likedUser.job }}</h4>
+                      <div class="liked-modal-btns">
+                        <button type="button" @click="goProfilePage(likedUser.uid)">profile</button>
+                        <button type="button">chat</button>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -277,7 +291,7 @@ const changePage = (uid: string) => router.push(`/@${uid}/profile`);
               @mouseleave="showBtnsList($event)"
               @mouseenter="showBtnsList($event)">
               <button type="button"
-                class="feed-card-more-btn">
+                class="article-card-more-btn">
                 <img v-show="!activeBtnsList.includes(article.id!)"
                   src="@/assets/images/Other.png" alt="more button">
                 <img v-show="activeBtnsList.includes(article.id!)"
@@ -296,8 +310,8 @@ const changePage = (uid: string) => router.push(`/@${uid}/profile`);
               </ul>
             </div>
           </div>
-          <div class="feed-card-body">
-            <div class="feed-card-user">
+          <div class="article-card-body">
+            <div class="article-card-user">
               <router-link :to="`/@${article.uid}`" class="user-link">
                 <img :src="article.photo || getImageUrl('user')" :alt="article.name">
               </router-link>
@@ -307,35 +321,35 @@ const changePage = (uid: string) => router.push(`/@${uid}/profile`);
                 <h4>{{ article.job }}</h4>
               </div>
               <div class="article-time">
-                <span class="article-create-time"> create time: 
+                <span class="article-create-time">
                   {{ dayjs(article.create_time! * 1000).format('YYYY/MM/DD HH:mm:ss') }}</span>
               </div>
             </div>
             <div v-html="convertArticle(article.content)"></div>
           </div>
-          <div class="feed-card-footer">
+          <div class="article-card-footer">
             <button v-if="checkAiticleThumbsUp(article)" type="button" @click="cancelThumbsUpArticle(article, key)"
-              class="feed-card-footer-btn active">
+              class="article-card-footer-btn active">
               <img src="@/assets/images/thumbs-up-active.png" alt="thumbs-up button"
                 class="thumbs-up-img">
-              <span class="feed-card-likes-qty">{{ article.likes?.length }}</span>
+              <span class="article-card-likes-qty">{{ article.likes?.length }}</span>
             </button>
-            <button v-else type="button" class="feed-card-footer-btn" @click="thumbsUpArticle(article, key)">
+            <button v-else type="button" class="article-card-footer-btn" @click="thumbsUpArticle(article, key)">
               <img src="@/assets/images/thumbs-up.png" alt="thumbs-up button" class="thumbs-up-img">
-              <span class="feed-card-likes-qty">{{ article.likes?.length }}</span>
+              <span class="article-card-likes-qty">{{ article.likes?.length }}</span>
             </button>
-            <button type="button" class="feed-card-footer-btn">
+            <button type="button" class="article-card-footer-btn" @click="handleCommentsDisplay($event)">
               <img src="@/assets/images/message-circle.png" alt="comments" class="comments-img">
-              <span class="feed-card-comments-qty">{{ article.comments?.length }}</span>
+              <span class="article-card-comments-qty">{{ article.comments?.length }}</span>
             </button>
-            <button type="button" class="feed-card-footer-btn">
+            <button type="button" class="article-card-footer-btn">
               <img src="@/assets/images/share-2.png" alt="share button" class="share-img">
               <span>share</span>
             </button>
           </div>
-          <ul class="article-messages">
+          <ul class="article-messages-list">
             <li v-for="comment in article.comments" :key="comment.id">
-              <img :src="comment.photo" alt="comment.name" @click="changePage(comment.uid)">
+              <img :src="comment.photo" alt="comment.name" @click="goProfilePage(comment.uid)">
               <div class="comment-body">
                 <div class="comment-header">
                   <router-link :to="`/@${comment.uid}`">{{ comment.name }}</router-link>
@@ -372,7 +386,7 @@ const changePage = (uid: string) => router.push(`/@${uid}/profile`);
   margin-right: 40px;
 }
 .new-post {
-  @include feed-card;
+  @include article-card;
 }
 .new-post-header {
   display: flex;
@@ -421,12 +435,18 @@ const changePage = (uid: string) => router.push(`/@${uid}/profile`);
   left: 50%;
   transform: translateX(-50%) translateY(-50%);
 }
-.feed-card {
-  @include feed-card;
+.article-card {
+  @include article-card;
   padding: 0;
   margin-bottom: 20px;
+  border: 1px solid rgba($blue-500, 0.15);
+  &.show {
+    .article-messages-list {
+      display: block;
+    }
+  }
 }
-.feed-card-header {
+.article-card-header {
   display: flex;
   align-items: center;
   border-bottom: 1px solid $white-100;
@@ -476,14 +496,21 @@ const changePage = (uid: string) => router.push(`/@${uid}/profile`);
   background: $white;
   transition: 0.3s box-shadow;
   box-shadow: 20px 20px 20px rgba($blue-400, 0.1);
+  &::before {
+    content: '';
+    width: 100%;
+    height: 20px;
+    position: absolute;
+    left: 0;
+    bottom: -20px;
+    cursor: auto;
+  }
   > img {
+    align-self: start;
     width: 50px;
     height: 50px;
     border-radius: 100%;
     margin-right: 10px;
-  }
-  &:hover {
-    box-shadow: 5px 5px 5px rgba($blue-400, 0.1);
   }
 }
 .liked-item-triangle-dicoration {
@@ -501,11 +528,35 @@ const changePage = (uid: string) => router.push(`/@${uid}/profile`);
   z-index: 10;
 }
 .liked-item-modal-content {
-  flex-shrink: 0;
+  flex: 1 0;
   > h4 {
     font-weight: normal;
     color: rgba($dark-100, 0.7);
     font-size: $fs-6;
+  }
+}
+.liked-modal-btns {
+  display: flex;
+  margin-right: -10px;
+  > button {
+    text-transform: uppercase;
+    font-weight: bold;
+    width: 48%;
+    border: none;
+    background: $blue-500;
+    color: $white;
+    border-radius: 5px;
+    transition: 0.2s background-color;
+    padding: 5px 10px;
+    cursor: pointer;
+    margin-top: 5px;
+    margin-right: 10px;
+    &:hover {
+      filter: brightness(0.9);
+    }
+    &:active {
+      filter: brightness(0.8);
+    }
   }
 }
 .people-like-btn {
@@ -567,7 +618,7 @@ const changePage = (uid: string) => router.push(`/@${uid}/profile`);
         padding: 10px 20px;
       }
       .un-favorite-btn {
-        background: $blue-600;
+        background: $red-100;
         &:hover {
           filter: brightness(0.9);
         }
@@ -584,7 +635,7 @@ const changePage = (uid: string) => router.push(`/@${uid}/profile`);
     }
   }
 }
-.feed-card-more-btn {
+.article-card-more-btn {
   background: transparent;
   border: none;
   cursor: pointer;
@@ -595,13 +646,13 @@ const changePage = (uid: string) => router.push(`/@${uid}/profile`);
     height: 24px;
   }
 }
-.feed-card-body {
+.article-card-body {
   letter-spacing: 0.025rem;
   line-height: 1.5;
   border-bottom: 1px solid $white-100;
   padding: 15px 30px 20px;
 }
-.feed-card-user {
+.article-card-user {
   display: flex;
   align-items: center;
   margin-bottom: 15px;
@@ -632,13 +683,14 @@ const changePage = (uid: string) => router.push(`/@${uid}/profile`);
   }
 }
 .article-time {
+  align-self: start;
   margin-left: auto;
   color: rgba($dark-100, 0.9);
 }
 .article-create-time {
   margin-bottom: 5px;
 }
-.feed-card-footer {
+.article-card-footer {
   display: flex;
   align-items: center;
   padding: 0 30px;
@@ -651,7 +703,7 @@ const changePage = (uid: string) => router.push(`/@${uid}/profile`);
     border-left: 1px solid $white-100;
   }
 }
-.feed-card-footer-btn {
+.article-card-footer-btn {
   display: flex;
   align-items: center;
   border: none;
@@ -673,7 +725,7 @@ const changePage = (uid: string) => router.push(`/@${uid}/profile`);
     filter: brightness(0.95);
   }
 }
-.feed-card-likes-qty, .feed-card-comments-qty {
+.article-card-likes-qty, .article-card-comments-qty {
   color: $blue-200;
 }
 .thumbs-up-img, .comments-img {
@@ -682,7 +734,8 @@ const changePage = (uid: string) => router.push(`/@${uid}/profile`);
 .share-img {
   margin-right: 5px;
 }
-.article-messages {
+.article-messages-list {
+  display: none;
   padding: 0 30px;
   border-top: 1px solid $white-100;
   > li {

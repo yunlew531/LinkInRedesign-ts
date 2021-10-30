@@ -57,6 +57,7 @@ const getText = () => quill.getText().trim();
 const setText = (text = '') => quill.setText(text);
 const getContents = () => quill.getContents();
 const setContents = (content: any) => quill.setContents(content);
+const checkEmpty = () => !quill.getText().trim().length;
 
 const isFocusAnimeInProgress = ref(false);
 const focus = () => {
@@ -70,6 +71,7 @@ defineExpose({
   getContents,
   setContents,
   focus,
+  checkEmpty,
 });
 </script>
 
