@@ -56,7 +56,7 @@ const filterFivePerson = (users: Array<SkillListUser>) => users.filter((user, ke
 
 const currentProject = ref({});
 const currentProjectIdx = ref(0);
-const projectModalEl = ref<any>(null);
+const projectModalEl = ref();
 const showProjectModal = (project: object, key: number) => {
   currentProject.value = project;
   currentProjectIdx.value = key;

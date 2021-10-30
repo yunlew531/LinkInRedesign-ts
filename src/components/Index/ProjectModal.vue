@@ -72,8 +72,8 @@ const handleCurrentProject = (num: number) => {
 
 type ModalStatus = 'update' | 'create';
 
-const titleEditorEl = ref<any>(null);
-const contentEditorEl = ref<any>(null);
+const titleEditorEl = ref();
+const contentEditorEl = ref();
 const isProjectEdit = ref(false);
 const modalStatus = ref<ModalStatus>('update');
 const isShowDeleteBtn = computed(() => modalStatus.value === 'update' ? true : false);

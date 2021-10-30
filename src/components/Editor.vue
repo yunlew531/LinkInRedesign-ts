@@ -38,7 +38,7 @@ const props = defineProps({
 const { options, theme, height, toolbar, marginY } = props;
 const deleteBtnStyle = computed(() => props.deleteBtn ? 'inline-block' : 'none');
 
-const editorEl = ref(null);
+const editorEl = ref();
 let quill: any = null;
 onMounted(() => {
   quill = new Quill(editorEl.value, {

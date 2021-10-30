@@ -84,7 +84,7 @@ const cancelEdit = () => isEditAbout.value = false;
 
 const currentProject = ref({});
 const currentProjectIdx = ref(0);
-const projectModalEl = ref<any>(null);
+const projectModalEl = ref();
 const showProjectModal = (project: object, key: number) => {
   currentProject.value = project;
   currentProjectIdx.value = key;
@@ -110,7 +110,7 @@ const handleProjectImg = (project: any) => {
   return hasImage ? hasImage.insert.image : getImageUrl('image');
 };
 
-const experienceModalEl = ref<any>(null);
+const experienceModalEl = ref();
 const createExperience = () => {
   experienceModalEl.value.setStatus('create');
   experienceModalEl.value.showModal();

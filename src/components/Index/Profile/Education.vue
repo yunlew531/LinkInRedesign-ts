@@ -63,7 +63,7 @@ watch([
   }
 });
 
-const editorEl = ref<any>(null);
+const editorEl = ref();
 const updateEdit = async () => {
   const { start_time, graduate_time } = yearPicker.value;
   const time = education.value.time || `${start_time} - ${graduate_time}`;

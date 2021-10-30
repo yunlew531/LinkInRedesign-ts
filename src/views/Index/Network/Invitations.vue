@@ -41,7 +41,7 @@ const currentComponent =  computed(() => {
 })
 
 let elHeight = 0;
-const fillHeightEl = ref<null | HTMLElement>(null);
+const fillHeightEl = ref<HTMLElement>();
 const handleComponent = (payload: Element | string | null) => {
   if(!payload) {
     elHeight = 0;

@@ -17,7 +17,7 @@ const props = defineProps({
   },
 });
 
-const editorEl = ref<any>(null);
+const editorEl = ref();
 
 const tempExperience = ref<Experience>({});
 watch(() => props.experience, (value) => {
