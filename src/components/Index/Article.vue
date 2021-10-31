@@ -1,13 +1,9 @@
 <script lang="ts" setup>
 import { computed, inject, Ref, PropType, ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { apiThumbsUpArticle, apiCancelThumbsUpArticle, apiPostComment,
-  apiDeleteComment, apiAddArticleFavorite, apiRemoveArticleFavorite, apiDeleteArticle
-} from '@/api';
 import { QuillDeltaToHtmlConverter } from 'quill-delta-to-html';
 import getImageUrl from '@/mixins/getImageUrl';
 import dayjs from '@/mixins/dayjs';
-import store from '@/composition/store';
 import { stateSymbol } from '@/Symbol';
 
 defineProps({
@@ -23,23 +19,36 @@ defineProps({
   },
 });
 
-const { getArticles, setArticle, setArticleComments } = store;
+const emits = defineEmits(['thumbsUp', 'removeThumbsUp', 'deleteArticle', 'addArticleFavorite',
+  'removeAriticleFavorite', 'deleteComment', 'submitComment']);
+
+const thumbsUpArticle = () => emits('thumbsUp');
+const cancelThumbsUpArticle = () => emits('removeThumbsUp');
+const deleteArticle = () => emits('deleteArticle');
+const addArticleFavorite = () => emits('addArticleFavorite');
+const removeAriticleFavorite = () => emits('removeAriticleFavorite');
+const submitComment = (articleId: string, articleIdx: number) => {
+  const data = {
+    articleId,
+    articleIdx,
+    comment: articleInputs.value[articleIdx],
+  };
+  emits('submitComment', data)
+};
+const deleteComment = (article: Article, articleIdx: number, commentId: string) => {
+  const data = {
+    article,
+    articleIdx,
+    commentId,
+  };
+  emits('deleteComment', data);
+};
+
 const router = useRouter();
 
 const state: Ref<State> = inject(stateSymbol)!;
 
 const user = computed(() => state.value.user);
-
-const cancelThumbsUpArticle = async (article: Article, idx: number) => {
-  const tempArticle: Article = JSON.parse(JSON.stringify(article));
-
-  try {
-    const { data } = await apiCancelThumbsUpArticle(article.id!);
-    const { likes } = data.article;
-    tempArticle.likes = likes;
-    setArticle(idx, tempArticle);
-  } catch (err) { console.dir(err); }
-};
 
 const checkAiticleThumbsUp = (article: Article): boolean => {
   if (!article.likes?.length) return false;
@@ -48,7 +57,7 @@ const checkAiticleThumbsUp = (article: Article): boolean => {
   return isThumbsUpActive;
 };
 
-const handleLikes = (articleLikes: ArticleLike[]) => {
+const handleLikesDisplayQty = (articleLikes: ArticleLike[]) => {
   if (!articleLikes || articleLikes && !articleLikes.length) return;
 
   return articleLikes.filter((like, idx) => idx < 5);
@@ -64,7 +73,7 @@ const handleLikedUserModalShow = (e: Event) => {
 const goProfilePage = (uid: string) => router.push(`/@${uid}/profile`);
 
 const handleCommentsDisplay = (e: Event) => {
-  const target = (<Element>e.target).closest('li')!;
+  const target = (<Element>e.target).closest('.article-card')!;
 
   target.classList.toggle('show');
 };
@@ -77,108 +86,31 @@ const showBtnsList = (event: Event) => {
     target.classList.remove('show');
 };
 
-const deleteArticle = async (articleId: string) => {
-  try {
-    await apiDeleteArticle(articleId);
-    getArticles(1);
-  } catch (err) { console.dir(err); }
-};
-
 const checkFavorite = (favorites: Favorite[] | undefined) => {
   if (!favorites?.length) return;
   return favorites.some((favorite) => favorite.uid === user.value.uid);
 }
-
-const addArticleFavorite =  async (articleIdx: number, article: Article) => {
-  const tempArticle = JSON.parse(JSON.stringify(article));
-
-  try {
-    const { data } = await apiAddArticleFavorite(article.id!);
-    const { favorites } = data;
-    tempArticle.favorites = favorites;
-    setArticle(articleIdx, tempArticle);
-    alert('add success');
-  } catch (err) { console.log(err); }
-};
-
-const removeAriticleFavorite = async (articleIdx: number, article: Article) => {
-  const tempArticle = JSON.parse(JSON.stringify(article));
-
-  try {
-    const { data } = await apiRemoveArticleFavorite(article.id!);
-    const { favorites } = data;
-    tempArticle.favorites = favorites;
-    setArticle(articleIdx, tempArticle);
-    alert('remove success');
-  } catch (err) { console.dir(err); }
-};
 
 const convertArticle = (content: any) => {
   const converter = new QuillDeltaToHtmlConverter(content.ops);
   return converter.convert();
 };
 
-const thumbsUpArticle = async (article: Article, idx: number) => {
-  const tempArticle: Article = JSON.parse(JSON.stringify(article));
-  const userData = {
-    name: user.value.name,
-    photo: user.value.photo,
-    job: user.value.job,
-  };
 
-  try {
-    const { data } = await apiThumbsUpArticle(userData, article.id!);
-    const { likes } = data.article;
-    tempArticle.likes = likes;
-    setArticle(idx, tempArticle);
-  } catch (err) { console.dir(err); }
-};
-
-const deleteComment = async (articleIdx: number , article: Article, commentId: string) => {
-  const tempArticle: Article = JSON.parse(JSON.stringify(article));
-  
-  try {
-    const { data } = await apiDeleteComment(article.id!, commentId);
-    const { comments } = data;
-    tempArticle.comments = comments;
-    setArticle(articleIdx, tempArticle);
-  } catch (err) { console.dir(err); }
-};
-
-const isCommentLimit = ref(false);
 const articleInputs = ref<string[]>([]);
-const submitComment = async (articleId: string, key: number) => {
-  if (isCommentLimit.value) {
-    alert('Please wait 30 seconds for each message')
-    return;
-  }
-  isCommentLimit.value = true;
-  const comment = articleInputs.value[key];
 
-  if (!comment) alert('comment required');
+const resetCommentInput = (articleIdx: number) => articleInputs.value[articleIdx] = '';
 
-  const commentData: CommentData = {
-    name: user.value.name!,
-    photo: user.value.photo || '',
-    comment,
-  };
-  try {
-    const { data } = await apiPostComment(commentData, articleId);
-    const { comments } = data;
-    setArticleComments(comments, key);
-    articleInputs.value[key] = '';
-  } catch (err) { console.dir(err); }
-  setTimeout(() => {
-    isCommentLimit.value = false;
-  }, 30 * 1000);
-};
+defineExpose({
+  resetCommentInput,
+});
 </script>
 
 <template>
-  <li class="article-card">
+  <div class="article-card">
     <div class="article-card-header">
       <ul class="liked-list">
-        <li v-for="(likedUser, userKey) in handleLikes(article.likes!)" :key="likedUser.uid"
+        <li v-for="(likedUser, userKey) in handleLikesDisplayQty(article.likes!)" :key="likedUser.uid"
           @mouseenter="handleLikedUserModalShow($event)"
             @mouseleave="handleLikedUserModalShow($event)"
             class="liked-item">
@@ -196,13 +128,13 @@ const submitComment = async (articleId: string, key: number) => {
               </div>
             </div>
           </div>
-          <span v-if="userKey !== 0 && (handleLikes(article.likes!)?.length! - 1) === userKey &&
+          <span v-if="userKey !== 0 && (handleLikesDisplayQty(article.likes!)?.length! - 1) === userKey &&
             article.likes && article.likes?.length <= 5">&nbspand&nbsp</span>
           <router-link :to="`@${likedUser.uid}`">{{ likedUser.name }}</router-link>
           <span v-if="
             userKey < 4 && article.likes && 
-            ((handleLikes(article.likes)?.length! - 2) !== userKey || article.likes.length > 5) &&
-            (handleLikes(article.likes!)?.length! - 1) !== userKey">,&nbsp</span>
+            ((handleLikesDisplayQty(article.likes)?.length! - 2) !== userKey || article.likes.length > 5) &&
+            (handleLikesDisplayQty(article.likes!)?.length! - 1) !== userKey">,&nbsp</span>
         </li>
         <li v-if="article.likes && article.likes.length > 5" class="like-this-text">
           and<button class="people-like-btn">more</button>people
@@ -217,14 +149,14 @@ const submitComment = async (articleId: string, key: number) => {
         </button>
         <ul>
           <li v-if="user.uid === article.uid">
-            <button type="button" @click="deleteArticle(article.id!)">delete</button>
+            <button type="button" @click="deleteArticle()">delete</button>
           </li>
           <li v-if="!checkFavorite(article.favorites)">
-            <button type="button" @click="addArticleFavorite(index, article)">favorite</button>
+            <button type="button" @click="addArticleFavorite()">favorite</button>
           </li>
           <li v-else>
             <button type="button" class="un-favorite-btn"
-              @click="removeAriticleFavorite(index, article)">UnFavorite</button>
+              @click="removeAriticleFavorite()">UnFavorite</button>
           </li>
         </ul>
       </div>
@@ -248,14 +180,14 @@ const submitComment = async (articleId: string, key: number) => {
     </div>
     <div class="article-card-footer">
       <button v-if="checkAiticleThumbsUp(article)" type="button"
-        @click="cancelThumbsUpArticle(article, index)"
+        @click="cancelThumbsUpArticle()"
         class="article-card-footer-btn active">
         <img src="@/assets/images/thumbs-up-active.png" alt="thumbs-up button"
           class="thumbs-up-img">
         <span class="article-card-likes-qty">{{ article.likes?.length }}</span>
       </button>
       <button v-else type="button" class="article-card-footer-btn"
-        @click="thumbsUpArticle(article, index)">
+        @click="thumbsUpArticle()">
         <img src="@/assets/images/thumbs-up.png" alt="thumbs-up button" class="thumbs-up-img">
         <span class="article-card-likes-qty">{{ article.likes?.length }}</span>
       </button>
@@ -278,10 +210,10 @@ const submitComment = async (articleId: string, key: number) => {
               {{ dayjs(comment.create_time * 1000).format('YYYY/MM/DD HH:mm:ss') }}
             </span>
           </div>
-          <p>{{ comment.comment || 'fefef5085484' }}</p>
+          <p>{{ comment.comment }}</p>
         </div>
         <button v-if="comment.uid === user.uid" type="button" class="comment-delete-btn"
-          @click="deleteComment(index, article, comment.id)">
+          @click="deleteComment(article, index, comment.id)">
           <span class="material-icons">delete_outline</span>
         </button>
       </li>
@@ -293,7 +225,7 @@ const submitComment = async (articleId: string, key: number) => {
           <span class="material-icons">send</span></button>
       </li>
     </ul>
-  </li>
+  </div>
 </template>
 
 <style lang="scss" scoped>
@@ -650,15 +582,18 @@ const submitComment = async (articleId: string, key: number) => {
   font-weight: bold;
   border-radius: 5px;
   background: $red-100;
-  color: $white;
   border: none;
-  padding: 5px 10px;
+  color: $white;
+  padding: 4px 8px;
   cursor: pointer;
   &:hover {
     filter: brightness(0.9)
   }
   &:active {
     filter: brightness(0.8)
+  }
+  .material-icons {
+    font-size: $fs-4;
   }
 }
 .comment-input-group {

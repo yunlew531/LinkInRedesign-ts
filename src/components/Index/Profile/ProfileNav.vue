@@ -1,32 +1,35 @@
 <script lang="ts" setup>
 import { ref } from 'vue';
+import { apiGetOwnArticle } from '@/api';
 import { useRoute } from 'vue-router';
 
 const route = useRoute();
-
 const { uid } = route.params;
-const profileLinks = ref([
-  {
-    title: 'Profile',
-    path: `${ uid ? `/@${uid}` : '' }/profile`,
-  },
-  {
-    title: 'Activity & interests',
-    path: `${ uid ? `/@${uid}` : '' }/profile/interests`,
-  },
-  {
-    title: 'Articles (3)',
-    path: `${ uid ? `/@${uid}` : '' }/profile/articles`,
-  },
-]);
+
+const articles = ref<Article[]>();
+const getOwnArticle = async () => {
+  try {
+    const { data } = await apiGetOwnArticle();
+    articles.value = data.articles;
+  } catch (err) { console.dir(err); }
+};
+
+const init = () => {
+  getOwnArticle();
+};
+init();
 </script>
 
 <template>
   <section class="profile-nav">
     <div class="profile-nav-container">
-      <router-link :to="link.path" exact-active-class="active"
-        v-for="link in profileLinks" :key="link.title" class="profile-nav-link">
-        {{ link.title }}
+      <router-link :to="`${uid ? `/@${uid}` : '' }/profile`" exact-active-class="active"
+        class="profile-nav-link">Profile</router-link>
+      <router-link :to="`${uid ? `/@${uid}` : '' }/profile/interests`" exact-active-class="active"
+        class="profile-nav-link">Activity & interests</router-link>
+      <router-link :to="`${uid ? `/@${uid}` : '' }/profile/articles`" exact-active-class="active"
+        class="profile-nav-link">Articles
+        <span class="articles-num">{{ articles?.length }}</span>
       </router-link>
     </div>
   </section>
@@ -75,5 +78,8 @@ const profileLinks = ref([
       color: $white;
     }
   }
+}
+.articles-num {
+  margin-left: 5px;
 }
 </style>

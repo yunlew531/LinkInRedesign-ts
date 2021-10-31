@@ -1,10 +1,12 @@
 <script lang="ts" setup>
 import { ref, defineAsyncComponent, computed, Ref, inject } from 'vue';
-import { apiCreateArticle} from '@/api';
+import { apiCreateArticle, apiThumbsUpArticle, apiCancelThumbsUpArticle, apiDeleteArticle,
+  apiAddArticleFavorite, apiRemoveArticleFavorite, apiPostComment, apiDeleteComment
+} from '@/api';
 import store from '@/composition/store';
 import { stateSymbol } from '@/Symbol';
 
-const { getProfile, getArticles, setArticles } = store;
+const { getProfile, getArticles, setArticles, setArticle ,setArticleComments } = store;
 
 getProfile();
 getArticles(1);
@@ -14,6 +16,7 @@ const Editor = defineAsyncComponent(() => import('../../components/Editor.vue'))
 const Article = defineAsyncComponent(() => import('@/components/Index/Article.vue'));
 
 const state: Ref<State> = inject(stateSymbol)!;
+const user = computed(() => state.value.user);
 const articles = computed(() => state.value.articles);
 
 const editorOptions = {
@@ -26,6 +29,8 @@ const editorOptions = {
     ],
   },
 };
+
+
 const editorEl = ref();
 
 const feeds = ref(
@@ -80,6 +85,122 @@ const createArticle = async () => {
 };
 
 const focusEditor = () => editorEl.value.focus();
+
+const thumbsUpArticle = async (article: Article, idx: number) => {
+  const tempArticle: Article = JSON.parse(JSON.stringify(article));
+  const userData = {
+    name: user.value.name,
+    photo: user.value.photo,
+    job: user.value.job,
+  };
+
+  try {
+    const { data } = await apiThumbsUpArticle(userData, article.id!);
+    const { likes } = data.article;
+    tempArticle.likes = likes;
+    setArticle(idx, tempArticle);
+  } catch (err) { console.dir(err); }
+};
+
+const removeThumbsUpArticle = async (article: Article, idx: number) => {
+  const tempArticle: Article = JSON.parse(JSON.stringify(article));
+
+  try {
+    const { data } = await apiCancelThumbsUpArticle(article.id!);
+    const { likes } = data.article;
+    tempArticle.likes = likes;
+    setArticle(idx, tempArticle);
+  } catch (err) { console.dir(err); }
+};
+
+const deleteArticle = async (articleId: string) => {
+  try {
+    await apiDeleteArticle(articleId);
+    getArticles(1);
+  } catch (err) { console.dir(err); }
+};
+
+const addArticleFavorite =  async (article: Article, articleIdx: number) => {
+  const tempArticle = JSON.parse(JSON.stringify(article));
+
+  try {
+    const { data } = await apiAddArticleFavorite(article.id!);
+    const { favorites } = data;
+    tempArticle.favorites = favorites;
+    setArticle(articleIdx, tempArticle);
+    alert('add success');
+  } catch (err) { console.log(err); }
+};
+
+const removeAriticleFavorite = async (article: Article, articleIdx: number) => {
+  const tempArticle = JSON.parse(JSON.stringify(article));
+
+  try {
+    const { data } = await apiRemoveArticleFavorite(article.id!);
+    const { favorites } = data;
+    tempArticle.favorites = favorites;
+    setArticle(articleIdx, tempArticle);
+    alert('remove success');
+  } catch (err) { console.dir(err); }
+};
+
+interface EmitSubmitCommentData {
+  articleId: string;
+  articleIdx: number;
+  comment: string;
+}
+
+const articlesRef = ref<any[]>([]);
+const isCommentLimit = ref(false);
+const submitComment = async (emitData: EmitSubmitCommentData) => {
+  const { articleId, articleIdx, comment } = emitData;
+
+  if (isCommentLimit.value) {
+    alert('Please wait 30 seconds for each message')
+    return;
+  }
+
+  isCommentLimit.value = true;
+
+  if (!comment) {
+    alert('comment required');
+    return;
+  };
+
+  const commentData: CommentData = {
+    name: user.value.name!,
+    photo: user.value.photo || '',
+    comment,
+  };
+
+  try {
+    const { data } = await apiPostComment(commentData, articleId);
+    const { comments } = data;
+    setArticleComments(comments, articleIdx);
+    articlesRef.value[articleIdx].resetCommentInput(articleIdx);
+  } catch (err) { console.dir(err); }
+  setTimeout(() => {
+    isCommentLimit.value = false;
+  }, 30 * 1000);
+};
+
+interface EmitDeleteCommentData {
+  article: Article;
+  articleIdx: number;
+  commentId: string;
+}
+
+const deleteComment = async (emitData: EmitDeleteCommentData) => {
+  const { article, articleIdx, commentId } = emitData;
+  const tempArticle: Article = JSON.parse(JSON.stringify(article));
+  
+  try {
+    const { data } = await apiDeleteComment(article.id!, commentId);
+    const { comments } = data;
+    tempArticle.comments = comments;
+    setArticle(articleIdx, tempArticle);
+  } catch (err) { console.dir(err); }
+};
 </script>
 
 <template>
@@ -102,7 +223,16 @@ const focusEditor = () => editorEl.value.focus();
         </span>
       </div>
       <ul class="feeds-list">
-        <Article v-for="(article, index) in articles" :key="article.id" :article="article" :index="index" />
+        <li v-for="(article, index) in articles" :key="article.id">
+          <Article :ref="(el: any) => articlesRef[index] = el" :article="article" :index="index"
+            @thumbsUp="thumbsUpArticle(article, index)" 
+            @removeThumbsUp="removeThumbsUpArticle(article, index)"
+            @deleteArticle="deleteArticle(article.id!)" 
+            @addArticleFavorite="addArticleFavorite(article, index)"
+            @removeAriticleFavorite="removeAriticleFavorite(article, index)"
+            @submitComment="submitComment"
+            @deleteComment="deleteComment" />
+        </li>
       </ul>
     </main>
     <FeedAside @focus="focusEditor" />

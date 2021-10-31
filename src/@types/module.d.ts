@@ -36,6 +36,7 @@ declare module '@/api' {
   export function apiAddArticleFavorite(articleId: string): Promise<any>;
   export function apiRemoveArticleFavorite(articleId: string): Promise<any>;
   export function apiDeleteArticle(articleId: string): Promise<any>;
+  export function apiGetOwnArticle(): Promise<any>;
 }
 
 declare module '@/composition/store' {

@@ -6,7 +6,7 @@ import { logout, checkLogin, register, signIn } from './Index/login';
 import { getProfile, createProject, updateProject, deleteProject, getPhoto, uploadPhoto,
   uploadBackgroundImg, updateDescription, updateAbout, createExperience, updateExperience,
   updateExperienceImg, deleteExperience, updateEducation, createArticle, getArticles,
-  thumbsUpArticle, cancelThumbsUpArticle, postComment, deleteComment
+  thumbsUpArticle, cancelThumbsUpArticle, postComment, deleteComment, getOwnArticle
 } from './Index/profile';
 
 import { addArticleFavorite, removeArticleFavorite, deleteArticle } from './Index/feed';
@@ -42,3 +42,4 @@ export const apiDeleteComment = deleteComment;
 export const apiAddArticleFavorite = addArticleFavorite;
 export const apiRemoveArticleFavorite = removeArticleFavorite;
 export const apiDeleteArticle = deleteArticle;
+export const apiGetOwnArticle = getOwnArticle;

@@ -131,8 +131,16 @@ const routes = [
 const router = createRouter({
   history,
   routes,
-  scrollBehavior() {
-    return { top: 0 }
+  scrollBehavior(to, from) {
+    const isChangePageInPathProfile = 
+      to.matched.some((item) => item.path.match('/profile')) &&
+      from.matched.some((item) => item.path.match('/profile'));
+    const isChangePageInPathUserProfile = 
+      to.matched.some((item) => item.path.match('/@:uid/profile')) &&
+      from.matched.some((item) => item.path.match('/@:uid/profile'));
+
+    if (isChangePageInPathProfile || isChangePageInPathUserProfile) {}
+    else return { top: 0 };
   },
  });
 
