@@ -33,7 +33,7 @@ const submitComment = (articleId: string, articleIdx: number) => {
     articleIdx,
     comment: articleInputs.value[articleIdx],
   };
-  emits('submitComment', data)
+  emits('submitComment', data);
 };
 const deleteComment = (article: Article, articleIdx: number, commentId: string) => {
   const data = {

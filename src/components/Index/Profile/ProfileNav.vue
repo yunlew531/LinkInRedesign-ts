@@ -29,7 +29,7 @@ init();
         class="profile-nav-link">Activity & interests</router-link>
       <router-link :to="`${uid ? `/@${uid}` : '' }/profile/articles`" exact-active-class="active"
         class="profile-nav-link">Articles
-        <span class="articles-num">{{ articles?.length }}</span>
+        <span class="articles-num">({{ articles?.length }})</span>
       </router-link>
     </div>
   </section>

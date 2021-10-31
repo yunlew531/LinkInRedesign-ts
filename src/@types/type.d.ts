@@ -99,3 +99,15 @@ interface CommentData {
   photo: string;
   comment: string;
 }
+
+interface EmitSubmitCommentData {
+  articleId: string;
+  articleIdx: number;
+  comment: string;
+}
+
+interface EmitDeleteCommentData {
+  article: Article;
+  articleIdx: number;
+  commentId: string;
+}

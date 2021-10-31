@@ -144,12 +144,6 @@ const removeAriticleFavorite = async (article: Article, articleIdx: number) => {
   } catch (err) { console.dir(err); }
 };
 
-interface EmitSubmitCommentData {
-  articleId: string;
-  articleIdx: number;
-  comment: string;
-}
-
 const articlesRef = ref<any[]>([]);
 const isCommentLimit = ref(false);
 const submitComment = async (emitData: EmitSubmitCommentData) => {
@@ -183,12 +177,6 @@ const submitComment = async (emitData: EmitSubmitCommentData) => {
     isCommentLimit.value = false;
   }, 30 * 1000);
 };
-
-interface EmitDeleteCommentData {
-  article: Article;
-  articleIdx: number;
-  commentId: string;
-}
 
 const deleteComment = async (emitData: EmitDeleteCommentData) => {
   const { article, articleIdx, commentId } = emitData;
