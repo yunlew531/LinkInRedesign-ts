@@ -20,7 +20,10 @@ const routes = [
         path: 'profile',
         name: 'Profile',
         component: () => import('@/views/Index/Profile.vue'),
-        meta: { requiresAuth: true },
+        meta: {
+          requiresAuth: true,
+          ownProfile: true,
+        },
         children: [
           {
             path: '',
@@ -44,6 +47,9 @@ const routes = [
         name: 'User',
         redirect: (to: RouteLocationNormalized) => `/@${to.params.uid}/profile`,
         component: () => import('@/views/Index/User.vue'),
+        meta: {
+          othersProfile: true,
+        },
         children: [
           {
             path: 'profile',
@@ -132,12 +138,8 @@ const router = createRouter({
   history,
   routes,
   scrollBehavior(to, from) {
-    const isChangePageInPathProfile = 
-      to.matched.some((item) => item.path.match('/profile')) &&
-      from.matched.some((item) => item.path.match('/profile'));
-    const isChangePageInPathUserProfile = 
-      to.matched.some((item) => item.path.match('/@:uid/profile')) &&
-      from.matched.some((item) => item.path.match('/@:uid/profile'));
+    const isChangePageInPathProfile = to.meta.ownProfile && from.meta.ownProfile;
+    const isChangePageInPathUserProfile = to.meta.othersProfile && from.meta.othersProfile;
 
     if (isChangePageInPathProfile || isChangePageInPathUserProfile) {}
     else return { top: 0 };
