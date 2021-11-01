@@ -1,7 +1,9 @@
 <script lang="ts" setup>
 import { ref, inject, computed, Ref } from 'vue';
 import Article from '@/components/Index/Article.vue';
-import { apiGetOwnArticle, apiThumbsUpArticle, apiCancelThumbsUpArticle, apiPostComment } from '@/api';
+import { apiGetOwnArticle, apiThumbsUpArticle, apiCancelThumbsUpArticle, apiPostComment, apiDeleteArticle,
+  apiDeleteComment
+} from '@/api';
 import { stateSymbol } from '@/Symbol';
 
 const state: Ref<State> = inject(stateSymbol)!;
@@ -17,6 +19,13 @@ const getOwnArticle = async () => {
 
 const updateArticle = (articleIdx: number, newArticle: Article) =>
   articles.value[articleIdx] = newArticle;
+
+const deleteArticle = async (articleId: string) => {
+  try {
+    await apiDeleteArticle(articleId);
+    getOwnArticle();
+  } catch (err) { console.dir(err); }
+};
 
 const thumbsUpArticle = async (article: Article, articleIdx: number) => {
   const tempArticle: Article = JSON.parse(JSON.stringify(article));
@@ -83,6 +92,18 @@ const submitComment = async (emitData: EmitSubmitCommentData) => {
   }, 30 * 1000);
 };
 
+const deleteComment = async (emitData: EmitDeleteCommentData) => {
+  const { article, articleIdx, commentId } = emitData;
+  const tempArticle: Article = JSON.parse(JSON.stringify(article));
+  
+  try {
+    const { data } = await apiDeleteComment(article.id!, commentId);
+    const { comments } = data;
+    tempArticle.comments = comments;
+    updateComments(articleIdx, comments);
+  } catch (err) { console.dir(err); }
+};
+
 const init = () => {
   getOwnArticle();
 };
@@ -95,7 +116,9 @@ init();
       <Article :ref="(el: any) => articlesRef[index] = el" :article="article" :index="index"
         @thumbsUp="thumbsUpArticle(article, index)"
         @removeThumbsUp="removeThumbsUpArticle(article, index)"
-        @submitComment="submitComment" />
+        @submitComment="submitComment"
+        @deleteArticle="deleteArticle(article.id!)"
+        @deleteComment="deleteComment" />
     </li>
   </ul> 
 </template>

@@ -130,7 +130,7 @@ defineExpose({
           </div>
           <span v-if="userKey !== 0 && (handleLikesDisplayQty(article.likes!)?.length! - 1) === userKey &&
             article.likes && article.likes?.length <= 5">&nbspand&nbsp</span>
-          <router-link :to="`@${likedUser.uid}`">{{ likedUser.name }}</router-link>
+          <router-link :to="`/@${likedUser.uid}`">{{ likedUser.name }}</router-link>
           <span v-if="
             userKey < 4 && article.likes && 
             ((handleLikesDisplayQty(article.likes)?.length! - 2) !== userKey || article.likes.length > 5) &&

@@ -1,21 +1,21 @@
 <script lang="ts" setup>
 import { ref } from 'vue';
-import { apiGetOwnArticle } from '@/api';
+import { } from '@/api';
 import { useRoute } from 'vue-router';
 
 const route = useRoute();
 const { uid } = route.params;
 
 const articles = ref<Article[]>();
-const getOwnArticle = async () => {
-  try {
-    const { data } = await apiGetOwnArticle();
-    articles.value = data.articles;
-  } catch (err) { console.dir(err); }
-};
+// const getOwnArticle = async () => {
+//   try {
+//     const { data } = await apiGetOwnArticle();
+//     articles.value = data.articles;
+//   } catch (err) { console.dir(err); }
+// };
 
 const init = () => {
-  getOwnArticle();
+  // getOwnArticle();
 };
 init();
 </script>
@@ -23,11 +23,11 @@ init();
 <template>
   <section class="profile-nav">
     <div class="profile-nav-container">
-      <router-link :to="`/profile`" exact-active-class="active"
+      <router-link :to="`/@${uid}/profile`" exact-active-class="active"
         class="profile-nav-link">Profile</router-link>
-      <router-link :to="`/profile/interests`" exact-active-class="active"
+      <router-link :to="`/@${uid}/profile/interests`" exact-active-class="active"
         class="profile-nav-link">Activity & interests</router-link>
-      <router-link :to="`/profile/articles`" exact-active-class="active"
+      <router-link :to="`/@${uid}/profile/articles`" exact-active-class="active"
         class="profile-nav-link">Articles
         <span class="articles-num">({{ articles?.length || 0 }})</span>
       </router-link>
