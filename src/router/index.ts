@@ -6,7 +6,7 @@ import store from '@/composition/store';
 import Index from '@/views/Index.vue';
 
 const { state } = store,
-  { setLogin } = store;
+  { setLogin, updateUserProfile } = store;
 
 const history = createWebHashHistory('/LinkInRedesignTypeScript/');
 const routes = [
@@ -82,6 +82,11 @@ const routes = [
         meta: { requiresAuth: true },
         children: [
           {
+            path: 'connections',
+            name: 'Connections',
+            component:  () => import('@/views/Index/Network/Connections.vue'),
+          },
+          {
             path: 'invitations',
             name: 'Invitations',
             component:  () => import('@/views/Index/Network/Invitations.vue'),
@@ -150,7 +155,10 @@ const checkLogin = () => new Promise<void>(async (resolve, reject) => {
   const token = document.cookie.replace(/(?:(?:^|.*;\s*)LinkInRe\s*=\s*([^;]*).*$)|^.*$/, '$1');
   authReq.defaults.headers.common.Authorization = `${token}`;
   try {
-    await apiCheckLogin();
+    const { data } = await apiCheckLogin();
+    const { uid } = data;
+
+    updateUserProfile({ uid });
     setLogin();
     resolve();
   } catch (err: any) {

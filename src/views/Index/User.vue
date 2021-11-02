@@ -1,33 +1,42 @@
 <script lang="ts" setup>
-import { ref, watch, computed, defineAsyncComponent, provide } from 'vue';
-import { useRoute } from 'vue-router';
+import { ref, watch, computed, defineAsyncComponent, provide, inject, Ref } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 import { apiGetUser } from '@/api';
+import confirmModal from '@/composition/confirmModal';
+import connectComposition from '@/composition/connections';
 import getImageUrl from '@/mixins/getImageUrl';
-import getSrcFolder from '@/mixins/getSrcFolder';
-import { userSymbol } from '@/Symbol';
+import { stateSymbol, orderSideUserSymbol } from '@/Symbol';
 
 const ProfileNav = defineAsyncComponent(() => import('@/components/Index/User/ProfileNav.vue'));
 const MiniDashboard = defineAsyncComponent(() => import('@/components/Index/MiniDashboard.vue'));
 const AsideCard = defineAsyncComponent(() => import('../../components/Index/AsideCard.vue'));
-// const AsideCard = defineAsyncComponent(() => import(`${getSrcFolder()}/components/Index/AsideCard.vue`));
 
+const { user, removeSentConnect, updateOrderSideUser, submitConnect, acceptConnect } = connectComposition;
+const { showModal } = confirmModal;
 const route = useRoute();
+const router = useRouter();
+const state: Ref<State> = inject(stateSymbol)!;
+const ownConnections = computed(() => state.value.user.connections);
+const ownUid = computed(() => state.value.user.uid);
+const isLogin = computed(() => state.value.isLogin);
 
-const user = ref<User>();
-provide(userSymbol, user);
+provide(orderSideUserSymbol, user);
 
 const getUser = async (uid: string) => {
   try {
     const { data } = await apiGetUser(uid);
-    user.value = data.user;
-  } catch (err) { console.dir(err); }
+    updateOrderSideUser(data.user);
+  } catch (err) { 
+    console.dir(err);
+    alert('not found');
+    router.go(-1);
+  }
 };
 
 watch(() => route.params.uid, (v) => {
   const inUserRoute = route.matched.some((match) => match.name === 'User');
   if (inUserRoute) getUser(<string>v);
 }, { immediate: true });
-
 
 const bgCover = computed(() =>
   `url(${user.value?.background_cover || getImageUrl('Rectangle 3')})`);
@@ -77,13 +86,46 @@ const courses = ref([
     viewers: '13858',
   },
 ]);
+
+const showConfirmModal = () => {
+  const content = 'Do you want to remove the connections ?';
+  showModal(content);
+};
+
+const isConnected = computed(() => {
+  const isConnected = 
+    ownConnections.value?.connected?.some((connectUser) => connectUser.uid === user.value?.uid);
+  return isConnected;
+});
+const isConnectSent = computed(() => {
+  const isSentConnect =
+    ownConnections.value?.sent?.some((connectUser) => connectUser.uid === user.value?.uid);
+  return isSentConnect;
+});
+const isReceivedConnect = computed(() =>
+  ownConnections.value?.received?.some((connectUser) => connectUser.uid === route.params.uid));
+const isOwnProfile = computed(() => route.params.uid === ownUid.value);
 </script>
 
 <template>
   <div class="profile-container">
     <main class="profile-main">
       <section class="profile-header">
-        <div class="profile-cover"></div>
+        <div class="profile-cover">
+          <div v-if="!isOwnProfile && isLogin && !isReceivedConnect" class="profile-cover-btns">
+            <button v-if="isConnected" type="button" class="connected-btn" @click="showConfirmModal">
+              <span>connected</span>
+              <span class="material-icons connected-btn-decoration">done</span>
+            </button>
+            <button v-if="!isConnected && !isConnectSent" type="button" @click="submitConnect(user.uid!)">connect</button>
+            <button v-if="isConnectSent" type="button" class="wait-for-connect-btn"
+              @click="removeSentConnect(user.uid!)">wait for connect</button>
+          </div>
+          <div v-if="!isOwnProfile && isLogin && isReceivedConnect" class="profile-cover-btns">
+            <button type="button" class="accept-connect-btn" @click="acceptConnect(user.uid!)">accept connect</button>
+            <button type="button" class="refuse-connect-btn">refuse connect</button>
+          </div>
+        </div>
         <div class="profile-header-content">
           <div class="user-photo">
             <img :src="user?.photo || getImageUrl('user')" alt="user photo">
@@ -180,33 +222,46 @@ const courses = ref([
   padding: 25px 45px 35px;
 }
 .profile-cover {
+  display: flex;
+  justify-content: end;
+  align-items: end;
   height: 180px;
   background: v-bind(bgCover) no-repeat center;
   background-size: cover;
   padding: 20px 30px;
 }
-.upload-photo-btn {
-  background: $blue-100;
-  padding: 10px;
-  border: none;
-  box-shadow: 0px 10px 30px rgba(113, 123, 133, 0.05);
-  border-radius: 4px;
-  cursor: pointer;
-  animation: heart 2s infinite;
-  position: absolute;
-  right: 10px;
-  bottom: 0;
+.profile-cover-btns {
+  > button {
+    @include button;
+    background: rgba($blue-400, 0.9);
+    color: $white;
+    transition: 0.2s filter;
+    &:hover {
+      filter: brightness(1.2);
+    }
+    &:active {
+      filter: brightness(0.9);
+    }
+  }
+  .wait-for-connect-btn {
+    background: rgba($gray-100, 0.6);
+  }
+  .accept-connect-btn {
+    margin-right: 10px;
+  }
+  .refuse-connect-btn {
+    background: rgba($red-100, 0.8);
+    border: 1px solid $red-100;
+  }
 }
-@keyframes heart {
-  0%   {
-    transform: translateY(0px);
-  }
-  50%  {
-    transform: translateY(-10px);
-  }
-  100% {
-    transform: translateY(0px);
-  }
+.connected-btn {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.connected-btn-decoration {
+  font-size: $fs-4;
+  margin-left: 5px;
 }
 .user-photo {
   flex-shrink: 0;
@@ -233,33 +288,6 @@ const courses = ref([
       border-radius: 5px;
       border: 0px solid $white;
     }
-  }
-}
-.upload-photo-input {
-  cursor: pointer;
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  border: 1px dashed blue;
-  z-index: 1;
-  opacity: 0;
-}
-.user-photo-hover {
-  opacity: 0;
-  width: 100%;
-  height: 100%;
-  position: absolute;
-  border-radius: 100%;
-  top: 0;
-  left: 0;
-  background: $dark-100;
-  transition: opacity 0.2s, border-radius 0.2s;
-  > img {
-    height: 50px;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translateX(-50%) translateY(-50%);
   }
 }
 .user-content-container {
@@ -340,16 +368,6 @@ const courses = ref([
 .aside {
   flex-shrink: 0;
   width: 290px;
-}
-.dashboard-num {
-  display: block;
-  font-size: $fs-1;
-  color: $blue-400;
-  margin-top: 20px;
-}
-.dashboard-title {
-  font-weight: normal;
-  margin-top: 10px;
 }
 .visitor-cards-list {
   margin-bottom: -15px;

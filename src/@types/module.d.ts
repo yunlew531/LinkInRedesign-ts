@@ -37,6 +37,9 @@ declare module '@/api' {
   export function apiRemoveArticleFavorite(articleId: string): Promise<any>;
   export function apiDeleteArticle(articleId: string): Promise<any>;
   export function apiGetOwnArticle(): Promise<any>;
+  export function apiSentConnect(userUid: string): Promise<any>;
+  export function apiRemoveSentConnect(userUid: string): Promise<any>;
+  export function apiAcceptConnect(userUid: string): Promise<any>;
 }
 
 declare module '@/composition/store' {
@@ -60,7 +63,6 @@ declare module '@/api/user_req' {
 }
 
 declare module '@/api/auth_req' {
-  // import { AxiosInstance } from 'axios';
   const authReq: any;
   export default authReq;
 }
@@ -88,9 +90,26 @@ declare module 'quill-delta-to-html';
 
 declare module '@/Symbol' {
   export const stateSymbol: Symbol;
-  export const userSymbol: Symbol;
+  export const orderSideUserSymbol: Symbol;
 }
 
 declare module '@/mixins/getSrcFolder' {
   export default function(): string;
+}
+
+declare module '@/composition/connections' {
+  import { Ref } from 'vue';
+  export const user: Ref<User>;
+  export function submitConnect(connectUid: string): void;
+  export function removeSentConnect(connectUid: string): void;
+  export function updateOrderSideUser(user: User): void;
+  export function acceptConnect(connectUid: string): void;
+}
+
+declare module '@/composition/confirmModal' {
+  export const isModalShow: boolean;
+  export const bodyContent: string;
+  export function showModal(content?: string): void;
+  export function hideModal(): void;
+  export function cleanText(event: TransitionEvent): void;
 }

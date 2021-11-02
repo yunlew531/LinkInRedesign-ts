@@ -1,12 +1,16 @@
 <script lang="ts" setup>
-import { ref, computed, defineAsyncComponent } from 'vue';
+import { ref, computed, defineAsyncComponent, inject, Ref } from 'vue';
 import getImageUrl from '@/mixins/getImageUrl';
 import dayjs from '@/mixins/dayjs';
+import { stateSymbol } from '@/Symbol';
 
 const ReceivedConnections = defineAsyncComponent(() =>
   import('@/components/Index/Network/Invitations/ReceivedConnections.vue'));
 const SentConnections = defineAsyncComponent(() =>
   import('@/components/Index/Network/Invitations/SentConnections.vue'));
+
+const state: Ref<State> = inject(stateSymbol)!;
+const connections = computed(() => state.value.user.connections);
 
 const recentUsers = ref([
   {
@@ -63,11 +67,15 @@ const handleComponent = (payload: Element | string | null) => {
   <div class="btns-container">
     <button type="button" class="page-btn"
       :class="{ active: currentDisplay === 'ReceivedConnections' }"
-      @click="handleComponent('ReceivedConnections')">Received
+      @click="handleComponent('ReceivedConnections')">
+      <span>Received</span>
+      <span class="received-qty">({{ connections?.received.length || 0 }})</span>
     </button>
     <button type="button" class="page-btn"
       :class="{ active: currentDisplay === 'SentConnections' }"
-      @click="handleComponent('SentConnections')">Sent
+      @click="handleComponent('SentConnections')">
+      <span>Sent</span>
+      <span class="sent-qty">({{ connections?.sent.length || 0 }})</span>
     </button>
   </div>
   <div ref="fillHeightEl"></div>
@@ -120,6 +128,9 @@ const handleComponent = (payload: Element | string | null) => {
   border-bottom: 1px solid $gray-300;
 }
 .page-btn {
+  display: flex;
+  justify-content: center;
+  align-items: center;
   width: 240px;
   text-transform: uppercase ;
   font-weight: bold;
@@ -231,5 +242,8 @@ const handleComponent = (payload: Element | string | null) => {
 .fade-leave-to {
   opacity: 0;
   transform: translateX(30px);
+}
+.received-qty, .sent-qty {
+  margin-left: 3px;
 }
 </style>

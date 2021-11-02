@@ -38,10 +38,11 @@ const register = async () => {
     const { token, expired } = data;
     
     document.cookie = `LinkInRe=${token};expires=${new Date(expired)};`;
+    authReq.defaults.headers.common.Authorization = `${token}`;
     setLogin();
     router.push('/');
   } catch (err: any) {
-    const message = err.response?.data.message || '無法註冊';
+    const message = err.response?.data.message || 'register failed';
     alert(message);
   }
   isRegisterBtnDisable.value = false;
@@ -49,8 +50,8 @@ const register = async () => {
 
 const isSignInBtnDisable = ref(false);
 const signinForm = ref<SignInForm>({
-  email: 'test@gmail.com',
-  password: '000000',
+  email: 'mike@gmail.com',
+  password: '6666666666',
 });
 const signIn = async () => {
   isSignInBtnDisable.value = true;

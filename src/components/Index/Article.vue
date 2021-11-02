@@ -86,7 +86,7 @@ const showBtnsList = (event: Event) => {
     target.classList.remove('show');
 };
 
-const checkFavorite = (favorites: Favorite[] | undefined) => {
+const checkFavorite = (favorites: FavoriteUser[]) => {
   if (!favorites?.length) return;
   return favorites.some((favorite) => favorite.uid === user.value.uid);
 }
@@ -95,7 +95,6 @@ const convertArticle = (content: any) => {
   const converter = new QuillDeltaToHtmlConverter(content.ops);
   return converter.convert();
 };
-
 
 const articleInputs = ref<string[]>([]);
 
@@ -151,7 +150,7 @@ defineExpose({
           <li v-if="user.uid === article.uid">
             <button type="button" @click="deleteArticle()">delete</button>
           </li>
-          <li v-if="!checkFavorite(article.favorites)">
+          <li v-if="!checkFavorite(article.favorites!)">
             <button type="button" @click="addArticleFavorite()">favorite</button>
           </li>
           <li v-else>

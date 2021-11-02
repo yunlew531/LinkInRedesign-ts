@@ -45,6 +45,7 @@ interface User {
   profile_views?: number;
   connections_qty?: number;
   education?: Education;
+  connections?: Connections;
 }
 
 interface Education {
@@ -64,14 +65,14 @@ interface Experience {
   image_url?: string;
 }
 
-type ArticleLike = {
+interface ArticleLike {
   uid: string;
   name: string;
   photo: string;
   job: string;
-};
+}
 
-type ArticleComment = {
+interface ArticleComment {
   id: string;
   name: string;
   uid: string;
@@ -80,7 +81,10 @@ type ArticleComment = {
   photo: string;
 }
 
-type Favorite = { uid: string }
+interface FavoriteUser {
+  uid: string;
+}
+
 interface Article {
   id?: string;
   uid?: string;
@@ -91,7 +95,7 @@ interface Article {
   content?: Object;
   likes?: ArticleLike[];
   comments?: ArticleComment[];
-  favorites?: Favorite[];
+  favorites?: FavoriteUser[];
 }
 
 interface CommentData {
@@ -110,4 +114,21 @@ interface EmitDeleteCommentData {
   article: Article;
   articleIdx: number;
   commentId: string;
+}
+
+interface ConnectUser {
+  uid: string;
+  name: string;
+  timestamp: number;
+  connections_qty: number;
+  job?: string;
+  photo?: string;
+  content?: string;
+  connected_time?: number;
+}
+
+interface Connections {
+  connected: ConnectUser[];
+  received: ConnectUser[];
+  sent: ConnectUser[];
 }

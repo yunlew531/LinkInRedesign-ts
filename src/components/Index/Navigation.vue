@@ -43,9 +43,9 @@ const user = computed(() => state.value.user);
 const getPhoto = async () => {
   try {
     const { data } = await apiGetPhoto();
-    const { photo, name } = data.user;
+    const { photo, name, connections } = data.user;
    
-    updateUserProfile({ photo, name });
+    updateUserProfile({ photo, name, connections });
   } catch (err) {}
 };
 getPhoto();

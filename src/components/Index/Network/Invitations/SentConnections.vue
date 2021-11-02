@@ -1,25 +1,31 @@
 <script lang="ts" setup>
-import { ref } from 'vue';
+import { inject, computed, Ref } from 'vue';
 import getImageUrl from '@/mixins/getImageUrl';
+import { stateSymbol } from '@/Symbol';
+import dayjs from '@/mixins/dayjs';
 
-const receivedUsers = ref([
-  {
-    name: 'Brandon Wilson',
-    uid: 'regrg',
-    content: 'Hey, I saw your works. I like it! Can we do something together? Or maybe you have project for UX at the moment?',
-    profession: 'Senior UX designer',
-    connections_qty: 30,
-    img: 'feed-user-3',
-  },
-  {
-    name: 'Theresa Steward',
-    uid: 'ergergr',
-    content: '',
-    profession: 'Senior UX designer',
-    connections_qty: 5,
-    img: 'feed-user-1',
-  },
-]);
+const state: Ref<State> = inject(stateSymbol)!;
+
+const connections = computed(() => state.value.user.connections);
+
+// const receivedUsers = ref([
+//   {
+//     name: 'Brandon Wilson',
+//     uid: 'regrg',
+//     content: 'Hey, I saw your works. I like it! Can we do something together? Or maybe you have project for UX at the moment?',
+//     profession: 'Senior UX designer',
+//     connections_qty: 30,
+//     img: 'feed-user-3',
+//   },
+//   {
+//     name: 'Theresa Steward',
+//     uid: 'ergergr',
+//     content: '',
+//     profession: 'Senior UX designer',
+//     connections_qty: 5,
+//     img: 'feed-user-1',
+//   },
+// ]);
 </script>
 
 <template>
@@ -27,27 +33,35 @@ const receivedUsers = ref([
     <div style="height: 1px; margin-bottom: -1px;"></div>
     <div class="divide">
       <span class="divide-text">
-        you have <span class="emphasize">{{ receivedUsers.length }} request wait for reply</span>
+        you have <span class="emphasize">{{ connections?.sent.length || 0 }} request wait for reply</span>
       </span>
     </div>
-    <ul>
-      <li v-for="user in receivedUsers" :key="user.uid" class="sent-card">
+    <ul v-if="connections?.sent.length">
+      <li v-for="user in connections.sent" :key="user.uid" class="sent-card">
         <router-link :to="`/@${user.uid}`" class="sent-card-img-link">
-          <img :src="getImageUrl(user.img)" :alt="user.name" class="sent-card-img">
+          <img :src="user.photo || getImageUrl('user')" :alt="user.name" class="sent-card-img">
         </router-link>
         <div class="sent-card-contents">
           <h3 class="sent-card-name">
             <router-link :to="`/@${user.uid}`">{{ user.name }}</router-link></h3>
-          <h4 class="sent-card-profession">{{ user.profession }}</h4>
+          <h4 class="sent-card-profession">{{ user.job }}</h4>
           <button type="button" class="sent-card-connections-qty">{{ user.connections_qty }} connections</button>
         </div>
         <div class="sent-card-content">
           <h3>YOUR MESSAGE</h3>
           <p>{{ user.content || 'empty' }}</p>
         </div>
-        <button type="button" class="cancel-sent-connetion-btn">cancel</button>
+        <div class="btn-container">
+          <button type="button" class="cancel-sent-connetion-btn">cancel</button>
+          <span class="sent-card-time">
+              {{ user.timestamp ? dayjs(user.timestamp * 1000).format('YYYY/MM/DD HH:mm:ss') : '' }}
+          </span>
+        </div>
       </li>
     </ul>
+    <div v-else class="empty-sent">
+      <p>empty</p>
+    </div>
   </div>
 </template>
 
@@ -142,6 +156,16 @@ const receivedUsers = ref([
     color: rgba($dark-100, 0.6);
   }
 }
+.sent-card-time {
+  font-size: $fs-6;
+  text-align: end;
+  display: block;
+  color: rgba($dark-100, 0.6);
+  margin-top: 10px;
+}
+.btn-container {
+  text-align: end
+}
 .cancel-sent-connetion-btn {
   @include button;
   width: inherit;
@@ -155,5 +179,11 @@ const receivedUsers = ref([
   &:active {
     filter: brightness(0.9);
   }
+}
+.empty-sent {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 101px;
 }
 </style>
