@@ -86,9 +86,9 @@ const showBtnsList = (event: Event) => {
     target.classList.remove('show');
 };
 
-const checkFavorite = (favorites: FavoriteUser[]) => {
-  if (!favorites?.length) return;
-  return favorites.some((favorite) => favorite.uid === user.value.uid);
+const checkFavorite = (favorites: string[]) => {
+  if (!favorites?.length || !user.value.uid) return;
+  return favorites.includes(user.value.uid);
 }
 
 const convertArticle = (content: any) => {

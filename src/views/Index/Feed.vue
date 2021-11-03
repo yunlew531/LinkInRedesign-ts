@@ -96,7 +96,7 @@ const thumbsUpArticle = async (article: Article, idx: number) => {
 
   try {
     const { data } = await apiThumbsUpArticle(userData, article.id!);
-    const { likes } = data.article;
+    const { likes } = data;
     tempArticle.likes = likes;
     setArticle(idx, tempArticle);
   } catch (err) { console.dir(err); }
@@ -107,7 +107,7 @@ const removeThumbsUpArticle = async (article: Article, idx: number) => {
 
   try {
     const { data } = await apiCancelThumbsUpArticle(article.id!);
-    const { likes } = data.article;
+    const { likes } = data;
     tempArticle.likes = likes;
     setArticle(idx, tempArticle);
   } catch (err) { console.dir(err); }

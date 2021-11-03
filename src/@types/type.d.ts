@@ -81,10 +81,6 @@ interface ArticleComment {
   photo: string;
 }
 
-interface FavoriteUser {
-  uid: string;
-}
-
 interface Article {
   id?: string;
   uid?: string;
@@ -95,7 +91,7 @@ interface Article {
   content?: Object;
   likes?: ArticleLike[];
   comments?: ArticleComment[];
-  favorites?: FavoriteUser[];
+  favorites?: string[];
 }
 
 interface CommentData {
