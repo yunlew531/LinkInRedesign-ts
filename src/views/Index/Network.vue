@@ -1,6 +1,10 @@
 <script lang="ts" setup>
-import { ref } from 'vue';
+import { computed, inject, Ref, ref } from 'vue';
 import getImageUrl from '@/mixins/getImageUrl';
+import { stateSymbol } from '@/Symbol';
+
+const state: Ref<State> = inject(stateSymbol)!;
+const connections = computed(() => state.value.user.connections);
 
 const navLinks = ref([
   {
@@ -29,7 +33,6 @@ const navLinks = ref([
     imgName: 'hash',
   },
 ]);
-
 </script>
 
 <template>
@@ -39,6 +42,8 @@ const navLinks = ref([
         active-class="active">
         <img :src="getImageUrl(link.imgName)" :alt="link.title" class="nav-link-icon">
         <span>{{ link.title }}</span>
+        <span v-if="link.title === 'Invitations' && connections?.received.length"
+          class="connect-received-qty">({{ connections?.received.length }})</span>
       </router-link>
     </aside>
     <div class="main-container">
@@ -84,5 +89,9 @@ const navLinks = ref([
 }
 .nav-link-icon {
   margin-right: 10px;
+}
+.connect-received-qty {
+  color: $blue-200;
+  margin-left: 5px;
 }
 </style>

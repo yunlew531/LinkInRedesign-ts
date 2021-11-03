@@ -7,7 +7,7 @@ import connectComposition from '@/composition/connections';
 
 const state: Ref<State> = inject(stateSymbol)!;
 
-const { acceptConnect } = connectComposition;
+const { acceptConnect, refuseConnect } = connectComposition;
 // const receivedUsers = ref([
 //   {
 //     name: 'Brandon Wilson',
@@ -58,7 +58,7 @@ const connections = computed(() => state.value.user.connections);
         </div>
         <div>
           <button type="button" class="received-card-accept-btn" @click="acceptConnect(user.uid)">accept</button>
-          <button type="button" class="received-card-decline-btn">decline</button>
+          <button type="button" class="received-card-decline-btn" @click="refuseConnect(user.uid)">decline</button>
           <span class="received-card-time">
             {{ user.timestamp ? dayjs(user.timestamp * 1000).format('YYYY/MM/DD HH:mm:ss') : '' }}
           </span>

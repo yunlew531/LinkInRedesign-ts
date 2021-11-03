@@ -8,12 +8,9 @@ import { getProfile, createProject, updateProject, deleteProject, getPhoto, uplo
   updateExperienceImg, deleteExperience, updateEducation, createArticle, getArticles,
   thumbsUpArticle, cancelThumbsUpArticle, postComment, deleteComment, getOwnArticle
 } from './Index/profile';
-
 import { addArticleFavorite, removeArticleFavorite, deleteArticle } from './Index/feed';
-
-import { sentConnect, removeSentConnect } from './Index/user';
-
-import { acceptConnect } from './Index/network';
+import { sentConnect, removeSentConnect, removeConnected } from './Index/user';
+import { acceptConnect, refuseConnect } from './Index/network';
 
 // normal
 export const apiGetUser = getUser;
@@ -50,3 +47,5 @@ export const apiGetOwnArticle = getOwnArticle;
 export const apiSentConnect = sentConnect;
 export const apiRemoveSentConnect = removeSentConnect;
 export const apiAcceptConnect = acceptConnect;
+export const apiRemoveConnected = removeConnected;
+export const apiRefuseConnect = refuseConnect;

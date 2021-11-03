@@ -78,7 +78,7 @@ const routes = [
         path: 'network',
         name: 'Network',
         component: () => import('@/views/Index/Network.vue'),
-        redirect: '/network/invitations',
+        redirect: '/network/connections',
         meta: { requiresAuth: true },
         children: [
           {

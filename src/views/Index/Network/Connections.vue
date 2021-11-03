@@ -1,15 +1,36 @@
 <script lang="ts" setup>
-import { computed, inject, Ref } from 'vue';
+import { ref, computed, inject, Ref, defineAsyncComponent } from 'vue';
 import { stateSymbol } from '@/Symbol';
 import getImageUrl from '@/mixins/getImageUrl';
 import dayjs from '@/mixins/dayjs';
+import connectConposition from '@/composition/connections';
 
+const ConfirmModal = defineAsyncComponent(() => import('@/components/ConfirmModal.vue'));
+
+const { removeConnected } = connectConposition;
 const state: Ref<State> = inject(stateSymbol)!;
 const connections = computed(() => state.value.user.connections);
+
+const tempRemoveConnectUid = ref<string>();
+const confirmModalEl = ref();
+const showConfirmModal = (connectedUid: string) => {
+  tempRemoveConnectUid.value = connectedUid;
+  const content = 'Do you want to remove the connections ?';
+  confirmModalEl.value.showModal(content);
+};
+
+const handleRemoveConnected = () => {
+  if (!tempRemoveConnectUid.value) return;
+  removeConnected(tempRemoveConnectUid.value);
+  confirmModalEl.value.hideModal();
+};
+
+const cleanTempConnectUid = () => tempRemoveConnectUid.value = '';
 </script>
 
 <template>
   <section>
+    <ConfirmModal ref="confirmModalEl" @clickYes="handleRemoveConnected" @modalHide="cleanTempConnectUid" />
     <h2 class="page-title">connections<span class="connected-qty">({{ connections?.connected.length }})</span></h2>
     <ul class="connected-list">
       <li v-for="connectedUser in connections?.connected" :key="connectedUser.uid" class="connected-item">
@@ -23,7 +44,7 @@ const connections = computed(() => state.value.user.connections);
           <h4 class="recent-connections-job">{{ connectedUser.job }}</h4>
         </div>
         <div v-if="connectedUser.connected_time" class="connected-time-container">
-          <button type="button" class="connected-btn">
+          <button type="button" class="connected-btn" @click="showConfirmModal(connectedUser.uid)">
             <span>connected</span>
             <span class="material-icons connected-btn-decoration">done</span>
           </button>

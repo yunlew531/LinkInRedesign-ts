@@ -1,5 +1,7 @@
 import { readonly, ref } from 'vue';
-import { apiRemoveSentConnect, apiSentConnect, apiAcceptConnect } from '@/api';
+import { apiRemoveSentConnect, apiSentConnect, apiAcceptConnect, apiRemoveConnected,
+  apiRefuseConnect
+} from '@/api';
 import store from '@/composition/store';
 
 const user = ref<User>();
@@ -25,13 +27,29 @@ const removeSentConnect = async (connectUid: string) => {
 const acceptConnect = async (connectUid: string) => {
   try {
     const { data } = await apiAcceptConnect(connectUid);
+    const { connections } = data;
+    updateUserProfile({ connections });
+  } catch (err) { console.dir(err); }
+};
+
+const removeConnected = async (connectUid: string) => {  
+  try {
+    const { data } = await apiRemoveConnected(connectUid);
+    const { connections } = data;
+    updateUserProfile({ connections });
+  } catch (err) { console.dir(err); }
+};
+
+const refuseConnect = async (connectUid: string) => {
+  try {
+    const { data } = await apiRefuseConnect(connectUid);
     console.log('data log => ', data);
     const { connections } = data;
     updateUserProfile({ connections });
   } catch (err) { console.dir(err); }
 };
 
-const updateOrderSideUser = (userProfile: User) => user.value = userProfile;
+const updateOrderSideUser = (userProfile: User = {}) => user.value = userProfile;
 
 export default {
   user: readonly(user),
@@ -39,4 +57,6 @@ export default {
   submitConnect,
   updateOrderSideUser,
   acceptConnect,
+  removeConnected,
+  refuseConnect,
 };

@@ -1,8 +1,7 @@
 <script lang="ts" setup>
 import { ref, watch, computed, defineAsyncComponent, provide, inject, Ref } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
+import { useRoute, useRouter, onBeforeRouteLeave } from 'vue-router';
 import { apiGetUser } from '@/api';
-import confirmModal from '@/composition/confirmModal';
 import connectComposition from '@/composition/connections';
 import getImageUrl from '@/mixins/getImageUrl';
 import { stateSymbol, orderSideUserSymbol } from '@/Symbol';
@@ -10,9 +9,10 @@ import { stateSymbol, orderSideUserSymbol } from '@/Symbol';
 const ProfileNav = defineAsyncComponent(() => import('@/components/Index/User/ProfileNav.vue'));
 const MiniDashboard = defineAsyncComponent(() => import('@/components/Index/MiniDashboard.vue'));
 const AsideCard = defineAsyncComponent(() => import('../../components/Index/AsideCard.vue'));
+const ConfirmModal = defineAsyncComponent(() => import('@/components/ConfirmModal.vue'));
 
-const { user, removeSentConnect, updateOrderSideUser, submitConnect, acceptConnect } = connectComposition;
-const { showModal } = confirmModal;
+const { user, removeSentConnect, updateOrderSideUser, submitConnect, acceptConnect, removeConnected
+} = connectComposition;
 const route = useRoute();
 const router = useRouter();
 const state: Ref<State> = inject(stateSymbol)!;
@@ -34,9 +34,14 @@ const getUser = async (uid: string) => {
 };
 
 watch(() => route.params.uid, (v) => {
-  const inUserRoute = route.matched.some((match) => match.name === 'User');
+  const inUserRoute = route.meta.othersProfile;
   if (inUserRoute) getUser(<string>v);
 }, { immediate: true });
+
+onBeforeRouteLeave((to, from, next) => {
+  updateOrderSideUser();
+  next();
+});
 
 const bgCover = computed(() =>
   `url(${user.value?.background_cover || getImageUrl('Rectangle 3')})`);
@@ -87,9 +92,16 @@ const courses = ref([
   },
 ]);
 
+const confirmModalEl = ref();
 const showConfirmModal = () => {
   const content = 'Do you want to remove the connections ?';
-  showModal(content);
+  confirmModalEl.value.showModal(content);
+};
+
+const handleRemoveConnected = () => {
+  if (!user.value || !user.value.uid) return;
+  removeConnected(user.value.uid);
+  confirmModalEl.value.hideModal();
 };
 
 const isConnected = computed(() => {
@@ -109,6 +121,7 @@ const isOwnProfile = computed(() => route.params.uid === ownUid.value);
 
 <template>
   <div class="profile-container">
+    <ConfirmModal ref="confirmModalEl" @clickYes="handleRemoveConnected" />
     <main class="profile-main">
       <section class="profile-header">
         <div class="profile-cover">

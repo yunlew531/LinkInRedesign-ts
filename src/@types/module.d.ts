@@ -40,6 +40,8 @@ declare module '@/api' {
   export function apiSentConnect(userUid: string): Promise<any>;
   export function apiRemoveSentConnect(userUid: string): Promise<any>;
   export function apiAcceptConnect(userUid: string): Promise<any>;
+  export function apiRemoveConnected(userUid: string): Promise<any>;
+  export function apiRefuseConnect(userUid: string): Promise<any>;
 }
 
 declare module '@/composition/store' {
@@ -102,8 +104,10 @@ declare module '@/composition/connections' {
   export const user: Ref<User>;
   export function submitConnect(connectUid: string): void;
   export function removeSentConnect(connectUid: string): void;
-  export function updateOrderSideUser(user: User): void;
+  export function updateOrderSideUser(user?: User): void;
   export function acceptConnect(connectUid: string): void;
+  export function removeConnected(connectUid: string): void;
+  export function refuseConnect(connectUid: string): void;
 }
 
 declare module '@/composition/confirmModal' {

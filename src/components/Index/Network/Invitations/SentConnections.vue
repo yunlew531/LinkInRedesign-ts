@@ -3,6 +3,9 @@ import { inject, computed, Ref } from 'vue';
 import getImageUrl from '@/mixins/getImageUrl';
 import { stateSymbol } from '@/Symbol';
 import dayjs from '@/mixins/dayjs';
+import connectComposition from '@/composition/connections';
+
+const { removeSentConnect } = connectComposition;
 
 const state: Ref<State> = inject(stateSymbol)!;
 
@@ -52,7 +55,7 @@ const connections = computed(() => state.value.user.connections);
           <p>{{ user.content || 'empty' }}</p>
         </div>
         <div class="btn-container">
-          <button type="button" class="cancel-sent-connetion-btn">cancel</button>
+          <button type="button" class="cancel-sent-connetion-btn" @click="removeSentConnect(user.uid)">cancel</button>
           <span class="sent-card-time">
               {{ user.timestamp ? dayjs(user.timestamp * 1000).format('YYYY/MM/DD HH:mm:ss') : '' }}
           </span>

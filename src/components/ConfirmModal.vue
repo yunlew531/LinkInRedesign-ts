@@ -1,12 +1,37 @@
 <script lang="ts" setup>
-import confirmModal from '@/composition/confirmModal';
+import { ref } from 'vue';
 
-const { isModalShow, bodyContent, hideModal, cleanText } = confirmModal;
+const emits = defineEmits(['clickYes', 'modalHide']);
+const handleClickYes = () => emits('clickYes');
+
+const isModalShow = ref(false);
+const bodyContent = ref('');
+
+const showModal = (content: string) => {
+  bodyContent.value = content;
+  isModalShow.value = true;
+};
+
+const hideModal = () => isModalShow.value = false;
+
+const handleCleanContent = (event: TransitionEvent) => {
+  const { propertyName } = event;
+  if (propertyName !== 'visibility' || isModalShow.value) return;
+  cleanContent();
+  emits('modalHide');
+};
+
+const cleanContent = () => bodyContent.value = '';
+
+defineExpose({
+  showModal,
+  hideModal,
+});
 </script>
 
 <template>
   <div class="modal-container" :class="{ show: isModalShow }"
-    @click.self="hideModal" @transitionend.self="cleanText($event)">
+    @click.self="hideModal" @transitionend.self="handleCleanContent($event)">
     <div class="modal">
       <div class="modal-header">
         <h3>Confirm</h3>
@@ -15,8 +40,8 @@ const { isModalShow, bodyContent, hideModal, cleanText } = confirmModal;
         <p>{{ bodyContent }}</p>
       </div>
       <div class="modal-footer">
-        <button type="button" class="accept-btn">accept</button>
-        <button type="button" @click="hideModal">close</button>
+        <button type="button" class="accept-btn" @click="handleClickYes">yes</button>
+        <button type="button" @click="hideModal">no</button>
       </div>
     </div>
   </div>
