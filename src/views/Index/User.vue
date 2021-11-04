@@ -130,12 +130,12 @@ const isOwnProfile = computed(() => route.params.uid === ownUid.value);
               <span>connected</span>
               <span class="material-icons connected-btn-decoration">done</span>
             </button>
-            <button v-if="!isConnected && !isConnectSent" type="button" @click="submitConnect(user.uid!)">connect</button>
+            <button v-if="!isConnected && !isConnectSent" type="button" @click="submitConnect(user?.uid!)">connect</button>
             <button v-if="isConnectSent" type="button" class="wait-for-connect-btn"
-              @click="removeSentConnect(user.uid!)">wait for connect</button>
+              @click="removeSentConnect(user?.uid!)">wait for connect</button>
           </div>
           <div v-if="!isOwnProfile && isLogin && isReceivedConnect" class="profile-cover-btns">
-            <button type="button" class="accept-connect-btn" @click="acceptConnect(user.uid!)">accept connect</button>
+            <button type="button" class="accept-connect-btn" @click="acceptConnect(user?.uid!)">accept connect</button>
             <button type="button" class="refuse-connect-btn">refuse connect</button>
           </div>
         </div>

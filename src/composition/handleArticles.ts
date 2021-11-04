@@ -1,16 +1,19 @@
 import { ref, readonly, Ref } from 'vue';
-import { apiThumbsUpArticle, apiCancelThumbsUpArticle, apiDeleteArticle, apiDeleteComment, apiPostComment
+import { apiThumbsUpArticle, apiCancelThumbsUpArticle, apiDeleteArticle, apiDeleteComment, apiPostComment,
+  apiGetOwnArticle, apiGetUserArticles,
 } from '@/api';
 import store from '@/composition/store';
 
 const { state } = store;
 
-export default (apiFunc: Function) => {
-  const articles = ref<Article[]>([]);
+type ApiFunc = typeof apiGetOwnArticle | typeof apiGetUserArticles;
 
+export default (apiFunc: ApiFunc) => {
+  const articles = ref<Article[]>([]);
+  
   const getArticles = async (uid?: string) => {
     try {
-      const { data } = await apiFunc(uid);
+      const { data } = await apiFunc(uid!);
       const { articles } = data;
       setArticles(articles);
     } catch (err) { console.dir(err); }
