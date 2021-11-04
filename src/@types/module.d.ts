@@ -42,6 +42,7 @@ declare module '@/api' {
   export function apiAcceptConnect(userUid: string): Promise<any>;
   export function apiRemoveConnected(userUid: string): Promise<any>;
   export function apiRefuseConnect(userUid: string): Promise<any>;
+  export function apiGetUserArticles(userUid: string): Promise<any>;
 }
 
 declare module '@/composition/store' {
@@ -93,10 +94,6 @@ declare module 'quill-delta-to-html';
 declare module '@/Symbol' {
   export const stateSymbol: Symbol;
   export const orderSideUserSymbol: Symbol;
-}
-
-declare module '@/mixins/getSrcFolder' {
-  export default function(): string;
 }
 
 declare module '@/composition/connections' {

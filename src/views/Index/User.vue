@@ -8,7 +8,7 @@ import { stateSymbol, orderSideUserSymbol } from '@/Symbol';
 
 const ProfileNav = defineAsyncComponent(() => import('@/components/Index/User/ProfileNav.vue'));
 const MiniDashboard = defineAsyncComponent(() => import('@/components/Index/MiniDashboard.vue'));
-const AsideCard = defineAsyncComponent(() => import('../../components/Index/AsideCard.vue'));
+const AsideCard = defineAsyncComponent(() => import('@/components/Index/AsideCard.vue'));
 const ConfirmModal = defineAsyncComponent(() => import('@/components/ConfirmModal.vue'));
 
 const { user, removeSentConnect, updateOrderSideUser, submitConnect, acceptConnect, removeConnected

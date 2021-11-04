@@ -1,7 +1,6 @@
 <script lang="ts" setup>
 import { ref, watch, computed, defineAsyncComponent, PropType } from 'vue';
 import { apiCreateProject, apiUpdateProject, apiDeleteProject } from '@/api';
-import getSrcFolder from '@/mixins/getSrcFolder';
 import { QuillDeltaToHtmlConverter } from 'quill-delta-to-html'; 
 import store from '@/composition/store';
 import dayjs from '@/mixins/dayjs';
@@ -10,8 +9,7 @@ import 'simplebar-vue/dist/simplebar.min.css';
 
 const { updateUserProfile } = store;
 
-const Editor = defineAsyncComponent(() => import('../Editor.vue'));
-// const Editor = defineAsyncComponent(() => import(`${getSrcFolder()}/components/Editor.vue`));
+const Editor = defineAsyncComponent(() => import('@/components/Editor.vue'));
 
 const props = defineProps({
   projects: {

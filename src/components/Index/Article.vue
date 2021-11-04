@@ -8,7 +8,7 @@ import { stateSymbol } from '@/Symbol';
 
 defineProps({
   article: {
-    type: Object as PropType<Article>,
+    type: Object as PropType<Readonly<Article>>,
     default: () => ({}),
     required: true,
   },
@@ -20,20 +20,20 @@ defineProps({
 });
 
 const emits = defineEmits(['thumbsUp', 'removeThumbsUp', 'deleteArticle', 'addArticleFavorite',
-  'removeAriticleFavorite', 'deleteComment', 'submitComment']);
+  'removeAriticleFavorite', 'deleteComment', 'postComment']);
 
 const thumbsUpArticle = () => emits('thumbsUp');
 const cancelThumbsUpArticle = () => emits('removeThumbsUp');
 const deleteArticle = () => emits('deleteArticle');
 const addArticleFavorite = () => emits('addArticleFavorite');
 const removeAriticleFavorite = () => emits('removeAriticleFavorite');
-const submitComment = (articleId: string, articleIdx: number) => {
+const postComment = (articleId: string, articleIdx: number) => {
   const data = {
     articleId,
     articleIdx,
     comment: articleInputs.value[articleIdx],
   };
-  emits('submitComment', data);
+  emits('postComment', data);
 };
 const deleteComment = (article: Article, articleIdx: number, commentId: string) => {
   const data = {
@@ -219,8 +219,8 @@ defineExpose({
       <li class="comment-input-group">
         <img :src="user.photo" alt="comment.name">
         <input type="text" v-model="articleInputs[index]"
-          @keyup.enter="submitComment(article.id!, index)">
-        <button type="button" @click="submitComment(article.id!, index)">
+          @keyup.enter="postComment(article.id!, index)">
+        <button type="button" @click="postComment(article.id!, index)">
           <span class="material-icons">send</span></button>
       </li>
     </ul>

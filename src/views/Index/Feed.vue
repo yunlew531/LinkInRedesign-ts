@@ -12,7 +12,7 @@ getProfile();
 getArticles(1);
 
 const FeedAside = defineAsyncComponent(() => import('@/components/Index/Feed/FeedAside.vue'));
-const Editor = defineAsyncComponent(() => import('../../components/Editor.vue'));
+const Editor = defineAsyncComponent(() => import('@/components/Editor.vue'));
 const Article = defineAsyncComponent(() => import('@/components/Index/Article.vue'));
 
 const state: Ref<State> = inject(stateSymbol)!;

@@ -9,11 +9,12 @@ import { getProfile, createProject, updateProject, deleteProject, getPhoto, uplo
   thumbsUpArticle, cancelThumbsUpArticle, postComment, deleteComment, getOwnArticle
 } from './Index/profile';
 import { addArticleFavorite, removeArticleFavorite, deleteArticle } from './Index/feed';
-import { sentConnect, removeSentConnect, removeConnected } from './Index/user';
+import { sentConnect, removeSentConnect, removeConnected, getUserArticles } from './Index/user';
 import { acceptConnect, refuseConnect } from './Index/network';
 
 // normal
 export const apiGetUser = getUser;
+export const apiGetUserArticles = getUserArticles;
 
 // auth
 export const apiRegister = register;

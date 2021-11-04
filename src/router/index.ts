@@ -33,12 +33,12 @@ const routes = [
           {
             path: 'interests',
             name: 'ProfileInterests',
-            component:  () => import('@/views/Index/Profile/ProfileInterests.vue'),
+            component: () => import('@/views/Index/Profile/ProfileInterests.vue'),
           },
           {
             path: 'articles',
             name: 'ProfileArticles',
-            component:  () => import('@/views/Index/Profile/ProfileArticles.vue'),
+            component: () => import('@/views/Index/Profile/ProfileArticles.vue'),
           }
         ],
       },
@@ -59,12 +59,12 @@ const routes = [
           {
             path: 'profile/interests',
             name: 'UserProfileInterests',
-            component:  () => import('@/views/Index/User/ProfileInterests.vue'),
+            component: () => import('@/views/Index/User/ProfileInterests.vue'),
           },
           {
             path: 'profile/articles',
             name: 'UserProfileArticles',
-            component:  () => import('@/views/Index/User/ProfileArticles.vue'),
+            component: () => import('@/views/Index/User/ProfileArticles.vue'),
           }
         ],
       },
