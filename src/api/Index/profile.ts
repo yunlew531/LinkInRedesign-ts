@@ -14,7 +14,7 @@ export const createExperience = (experience: Experience) => authReq.post(`/self/
 export const updateExperience = (id: string, experience: Experience) => authReq.put(`/self/experience/${id}`, experience);
 export const deleteExperience = (id: string) => authReq.delete(`/self/experience/${id}`);
 export const updateEducation = (education: Education) => authReq.post('/self/education', education);
-export const createArticle = (article: Article) => authReq.post('/self/article/create', article);
+export const createArticle = (article: Article): Promise<any> => authReq.post('/self/article/create', article);
 export const getArticles = (page: number = 1) => authReq.get(`/self/articles/page/${page}`);
 export const thumbsUpArticle = (user: User, articleId: string): Promise<any> => authReq.post(`/self/article/like/${articleId}`, user);
 export const cancelThumbsUpArticle = (articleId: string) => authReq.post(`/self/article/dislike/${articleId}`);
