@@ -31,7 +31,7 @@ const setArticle = (articleIdx: number, articleData: Article) =>
   state.value.articles[articleIdx] = articleData;
 const setArticleComments = (comments: ArticleComment[], idx: number) =>
   state.value.articles[idx].comments = comments;
-const updateUserProfile = (options: any) => {
+const updateUserProfile = (options: User) => {
   const optionsKeys = Object.keys(options);
   const optionsValues: Array<string> = Object.values(options);
   optionsKeys.forEach((key, idx) => (state.value.user as any)[key] = optionsValues[idx]);

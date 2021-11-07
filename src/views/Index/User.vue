@@ -2,7 +2,7 @@
 import { ref, watch, computed, defineAsyncComponent, provide, inject, Ref } from 'vue';
 import { useRoute, useRouter, onBeforeRouteLeave } from 'vue-router';
 import { apiGetUser } from '@/api';
-import connectComposition from '@/composition/connections';
+import handleUser from '@/composition/handleUser';
 import getImageUrl from '@/mixins/getImageUrl';
 import { stateSymbol, orderSideUserSymbol } from '@/Symbol';
 
@@ -12,7 +12,7 @@ const AsideCard = defineAsyncComponent(() => import('@/components/Index/AsideCar
 const ConfirmModal = defineAsyncComponent(() => import('@/components/ConfirmModal.vue'));
 
 const { user, removeSentConnect, updateOrderSideUser, submitConnect, acceptConnect, removeConnected
-} = connectComposition;
+} = handleUser();
 const route = useRoute();
 const router = useRouter();
 const state: Ref<State> = inject(stateSymbol)!;

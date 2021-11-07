@@ -3,32 +3,13 @@ import { inject, computed, Ref } from 'vue';
 import getImageUrl from '@/mixins/getImageUrl';
 import { stateSymbol } from '@/Symbol';
 import dayjs from '@/mixins/dayjs';
-import connectComposition from '@/composition/connections';
+import handleUser from '@/composition/handleUser';
 
-const { removeSentConnect } = connectComposition;
+const { removeSentConnect } = handleUser();
 
 const state: Ref<State> = inject(stateSymbol)!;
 
 const connections = computed(() => state.value.user.connections);
-
-// const receivedUsers = ref([
-//   {
-//     name: 'Brandon Wilson',
-//     uid: 'regrg',
-//     content: 'Hey, I saw your works. I like it! Can we do something together? Or maybe you have project for UX at the moment?',
-//     profession: 'Senior UX designer',
-//     connections_qty: 30,
-//     img: 'feed-user-3',
-//   },
-//   {
-//     name: 'Theresa Steward',
-//     uid: 'ergergr',
-//     content: '',
-//     profession: 'Senior UX designer',
-//     connections_qty: 5,
-//     img: 'feed-user-1',
-//   },
-// ]);
 </script>
 
 <template>

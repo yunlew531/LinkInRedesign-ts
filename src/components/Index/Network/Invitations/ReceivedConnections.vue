@@ -3,11 +3,11 @@ import { computed, inject, Ref } from 'vue';
 import getImageUrl from '@/mixins/getImageUrl';
 import { stateSymbol } from '@/Symbol';
 import dayjs from '@/mixins/dayjs';
-import connectComposition from '@/composition/connections';
+import handleUser from '@/composition/handleUser';
 
 const state: Ref<State> = inject(stateSymbol)!;
 
-const { acceptConnect, refuseConnect } = connectComposition;
+const { acceptConnect, refuseConnect } = handleUser();
 // const receivedUsers = ref([
 //   {
 //     name: 'Brandon Wilson',
