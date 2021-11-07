@@ -9,7 +9,7 @@ import { stateSymbol } from '@/Symbol';
 const { getProfile, getArticles, setArticles, setArticle ,setArticleComments } = store;
 
 getProfile();
-getArticles(1);
+getArticles();
 
 const FeedAside = defineAsyncComponent(() => import('@/components/Index/Feed/FeedAside.vue'));
 const Editor = defineAsyncComponent(() => import('@/components/Editor.vue'));
@@ -116,7 +116,7 @@ const removeThumbsUpArticle = async (article: Article, idx: number) => {
 const deleteArticle = async (articleId: string) => {
   try {
     await apiDeleteArticle(articleId);
-    getArticles(1);
+    getArticles();
   } catch (err) { console.dir(err); }
 };
 
@@ -132,7 +132,7 @@ const addArticleFavorite =  async (article: Article, articleIdx: number) => {
   } catch (err) { console.log(err); }
 };
 
-const removeAriticleFavorite = async (article: Article, articleIdx: number) => {
+const removeArticleFavorite = async (article: Article, articleIdx: number) => {
   const tempArticle = JSON.parse(JSON.stringify(article));
 
   try {
@@ -146,7 +146,7 @@ const removeAriticleFavorite = async (article: Article, articleIdx: number) => {
 
 const articlesRef = ref<any[]>([]);
 const isCommentLimit = ref(false);
-const submitComment = async (emitData: EmitSubmitCommentData) => {
+const postComment = async (emitData: EmitSubmitCommentData) => {
   const { articleId, articleIdx, comment } = emitData;
 
   if (isCommentLimit.value) {
@@ -217,8 +217,8 @@ const deleteComment = async (emitData: EmitDeleteCommentData) => {
             @removeThumbsUp="removeThumbsUpArticle(article, index)"
             @deleteArticle="deleteArticle(article.id!)" 
             @addArticleFavorite="addArticleFavorite(article, index)"
-            @removeAriticleFavorite="removeAriticleFavorite(article, index)"
-            @submitComment="submitComment"
+            @removeArticleFavorite="removeArticleFavorite(article, index)"
+            @postComment="postComment"
             @deleteComment="deleteComment" />
         </li>
       </ul>

@@ -8,8 +8,9 @@ const Article = defineAsyncComponent(() => import('@/components/Index/Article.vu
 
 const route = useRoute();
 
-const { articles, getArticles, thumbsUpArticle, removeThumbsUpArticle, deleteArticle, postComment, deleteComment } =
-  handleArticles(apiGetUserArticles);
+const { articles, getArticles, thumbsUpArticle, removeThumbsUpArticle, deleteArticle, postComment, deleteComment,
+  addArticleFavorite, removeArticleFavorite
+} = handleArticles(apiGetUserArticles);
 
 const ArticleRefs = ref<any[]>([]);
 
@@ -34,6 +35,8 @@ getArticles(<string>route.params.uid);
         @postComment="handlePostComment"
         @deleteComment="deleteComment"
         @deleteArticle="deleteArticle(article.id!)"
+        @addArticleFavorite="addArticleFavorite(article, index)"
+        @removeArticleFavorite="removeArticleFavorite(article, index)"
       />
     </li>
   </ul>

@@ -15,9 +15,9 @@ const getProfile = async () => {
   } catch(err) {}
 };
 
-const getArticles = async (page: number = 1) => {
+const getArticles = async () => {
   try {
-    const { data } = await apiGetArticles(page);
+    const { data } = await apiGetArticles();
     const { articles } = data;
     setArticles(articles);
   } catch (err) {}

@@ -1,6 +1,6 @@
 import { ref, readonly, Ref } from 'vue';
 import { apiThumbsUpArticle, apiCancelThumbsUpArticle, apiDeleteArticle, apiDeleteComment, apiPostComment,
-  apiGetOwnArticle, apiGetUserArticles,
+  apiGetOwnArticle, apiGetUserArticles, apiAddArticleFavorite, apiRemoveArticleFavorite
 } from '@/api';
 import store from '@/composition/store';
 
@@ -48,6 +48,8 @@ export default (apiFunc: ApiFunc) => {
   };
 
   const setArticles = (articlesData: Article[]) => articles.value = articlesData;
+  const setArticle = (articleIdx: number, articleData: Article) =>
+    articles.value[articleIdx] = articleData;
 
   const deleteArticle = async (articleId: string) => {
     try {
@@ -107,6 +109,30 @@ export default (apiFunc: ApiFunc) => {
     } catch (err) { console.dir(err); }
   };
   
+  const addArticleFavorite =  async (article: Article, articleIdx: number) => {
+    const tempArticle = JSON.parse(JSON.stringify(article));
+  
+    try {
+      const { data } = await apiAddArticleFavorite(article.id!);
+      const { favorites } = data;
+      tempArticle.favorites = favorites;
+      setArticle(articleIdx, tempArticle);
+      alert('add success');
+    } catch (err) { console.log(err); }
+  };
+
+  const removeArticleFavorite = async (article: Article, articleIdx: number) => {
+    const tempArticle = JSON.parse(JSON.stringify(article));
+  
+    try {
+      const { data } = await apiRemoveArticleFavorite(article.id!);
+      const { favorites } = data;
+      tempArticle.favorites = favorites;
+      setArticle(articleIdx, tempArticle);
+      alert('remove success');
+    } catch (err) { console.dir(err); }
+  };
+
   return {
     articles: readonly(articles) as Ref<Article[]>,
     getArticles,
@@ -116,5 +142,7 @@ export default (apiFunc: ApiFunc) => {
     deleteArticle,
     postComment,
     deleteComment,
+    addArticleFavorite,
+    removeArticleFavorite,
   };
 };

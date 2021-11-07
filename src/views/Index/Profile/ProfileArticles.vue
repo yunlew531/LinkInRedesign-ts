@@ -5,8 +5,9 @@ import handleArticles from '@/composition/handleArticles';
 
 const Article = defineAsyncComponent(() => import('@/components/Index/Article.vue'));
 
-const { articles, getArticles, thumbsUpArticle, removeThumbsUpArticle, deleteArticle, postComment, deleteComment } =
-  handleArticles(apiGetOwnArticle);
+const { articles, getArticles, thumbsUpArticle, removeThumbsUpArticle, deleteArticle, postComment,
+  deleteComment, addArticleFavorite, removeArticleFavorite
+} = handleArticles(apiGetOwnArticle);
 
 const ArticleRefs = ref<any[]>([]);
 
@@ -31,6 +32,8 @@ getArticles();
         @postComment="handlePostComment"
         @deleteComment="deleteComment"
         @deleteArticle="deleteArticle(article.id!)"
+        @addArticleFavorite="addArticleFavorite(article, index)"
+        @removeArticleFavorite="removeArticleFavorite(article, index)"
       />
     </li>
   </ul> 

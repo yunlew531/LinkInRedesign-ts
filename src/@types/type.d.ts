@@ -128,3 +128,11 @@ interface Connections {
   received: ConnectUser[];
   sent: ConnectUser[];
 }
+
+interface Response {
+  message: string;
+  success: boolean;
+  data: {
+    [key: string]: any;
+  }
+}

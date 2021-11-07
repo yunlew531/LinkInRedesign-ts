@@ -20,13 +20,13 @@ defineProps({
 });
 
 const emits = defineEmits(['thumbsUp', 'removeThumbsUp', 'deleteArticle', 'addArticleFavorite',
-  'removeAriticleFavorite', 'deleteComment', 'postComment']);
+  'removeArticleFavorite', 'deleteComment', 'postComment']);
 
 const thumbsUpArticle = () => emits('thumbsUp');
 const cancelThumbsUpArticle = () => emits('removeThumbsUp');
 const deleteArticle = () => emits('deleteArticle');
 const addArticleFavorite = () => emits('addArticleFavorite');
-const removeAriticleFavorite = () => emits('removeAriticleFavorite');
+const removeArticleFavorite = () => emits('removeArticleFavorite');
 const postComment = (articleId: string, articleIdx: number) => {
   const data = {
     articleId,
@@ -155,7 +155,7 @@ defineExpose({
           </li>
           <li v-else>
             <button type="button" class="un-favorite-btn"
-              @click="removeAriticleFavorite()">UnFavorite</button>
+              @click="removeArticleFavorite()">UnFavorite</button>
           </li>
         </ul>
       </div>
