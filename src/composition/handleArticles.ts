@@ -1,12 +1,14 @@
 import { ref, readonly, Ref } from 'vue';
 import { apiThumbsUpArticle, apiCancelThumbsUpArticle, apiDeleteArticle, apiDeleteComment, apiPostComment,
-  apiGetOwnArticle, apiGetUserArticles, apiAddArticleFavorite, apiRemoveArticleFavorite
+  apiGetOwnArticle, apiGetUserArticles, apiAddArticleFavorite, apiRemoveArticleFavorite, apiGetArticles
 } from '@/api';
 import store from '@/composition/store';
 
 const { state } = store;
 
-type ApiFunc = typeof apiGetOwnArticle | typeof apiGetUserArticles;
+type ApiFunc = typeof apiGetOwnArticle
+  | typeof apiGetUserArticles
+  | typeof apiGetArticles;
 
 export default (apiFunc: ApiFunc) => {
   const articles = ref<Article[]>([]);

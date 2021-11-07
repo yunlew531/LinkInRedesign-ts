@@ -9,24 +9,25 @@ const { articles, getArticles, thumbsUpArticle, removeThumbsUpArticle, deleteArt
   deleteComment, addArticleFavorite, removeArticleFavorite
 } = handleArticles(apiGetOwnArticle);
 
-const ArticleRefs = ref<any[]>([]);
+const init = () => getArticles();
+init();
+
+const articleRefs = ref<any[]>([]);
 
 const handlePostComment = async (emitData: EmitSubmitCommentData) => {
   const { articleIdx } = emitData;
 
   try {
     await postComment(emitData);
-    ArticleRefs.value[articleIdx].resetCommentInput(articleIdx);
+    articleRefs.value[articleIdx].resetCommentInput(articleIdx);
   } catch (err) { console.log(err); }
 };
-
-getArticles();
 </script>
 
 <template>
   <ul>
     <li v-for="(article, index) in articles" :key="article.id">
-      <Article :ref="(el: typeof ref) => ArticleRefs[index] = el" :article="article" :index="index"
+      <Article :ref="(el: typeof ref) => articleRefs[index] = el" :article="article" :index="index"
         @thumbsUp="thumbsUpArticle(article, index)"
         @removeThumbsUp="removeThumbsUpArticle(article, index)"
         @postComment="handlePostComment"

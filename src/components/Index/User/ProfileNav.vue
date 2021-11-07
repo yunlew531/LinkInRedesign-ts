@@ -1,22 +1,20 @@
 <script lang="ts" setup>
 import { ref } from 'vue';
-import { } from '@/api';
+import { apiGetUserArticles } from '@/api';
 import { useRoute } from 'vue-router';
 
 const route = useRoute();
 const { uid } = route.params;
 
 const articles = ref<Article[]>();
-// const getOwnArticle = async () => {
-//   try {
-//     const { data } = await apiGetOwnArticle();
-//     articles.value = data.articles;
-//   } catch (err) { console.dir(err); }
-// };
-
-const init = () => {
-  // getOwnArticle();
+const getUserArticles = async () => {
+  try {
+    const { data } = await apiGetUserArticles(<string>uid);
+    articles.value = data.articles;
+  } catch (err) { console.dir(err); }
 };
+
+const init = () => getUserArticles();
 init();
 </script>
 

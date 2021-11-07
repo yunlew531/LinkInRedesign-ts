@@ -1,10 +1,6 @@
 <script lang="ts" setup>
 import { ref } from 'vue';
 import { apiGetOwnArticle } from '@/api';
-import { useRoute } from 'vue-router';
-
-const route = useRoute();
-const { uid } = route.params;
 
 const articles = ref<Article[]>();
 const getOwnArticle = async () => {
@@ -14,9 +10,7 @@ const getOwnArticle = async () => {
   } catch (err) { console.dir(err); }
 };
 
-const init = () => {
-  getOwnArticle();
-};
+const init = () => getOwnArticle();
 init();
 </script>
 
