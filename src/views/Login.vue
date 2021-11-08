@@ -38,7 +38,7 @@ const register = async () => {
     const { token, expired } = data;
     
     document.cookie = `LinkInRe=${token};expires=${new Date(expired)};`;
-    authReq.defaults.headers.common.Authorization = `${token}`;
+    (authReq.defaults.headers as any).common.Authorization = `${token}`;
     setLogin();
     router.push('/');
   } catch (err: any) {
@@ -60,7 +60,7 @@ const signIn = async () => {
     const { token, expired } = data;
 
     document.cookie = `LinkInRe=${token};expires=${new Date(expired)};`;
-    authReq.defaults.headers.common.Authorization = `${token}`;
+    (authReq.defaults.headers as any).common.Authorization = `${token}`;
     setLogin();
     router.push('/');
   } catch (err: any) {
