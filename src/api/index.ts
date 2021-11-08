@@ -10,7 +10,7 @@ import { getProfile, createProject, updateProject, deleteProject, getPhoto, uplo
 } from './Index/profile';
 import { addArticleFavorite, removeArticleFavorite, deleteArticle } from './Index/feed';
 import { sentConnect, removeSentConnect, removeConnected, getUserArticles } from './Index/user';
-import { acceptConnect, refuseConnect } from './Index/network';
+import { acceptConnect, refuseConnect, getFavoritesArticles } from './Index/network';
 
 // normal
 export const apiGetUser = getUser;
@@ -50,3 +50,4 @@ export const apiRemoveSentConnect = removeSentConnect;
 export const apiAcceptConnect = acceptConnect;
 export const apiRemoveConnected = removeConnected;
 export const apiRefuseConnect = refuseConnect;
+export const apiGetFavoritesArticles = getFavoritesArticles;

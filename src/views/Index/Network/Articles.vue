@@ -1,18 +1,24 @@
 <script lang="ts" setup>
-import { defineAsyncComponent, ref } from 'vue';
-import { apiGetOwnArticle } from '@/api';
+import { defineAsyncComponent, ref, watch } from 'vue';
+import { apiGetOwnArticle, apiGetFavoritesArticles } from '@/api';
 import handleArticles from '@/composition/handleArticles';
 
 const Article = defineAsyncComponent(() => import('@/components/Index/Article.vue'));
 
 const { articles, getArticles } = handleArticles(apiGetOwnArticle);
+const favoriteArticles = handleArticles(apiGetFavoritesArticles);
 
 type CurrentDisplay = 'post' | 'favorites';
 const currentDisplay = ref<CurrentDisplay>('post');
 const handleCurrentDisplay = (display: CurrentDisplay) => currentDisplay.value = display;
 
-const init = () => getArticles();
-init();
+watch(currentDisplay, (current) => {
+  if (current === 'post') {
+    getArticles();
+  } else if (current === 'favorites') {
+    favoriteArticles.getArticles();
+  }
+}, { immediate: true });
 </script>
 
 <template>
@@ -32,8 +38,13 @@ init();
         </button>
       </div>
     </div>
-    <ul>
+    <ul v-if="currentDisplay === 'post'">
       <li v-for="(article, index) in articles" :key="article.id">
+        <Article :article="article" :index="index" />
+      </li>
+    </ul>
+    <ul v-else-if="currentDisplay === 'favorites'">
+      <li v-for="(article, index) in favoriteArticles.articles.value" :key="article.id">
         <Article :article="article" :index="index" />
       </li>
     </ul>

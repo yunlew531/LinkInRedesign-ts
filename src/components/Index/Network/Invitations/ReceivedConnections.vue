@@ -8,24 +8,6 @@ import handleUser from '@/composition/handleUser';
 const state: Ref<State> = inject(stateSymbol)!;
 
 const { acceptConnect, refuseConnect } = handleUser();
-// const receivedUsers = ref([
-//   {
-//     name: 'Brandon Wilson',
-//     uid: 'regrg',
-//     content: 'Hey, I saw your works. I like it! Can we do something together? Or maybe you have project for UX at the moment?',
-//     profession: 'Senior UX designer',
-//     connections_qty: 30,
-//     img: 'feed-user-3',
-//   },
-//   {
-//     name: 'Theresa Steward',
-//     uid: 'ergergr',
-//     content: '',
-//     profession: 'Senior UX designer',
-//     connections_qty: 5,
-//     img: 'feed-user-1',
-//   },
-// ]);
 
 const connections = computed(() => state.value.user.connections);
 </script>

@@ -30,4 +30,4 @@ export const postComment = (commentData: CommentData, articleId: string): Promis
   authReq.post(`/self/article/comment/${articleId}`, commentData);
 export const deleteComment = (articleId: string, commentId: string) =>
   authReq.delete(`/self/article/${articleId}/comment/${commentId}`);
-export const getOwnArticle = (): Promise<Response> => authReq.get('/self/articles/own');
+export const getOwnArticle = (): Promise<Response> => authReq.get('/self/articles?filter=own');
