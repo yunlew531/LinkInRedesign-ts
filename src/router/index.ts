@@ -90,7 +90,12 @@ const routes = [
             path: 'invitations',
             name: 'Invitations',
             component:  () => import('@/views/Index/Network/Invitations.vue'),
-          }
+          },
+          {
+            path: 'articles',
+            name: 'Articles',
+            component:  () => import('@/views/Index/Network/Articles.vue'),
+          },
         ],
       },
       {
@@ -153,7 +158,8 @@ const router = createRouter({
 
 const checkLogin = () => new Promise<void>(async (resolve, reject) => {
   const token = document.cookie.replace(/(?:(?:^|.*;\s*)LinkInRe\s*=\s*([^;]*).*$)|^.*$/, '$1');
-  authReq.defaults.headers.common.Authorization = `${token}`;
+  (authReq.defaults.headers as any).common.Authorization = `${token}`;
+  
   try {
     const { data } = await apiCheckLogin();
     const { uid } = data;
