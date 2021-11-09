@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { ref, defineAsyncComponent } from 'vue';
+import { ref, defineAsyncComponent, DefineComponent } from 'vue';
 import { apiGetArticles, apiCreateArticle } from '@/api';
 import handleArticles from '@/composition/handleArticles';
 import store from '@/composition/store';
@@ -30,30 +30,30 @@ const editorOptions = {
   },
 };
 
-const editorEl = ref();
+const editorEl = ref<DefineComponent>();
 
 const createArticle = async () => {
-  const empty = editorEl.value.checkEmpty();
+  const empty = editorEl.value!.checkEmpty();
   if (empty) {
     alert('content required');
     return;
   };
 
   const article = {
-    content: editorEl.value.getContents(),
+    content: editorEl.value!.getContents(),
   };
   
   try {
     const { data } = await apiCreateArticle(article);
     const { articles } = data;
     setArticles(articles);
-    editorEl.value.setText();
+    editorEl.value!.setText();
   } catch (err) { console.dir(err); }
 };
 
-const focusEditor = () => editorEl.value.focus();
+const focusEditor = () => editorEl.value!.focus();
 
-const articleRefs = ref<any[]>([]);
+const articleRefs = ref<DefineComponent[]>([]);
 
 const handlePostComment = async (emitData: EmitSubmitCommentData) => {
   const { articleIdx } = emitData;

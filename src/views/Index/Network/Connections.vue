@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { ref, computed, inject, Ref, defineAsyncComponent } from 'vue';
+import { ref, computed, inject, Ref, defineAsyncComponent, DefineComponent } from 'vue';
 import { stateSymbol } from '@/Symbol';
 import getImageUrl from '@/mixins/getImageUrl';
 import dayjs from '@/mixins/dayjs';
@@ -12,17 +12,17 @@ const state: Ref<State> = inject(stateSymbol)!;
 const connections = computed(() => state.value.user.connections);
 
 const tempRemoveConnectUid = ref<string>();
-const confirmModalEl = ref();
+const confirmModalEl = ref<DefineComponent>();
 const showConfirmModal = (connectedUid: string) => {
   tempRemoveConnectUid.value = connectedUid;
   const content = 'Do you want to remove the connections ?';
-  confirmModalEl.value.showModal(content);
+  confirmModalEl.value!.showModal(content);
 };
 
 const handleRemoveConnected = () => {
   if (!tempRemoveConnectUid.value) return;
   removeConnected(tempRemoveConnectUid.value);
-  confirmModalEl.value.hideModal();
+  confirmModalEl.value!.hideModal();
 };
 
 const cleanTempConnectUid = () => tempRemoveConnectUid.value = '';

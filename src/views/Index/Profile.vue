@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { ref, inject, computed, Ref, defineAsyncComponent } from 'vue';
+import { ref, inject, computed, Ref, defineAsyncComponent, DefineComponent } from 'vue';
 import { apiUploadPhoto, apiUploadBackgroundImg, apiUpdateDescription } from '@/api';
 import store from '@/composition/store';
 import getImageUrl from '@/mixins/getImageUrl';
@@ -65,27 +65,25 @@ const courses = ref([
   },
 ]);
 
-const editorEl:any = ref(null);
+const editorEl = ref<DefineComponent>();
 const editorOptions = ref({
   placeholder: 'input description',
 });
 
 const isEditDescription = ref(false);
 const editDescription = () => {
-  editorEl.value.setText(user.value.description);
+  editorEl.value!.setText(user.value.description);
   isEditDescription.value = true;
 };
 
 const updateDescription = async () => {
-  const description = editorEl.value.getText();
+  const description = editorEl.value!.getText();
   try {
     const { data } = await apiUpdateDescription(description);
     const { description: resDescription } = data;
     updateUserProfile({ description: resDescription });
     isEditDescription.value = false;
-  } catch (err: any) {
-    alert(err.response.data.message);
-  }
+  } catch (err: any) { alert(err.response.data.message); }
 };
 
 const cancelEditDescription = () => isEditDescription.value = false;
@@ -98,9 +96,7 @@ const uploadPhoto = async (e: Event) => {
     const { data } = await apiUploadPhoto(formData);
     const { url } = data;
     updateUserProfile({ photo: url });
-  } catch (err: any) {
-    alert(err.response.data.message);
-  }
+  } catch (err: any) { alert(err.response.data.message); }
 };
 
 const uploadBackgroundImg = async (e: Event) => {
@@ -111,9 +107,7 @@ const uploadBackgroundImg = async (e: Event) => {
     const { data } = await apiUploadBackgroundImg(formData);
     const { url } = data;
     updateUserProfile({ background_cover: url });
-  } catch (err: any) {
-    alert(err.response.data.message);
-  }
+  } catch (err: any) { alert(err.response.data.message); }
 };
 </script>
 

@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { ref, watch, computed, defineAsyncComponent, PropType } from 'vue';
+import { ref, watch, computed, defineAsyncComponent, PropType, DefineComponent } from 'vue';
 import { apiCreateProject, apiUpdateProject, apiDeleteProject } from '@/api';
 import { QuillDeltaToHtmlConverter } from 'quill-delta-to-html'; 
 import store from '@/composition/store';
@@ -43,8 +43,8 @@ watch(isModalShow, (value) => {
     body.style.overflow = 'auto';
     isProjectEdit.value = false;
     emits('setCurrentProject', {});
-    titleEditorEl.value.setText('');
-    contentEditorEl.value.setContents({});
+    titleEditorEl.value!.setText('');
+    contentEditorEl.value!.setContents({});
   }
 });
 
@@ -70,16 +70,16 @@ const handleCurrentProject = (num: number) => {
 
 type ModalStatus = 'update' | 'create';
 
-const titleEditorEl = ref();
-const contentEditorEl = ref();
+const titleEditorEl = ref<DefineComponent>();
+const contentEditorEl = ref<DefineComponent>();
 const isProjectEdit = ref(false);
 const modalStatus = ref<ModalStatus>('update');
 const isShowDeleteBtn = computed(() => modalStatus.value === 'update' ? true : false);
 const editProject = () => {
   modalStatus.value = 'update';
   const { title, content } = currentProject.value;
-  titleEditorEl.value.setText(title);
-  contentEditorEl.value.setContents(content);
+  titleEditorEl.value!.setText(title);
+  contentEditorEl.value!.setContents(content);
   isProjectEdit.value = true;
 };
 const createProject = () => {
@@ -95,15 +95,15 @@ const postProject = async () => {
   const { id } = currentProject.value;
   const project: Project = {
     id,
-    title: titleEditorEl.value.getText(),
-    content: contentEditorEl.value.getContents(),
+    title: titleEditorEl.value!.getText(),
+    content: contentEditorEl.value!.getContents(),
   };
 
   try {
     const { data } = await method.value(project, id);
     const { projects, project_id } = data;
     updateUserProfile({ projects });
-    const filterProject = projects.filter((project: { id: string }) => project.id === project_id)[0];
+    const filterProject: Project[] = projects.filter((project: Project) => project.id === project_id)[0];
     emits('setCurrentProject', filterProject);
     isProjectEdit.value = false;
   } catch (err: any) {

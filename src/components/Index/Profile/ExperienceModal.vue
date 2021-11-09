@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { PropType, ref, watch, computed, defineAsyncComponent } from 'vue';
+import { PropType, ref, watch, computed, defineAsyncComponent, DefineComponent } from 'vue';
 import { apiCreateExperience, apiUpdateExperience, apiUploadExperienceImg, apiDeleteExperience
 } from '@/api';
 import getImageUrl from '@/mixins/getImageUrl';
@@ -17,12 +17,12 @@ const props = defineProps({
   },
 });
 
-const editorEl = ref();
+const editorEl = ref<DefineComponent>();
 
 const tempExperience = ref<Experience>({});
 watch(() => props.experience, (value) => {
   tempExperience.value = JSON.parse(JSON.stringify(value));
-  editorEl.value.setText(tempExperience.value.content);
+  editorEl.value!.setText(tempExperience.value.content);
   if (value && tempExperience.value.start_time && tempExperience.value.end_time) {
     workTime.value.workTimeStart = dayjs(tempExperience.value.start_time * 1000).format('YYYY-MM-DD');
     workTime.value.workTimeEnd = dayjs(tempExperience.value.end_time * 1000).format('YYYY-MM-DD');
@@ -66,7 +66,7 @@ const createExperience = async () => {
     end_time: Math.floor(dayjs(workTime.value.workTimeEnd).valueOf() / 1000), 
     image_url: tempExperience.value.image_url, 
     place: tempExperience.value.place, 
-    content: editorEl.value.getText(),
+    content: editorEl.value!.getText(),
   };
 
   try {
@@ -87,7 +87,7 @@ const updateExperience = async () => {
     end_time: Math.floor(dayjs(workTime.value.workTimeEnd).valueOf() / 1000), 
     image_url: tempExperience.value.image_url, 
     place: tempExperience.value.place, 
-    content: editorEl.value.getText(),
+    content: editorEl.value!.getText(),
   };
 
   try {

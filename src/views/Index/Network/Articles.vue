@@ -1,11 +1,11 @@
 <script lang="ts" setup>
-import { defineAsyncComponent, ref, watch } from 'vue';
+import { defineAsyncComponent, ref, watch, DefineComponent } from 'vue';
 import { apiGetOwnArticle, apiGetFavoritesArticles } from '@/api';
 import handleArticles from '@/composition/handleArticles';
 
 const Article = defineAsyncComponent(() => import('@/components/Index/Article.vue'));
 
-const { articles, getArticles } = handleArticles(apiGetOwnArticle);
+const ownArticles = handleArticles(apiGetOwnArticle);
 const favoriteArticles = handleArticles(apiGetFavoritesArticles);
 
 type CurrentDisplay = 'post' | 'favorites';
@@ -13,12 +13,38 @@ const currentDisplay = ref<CurrentDisplay>('post');
 const handleCurrentDisplay = (display: CurrentDisplay) => currentDisplay.value = display;
 
 watch(currentDisplay, (current) => {
-  if (current === 'post') {
-    getArticles();
-  } else if (current === 'favorites') {
+  if (current === 'post')
+    ownArticles.getArticles();
+  else if (current === 'favorites')
     favoriteArticles.getArticles();
-  }
 }, { immediate: true });
+
+const ownArticleRefs = ref<DefineComponent[]>([]);
+const handleOwnArticlesPostComment = async (emitData: EmitSubmitCommentData) => {
+  const { articleIdx } = emitData;
+
+  try {
+    await ownArticles.postComment(emitData);
+    ownArticleRefs.value[articleIdx].resetCommentInput(articleIdx);
+  } catch (err) { console.log(err); }
+};
+
+const favoritesArticleRefs = ref<DefineComponent[]>([]);
+const handleFavoArticlesPostComment = async (emitData: EmitSubmitCommentData) => {
+  const { articleIdx } = emitData;
+
+  try {
+    await favoriteArticles.postComment(emitData);
+    favoritesArticleRefs.value[articleIdx].resetCommentInput(articleIdx);
+  } catch (err) { console.log(err); }
+};
+
+const handleRemoveArticleFavorite = async (article: Article, index: number) => {
+  try {
+    await favoriteArticles.removeArticleFavorite(article, index);
+    favoriteArticles.getArticles();
+  } catch (err) { console.dir(err); }
+};
 </script>
 
 <template>
@@ -39,13 +65,29 @@ watch(currentDisplay, (current) => {
       </div>
     </div>
     <ul v-if="currentDisplay === 'post'">
-      <li v-for="(article, index) in articles" :key="article.id">
-        <Article :article="article" :index="index" />
+      <li v-for="(article, index) in ownArticles.articles.value" :key="article.id">
+        <Article :ref="(el: any) => ownArticleRefs[index] = el" :article="article" :index="index"
+          @thumbsUp="ownArticles.thumbsUpArticle(article, index)"
+          @removeThumbsUp="ownArticles.removeThumbsUpArticle(article, index)"
+          @deleteArticle="ownArticles.deleteArticle(article.id!)" 
+          @postComment="handleOwnArticlesPostComment"
+          @deleteComment="ownArticles.deleteComment"
+          @addArticleFavorite="ownArticles.addArticleFavorite(article, index)"
+          @removeArticleFavorite="ownArticles.removeArticleFavorite(article, index)"
+        />
       </li>
     </ul>
     <ul v-else-if="currentDisplay === 'favorites'">
       <li v-for="(article, index) in favoriteArticles.articles.value" :key="article.id">
-        <Article :article="article" :index="index" />
+        <Article :ref="(el: any) => favoritesArticleRefs[index] = el" :article="article" :index="index"
+          @thumbsUp="favoriteArticles.thumbsUpArticle(article, index)" 
+          @removeThumbsUp="favoriteArticles.removeThumbsUpArticle(article, index)"
+          @deleteArticle="favoriteArticles.deleteArticle(article.id!)" 
+          @postComment="handleFavoArticlesPostComment"
+          @deleteComment="favoriteArticles.deleteComment"
+          @addArticleFavorite="favoriteArticles.addArticleFavorite(article, index)"
+          @removeArticleFavorite="handleRemoveArticleFavorite(article, index)"
+        />
       </li>
     </ul>
   </section>

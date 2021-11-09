@@ -126,13 +126,16 @@ export default (apiFunc: ApiFunc) => {
   const removeArticleFavorite = async (article: Article, articleIdx: number) => {
     const tempArticle = JSON.parse(JSON.stringify(article));
   
-    try {
-      const { data } = await apiRemoveArticleFavorite(article.id!);
-      const { favorites } = data;
-      tempArticle.favorites = favorites;
-      setArticle(articleIdx, tempArticle);
-      alert('remove success');
-    } catch (err) { console.dir(err); }
+    return new Promise(async (resolve, reject) => {
+      try {
+        const { data } = await apiRemoveArticleFavorite(article.id!);
+        const { favorites } = data;
+        tempArticle.favorites = favorites;
+        setArticle(articleIdx, tempArticle);
+        alert('remove success');
+        resolve(favorites);
+      } catch (err) { reject(err); }
+    });
   };
 
   return {

@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { ref, watch, defineAsyncComponent, PropType } from 'vue';
+import { ref, watch, defineAsyncComponent, PropType, DefineComponent } from 'vue';
 import { apiUpdateEducation } from '@/api';
 import DatePicker from 'vue3-persian-datetime-picker';
 import store from '@/composition/store';
@@ -29,8 +29,8 @@ const editEducation = () => {
     const [ startTime, graduateTime ] = education.value.time.split(' - ');
     yearPicker.value.start_time = startTime;
     yearPicker.value.graduate_time = graduateTime;
-    startTimePicker.value.updateDates(startTime);
-    graduateTimePicker.value.updateDates(graduateTime);
+    startTimePicker.value!.updateDates(startTime);
+    graduateTimePicker.value!.updateDates(graduateTime);
   }
 };
 
@@ -43,8 +43,8 @@ const yearPicker = ref({
   graduate_time: '2021',
 });
 
-const startTimePicker = ref<any>(null);
-const graduateTimePicker = ref<any>(null);
+const startTimePicker = ref<DefineComponent>();
+const graduateTimePicker = ref<DefineComponent>();
 watch([
   () => yearPicker.value.start_time,
   () => yearPicker.value.graduate_time],
@@ -53,10 +53,10 @@ watch([
     alert("start time can't greater than graduate time!");
     if (newV[0] !== preV[0]) {
       yearPicker.value.start_time = preV[0];
-      startTimePicker.value.updateDates(preV[0]);
+      startTimePicker.value!.updateDates(preV[0]);
     } else if (newV[1] !== preV[1]) {
       yearPicker.value.graduate_time = preV[1];
-      graduateTimePicker.value.updateDates(preV[1]);
+      graduateTimePicker.value!.updateDates(preV[1]);
     }
   } else {
     education.value.time = `${newV[0]} - ${newV[1]}`;

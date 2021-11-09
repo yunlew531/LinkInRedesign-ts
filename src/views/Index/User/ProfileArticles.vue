@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { ref, defineAsyncComponent } from 'vue';
+import { ref, defineAsyncComponent, DefineComponent } from 'vue';
 import { useRoute } from 'vue-router';
 import { apiGetUserArticles } from '@/api';
 import handleArticles from '@/composition/handleArticles';
@@ -15,7 +15,7 @@ const { articles, getArticles, thumbsUpArticle, removeThumbsUpArticle, deleteArt
 const init = () => getArticles(<string>route.params.uid);
 init();
 
-const articleRefs = ref<any[]>([]);
+const articleRefs = ref<DefineComponent[]>([]);
 
 const handlePostComment = async (emitData: EmitSubmitCommentData) => {
   const { articleIdx } = emitData;
@@ -30,7 +30,8 @@ const handlePostComment = async (emitData: EmitSubmitCommentData) => {
 <template>
   <ul>
     <li v-for="(article, index) in articles" :key="article.id">
-      <Article :ref="(el: typeof ref) => articleRefs[index] = el" :article="article" :index="index"
+      <Article :ref="(el: any) => articleRefs[index] = el"
+        :article="article" :index="index"
         @thumbsUp="thumbsUpArticle(article, index)"
         @removeThumbsUp="removeThumbsUpArticle(article, index)"
         @postComment="handlePostComment"

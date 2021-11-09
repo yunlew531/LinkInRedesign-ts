@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { ref, inject, computed, defineAsyncComponent, Ref } from 'vue';
+import { ref, inject, computed, defineAsyncComponent, Ref, DefineComponent } from 'vue';
 import { apiUpdateAbout } from '@/api';
 import dayjs from '@/mixins/dayjs';
 import store from '@/composition/store';
@@ -60,16 +60,16 @@ interface SkillListUser {
 
 const filterFivePerson = (users: Array<SkillListUser>) => users.filter((user, key) => key < 5);
 
-const editorEl: any = ref(null);
+const editorEl = ref<DefineComponent>();
 const isEditAbout = ref(false);
 const editAbout = () => {
   const about = user.value.about;
-  editorEl.value.setText(about);
+  editorEl.value!.setText(about);
   isEditAbout.value = true;
 };
 
 const updateAbout = async () => {
-  const about = editorEl.value.getText();
+  const about = editorEl.value!.getText();
   try {
     const { data } = await apiUpdateAbout(about);
     const { about: newAbout } = data;
@@ -84,20 +84,20 @@ const cancelEdit = () => isEditAbout.value = false;
 
 const currentProject = ref({});
 const currentProjectIdx = ref(0);
-const projectModalEl = ref();
+const projectModalEl = ref<DefineComponent>();
 const showProjectModal = (project: object, key: number) => {
   currentProject.value = project;
   currentProjectIdx.value = key;
-  projectModalEl.value.setModalStatus('update');
-  projectModalEl.value.showModal();
+  projectModalEl.value!.setModalStatus('update');
+  projectModalEl.value!.showModal();
 };
-const setCurrentProject = (project: any) => currentProject.value = project;
+const setCurrentProject = (project: Project) => currentProject.value = project;
 const setCurrentIdx = (idx: number) => {
   currentProjectIdx.value = idx;
   if(!user.value.projects) return;
   currentProject.value = user.value.projects[idx];
 };
-const createProject = () => projectModalEl.value.createProject();
+const createProject = () => projectModalEl.value!.createProject();
 
 interface Op {
   insert: {
@@ -110,17 +110,17 @@ const handleProjectImg = (project: any) => {
   return hasImage ? hasImage.insert.image : getImageUrl('image');
 };
 
-const experienceModalEl = ref();
+const experienceModalEl = ref<DefineComponent>();
 const createExperience = () => {
-  experienceModalEl.value.setStatus('create');
-  experienceModalEl.value.showModal();
+  experienceModalEl.value!.setStatus('create');
+  experienceModalEl.value!.showModal();
 };
 
 const tempEeperience = ref<Experience>({});
 const editExperience = (experience: Experience) => {
   tempEeperience.value = experience;
-  experienceModalEl.value.setStatus('update');
-  experienceModalEl.value.showModal();
+  experienceModalEl.value!.setStatus('update');
+  experienceModalEl.value!.showModal();
 };
 
 const handleRelativeTime = (startTime: number | undefined, endTime: number | undefined) => {

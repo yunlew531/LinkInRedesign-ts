@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { ref, defineAsyncComponent, inject, Ref } from 'vue';
+import { ref, defineAsyncComponent, inject, Ref, DefineComponent } from 'vue';
 import dayjs from '@/mixins/dayjs';
 import getImageUrl from '@/mixins/getImageUrl';
 import { orderSideUserSymbol } from '@/Symbol';
@@ -53,14 +53,14 @@ const filterFivePerson = (users: Array<SkillListUser>) => users.filter((user, ke
 
 const currentProject = ref({});
 const currentProjectIdx = ref(0);
-const projectModalEl = ref();
+const projectModalEl = ref<DefineComponent>();
 const showProjectModal = (project: object, key: number) => {
   currentProject.value = project;
   currentProjectIdx.value = key;
-  projectModalEl.value.setModalStatus('update');
-  projectModalEl.value.showModal();
+  projectModalEl.value!.setModalStatus('update');
+  projectModalEl.value!.showModal();
 };
-const setCurrentProject = (project: any) => currentProject.value = project;
+const setCurrentProject = (project: Project) => currentProject.value = project;
 const setCurrentIdx = (idx: number) => {
   currentProjectIdx.value = idx;
   if(!user.value?.projects) return;

@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { ref, watch, computed, defineAsyncComponent, provide, inject, Ref } from 'vue';
+import { ref, watch, computed, defineAsyncComponent, provide, inject, Ref, DefineComponent } from 'vue';
 import { useRoute, useRouter, onBeforeRouteLeave } from 'vue-router';
 import { apiGetUser } from '@/api';
 import handleUser from '@/composition/handleUser';
@@ -92,16 +92,16 @@ const courses = ref([
   },
 ]);
 
-const confirmModalEl = ref();
+const confirmModalEl = ref<DefineComponent>();
 const showConfirmModal = () => {
   const content = 'Do you want to remove the connections ?';
-  confirmModalEl.value.showModal(content);
+  confirmModalEl.value!.showModal(content);
 };
 
 const handleRemoveConnected = () => {
   if (!user.value || !user.value.uid) return;
   removeConnected(user.value.uid);
-  confirmModalEl.value.hideModal();
+  confirmModalEl.value!.hideModal();
 };
 
 const isConnected = computed(() => {
