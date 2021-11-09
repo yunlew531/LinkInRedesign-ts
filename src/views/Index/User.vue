@@ -10,6 +10,7 @@ const ProfileNav = defineAsyncComponent(() => import('@/components/Index/User/Pr
 const MiniDashboard = defineAsyncComponent(() => import('@/components/Index/MiniDashboard.vue'));
 const AsideCard = defineAsyncComponent(() => import('@/components/Index/AsideCard.vue'));
 const ConfirmModal = defineAsyncComponent(() => import('@/components/ConfirmModal.vue'));
+const ConnectionsModal = defineAsyncComponent(() => import('@/components/Index/ConnectionsModal.vue'));
 
 const { user, removeSentConnect, updateOrderSideUser, submitConnect, acceptConnect, removeConnected
 } = handleUser();
@@ -32,16 +33,6 @@ const getUser = async (uid: string) => {
     router.go(-1);
   }
 };
-
-watch(() => route.params.uid, (v) => {
-  const inUserRoute = route.meta.othersProfile;
-  if (inUserRoute) getUser(<string>v);
-}, { immediate: true });
-
-onBeforeRouteLeave((to, from, next) => {
-  updateOrderSideUser();
-  next();
-});
 
 const bgCover = computed(() =>
   `url(${user.value?.background_cover || getImageUrl('Rectangle 3')})`);
@@ -117,11 +108,32 @@ const isConnectSent = computed(() => {
 const isReceivedConnect = computed(() =>
   ownConnections.value?.received?.some((connectUser) => connectUser.uid === route.params.uid));
 const isOwnProfile = computed(() => route.params.uid === ownUid.value);
+
+const connectionsModalEl = ref<DefineComponent>();
+const showConnectionsModal = () => {
+  connectionsModalEl.value!.showModal();
+};
+
+watch(() => route.params.uid, (v) => {
+  const inUserRoute = route.meta.othersProfile;
+
+  if (connectionsModalEl.value?.isModalShow) {
+    connectionsModalEl.value.hideModal();
+  }
+  
+  if (inUserRoute) getUser(<string>v);
+}, { immediate: true });
+
+onBeforeRouteLeave((to, from, next) => {
+  updateOrderSideUser();
+  next();
+});
 </script>
 
 <template>
   <div class="profile-container">
     <ConfirmModal ref="confirmModalEl" @clickYes="handleRemoveConnected" />
+    <ConnectionsModal ref="connectionsModalEl" :connections="user?.connections as Connections" />
     <main class="profile-main">
       <section class="profile-header">
         <div class="profile-cover">
@@ -159,7 +171,7 @@ const isOwnProfile = computed(() => route.params.uid === ownUid.value);
               {{ user?.description || 'This user did not write anything.' }}</p>
             <div class="btns-group">
               <button class="contact-btn" type="button">Contact info</button>
-              <button class="connections-btn" type="button">
+              <button class="connections-btn" type="button" @click="showConnectionsModal">
                 {{ user?.connections_qty || 0 }} connections</button>
             </div>
           </div>

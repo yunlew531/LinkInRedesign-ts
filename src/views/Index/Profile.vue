@@ -9,11 +9,13 @@ const ProfileNav = defineAsyncComponent(() => import('@/components/Index/Profile
 const MiniDashboard = defineAsyncComponent(() => import('@/components/Index/MiniDashboard.vue'));
 const AsideCard = defineAsyncComponent(() => import('@/components/Index/AsideCard.vue'));
 const Editor = defineAsyncComponent(() => import('@/components/Editor.vue'));
+const ConnectionsModal = defineAsyncComponent(() => import('@/components/Index/ConnectionsModal.vue'));
 
 const { getProfile, updateUserProfile } = store;
 const state: Ref<State> = inject(stateSymbol)!;
 
-getProfile();
+const init = () => getProfile();
+init();
 
 const user = computed(() => state.value.user);
 const bgCover = computed(() =>
@@ -109,10 +111,16 @@ const uploadBackgroundImg = async (e: Event) => {
     updateUserProfile({ background_cover: url });
   } catch (err: any) { alert(err.response.data.message); }
 };
+
+const connectionsModalEl = ref<DefineComponent>();
+const showConnectionsModal = () => {
+  connectionsModalEl.value!.showModal();
+};
 </script>
 
 <template>
   <div class="profile-container">
+    <ConnectionsModal ref="connectionsModalEl" :connections="user.connections" :consoleBtn="true" />
     <main class="profile-main">
       <section class="profile-header">
         <div class="profile-cover">
@@ -158,8 +166,8 @@ const uploadBackgroundImg = async (e: Event) => {
               {{ user.description || 'empty. double click to add description' }}</p>
             <div v-show="!isEditDescription" class="btns-group">
               <button class="contact-btn" type="button">Contact info</button>
-              <button class="connections-btn" type="button">
-                {{ user.connections_qty || 0 }} connections</button>
+              <button class="connections-btn" type="button" @click="showConnectionsModal">
+                {{ user.connections?.connected.length || 0 }} connections</button>
             </div>
           </div>
         </div>

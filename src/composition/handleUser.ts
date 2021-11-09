@@ -34,11 +34,14 @@ export default () => {
   };
   
   const removeConnected = async (connectUid: string) => {  
-    try {
-      const { data } = await apiRemoveConnected(connectUid);
-      const { connections } = data;
-      updateUserProfile({ connections });
-    } catch (err) { console.dir(err); }
+    return new Promise(async (resolve, reject) => {
+      try {
+        const { data } = await apiRemoveConnected(connectUid);
+        const { connections } = data;
+        updateUserProfile({ connections });
+        resolve(connections);
+      } catch (err) { reject(err); }
+    });
   };
   
   const refuseConnect = async (connectUid: string) => {
