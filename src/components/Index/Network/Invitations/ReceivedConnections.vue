@@ -3,11 +3,9 @@ import { computed, inject, Ref } from 'vue';
 import getImageUrl from '@/mixins/getImageUrl';
 import { stateSymbol } from '@/Symbol';
 import dayjs from '@/mixins/dayjs';
-import handleUser from '@/composition/handleUser';
+import { acceptConnect, refuseConnect } from '@/mixins/handleConnections';
 
 const state: Ref<State> = inject(stateSymbol)!;
-
-const { acceptConnect, refuseConnect } = handleUser();
 
 const connections = computed(() => state.value.user.connections);
 </script>

@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { PropType, ref, inject, computed, Ref, defineAsyncComponent, DefineComponent } from 'vue';
 import getImageUrl from '@/mixins/getImageUrl';
-import handleUser from '@/composition/handleUser';
+import { removeConnected } from '@/mixins/handleConnections';
 import { stateSymbol } from '@/Symbol';
 
 const ConfirmModal = defineAsyncComponent(() => import('@/components/ConfirmModal.vue'));
@@ -15,7 +15,6 @@ defineProps({
   consoleBtn: Boolean,
 });
 
-const { removeConnected } = handleUser();
 const state: Ref<State> = inject(stateSymbol)!;
 const ownUid = computed(() => state.value.user.uid);
 const ownConnected = computed(() => state.value.user.connections?.connected);

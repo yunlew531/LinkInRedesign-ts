@@ -3,11 +3,10 @@ import { ref, computed, inject, Ref, defineAsyncComponent, DefineComponent } fro
 import { stateSymbol } from '@/Symbol';
 import getImageUrl from '@/mixins/getImageUrl';
 import dayjs from '@/mixins/dayjs';
-import handleUser from '@/composition/handleUser';
+import { removeConnected } from '@/mixins/handleConnections';
 
 const ConfirmModal = defineAsyncComponent(() => import('@/components/ConfirmModal.vue'));
 
-const { removeConnected } = handleUser();
 const state: Ref<State> = inject(stateSymbol)!;
 const connections = computed(() => state.value.user.connections);
 

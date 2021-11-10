@@ -3,9 +3,7 @@ import { inject, computed, Ref } from 'vue';
 import getImageUrl from '@/mixins/getImageUrl';
 import { stateSymbol } from '@/Symbol';
 import dayjs from '@/mixins/dayjs';
-import handleUser from '@/composition/handleUser';
-
-const { removeSentConnect } = handleUser();
+import { removeSentConnect } from '@/mixins/handleConnections';
 
 const state: Ref<State> = inject(stateSymbol)!;
 

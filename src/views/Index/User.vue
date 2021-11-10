@@ -2,7 +2,7 @@
 import { ref, watch, computed, defineAsyncComponent, provide, inject, Ref, DefineComponent } from 'vue';
 import { useRoute, useRouter, onBeforeRouteLeave } from 'vue-router';
 import { apiGetUser } from '@/api';
-import handleUser from '@/composition/handleUser';
+import { removeSentConnect, submitConnect, acceptConnect, removeConnected } from '@/mixins/handleConnections';
 import getImageUrl from '@/mixins/getImageUrl';
 import { stateSymbol, orderSideUserSymbol } from '@/Symbol';
 
@@ -12,8 +12,6 @@ const AsideCard = defineAsyncComponent(() => import('@/components/Index/AsideCar
 const ConfirmModal = defineAsyncComponent(() => import('@/components/ConfirmModal.vue'));
 const ConnectionsModal = defineAsyncComponent(() => import('@/components/Index/ConnectionsModal.vue'));
 
-const { user, removeSentConnect, updateOrderSideUser, submitConnect, acceptConnect, removeConnected
-} = handleUser();
 const route = useRoute();
 const router = useRouter();
 const state: Ref<State> = inject(stateSymbol)!;
@@ -21,12 +19,14 @@ const ownConnections = computed(() => state.value.user.connections);
 const ownUid = computed(() => state.value.user.uid);
 const isLogin = computed(() => state.value.isLogin);
 
+const user = ref<User>();
 provide(orderSideUserSymbol, user);
 
 const getUser = async (uid: string) => {
   try {
     const { data } = await apiGetUser(uid);
-    updateOrderSideUser(data.user);
+    user.value = data.user;
+    // updateOrderSideUser(data.user);
   } catch (err) { 
     console.dir(err);
     alert('not found');
@@ -125,7 +125,7 @@ watch(() => route.params.uid, (v) => {
 }, { immediate: true });
 
 onBeforeRouteLeave((to, from, next) => {
-  updateOrderSideUser();
+  user.value = {};
   next();
 });
 </script>
