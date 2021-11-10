@@ -1,21 +1,21 @@
 <script lang="ts" setup>
-import { ref } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { apiGetUserArticles } from '@/api';
 import { useRoute } from 'vue-router';
 
 const route = useRoute();
-const { uid } = route.params;
+const uid = computed(() => route.params.uid);
 
 const articles = ref<Article[]>();
-const getUserArticles = async () => {
+
+const getUserArticles = async (uid: string) => {
   try {
-    const { data } = await apiGetUserArticles(<string>uid);
+    const { data } = await apiGetUserArticles(uid);
     articles.value = data.articles;
   } catch (err) { console.dir(err); }
 };
 
-const init = () => getUserArticles();
-init();
+watch(uid, (v) => getUserArticles(<string>v), { immediate: true });
 </script>
 
 <template>

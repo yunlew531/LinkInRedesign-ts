@@ -148,10 +148,12 @@ const router = createRouter({
   history,
   routes,
   scrollBehavior(to, from) {
+    const isUidChange = to.params.uid !== from.params.uid;
     const isChangePageInPathProfile = to.meta.ownProfile && from.meta.ownProfile;
     const isChangePageInPathUserProfile = to.meta.othersProfile && from.meta.othersProfile;
-
-    if (isChangePageInPathProfile || isChangePageInPathUserProfile) {}
+    
+    if (isUidChange) return { top: 0 };
+    else if (isChangePageInPathProfile || isChangePageInPathUserProfile) {}
     else return { top: 0 };
   },
  });

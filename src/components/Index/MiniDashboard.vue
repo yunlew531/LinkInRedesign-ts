@@ -28,9 +28,7 @@ defineProps({
     <span class="dashboard-num">{{ profileViews }}</span>
     <h4 class="dashboard-title">profile views</h4>
     <span class="dashboard-num">{{ postsViews }}</span>
-    <h4 class="dashboard-title">posts views</h4>
-    <span class="dashboard-num">{{ seachAppereances }}</span>
-    <h4 class="dashboard-title">search appereances</h4>
+    <h4 class="dashboard-title">articles likes</h4>
   </div>
 </template>
 

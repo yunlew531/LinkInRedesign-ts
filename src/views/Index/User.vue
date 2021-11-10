@@ -16,6 +16,7 @@ const route = useRoute();
 const router = useRouter();
 const state: Ref<State> = inject(stateSymbol)!;
 const ownConnections = computed(() => state.value.user.connections);
+const uid = computed(() => route.params.uid);
 const ownUid = computed(() => state.value.user.uid);
 const isLogin = computed(() => state.value.isLogin);
 
@@ -26,7 +27,6 @@ const getUser = async (uid: string) => {
   try {
     const { data } = await apiGetUser(uid);
     user.value = data.user;
-    // updateOrderSideUser(data.user);
   } catch (err) { 
     console.dir(err);
     alert('not found');
@@ -133,7 +133,8 @@ onBeforeRouteLeave((to, from, next) => {
 <template>
   <div class="profile-container">
     <ConfirmModal ref="confirmModalEl" @clickYes="handleRemoveConnected" />
-    <ConnectionsModal ref="connectionsModalEl" :connections="user?.connections as Connections" />
+    <ConnectionsModal ref="connectionsModalEl" :connections="user?.connections"
+      @refreshUser="getUser(uid as string)" />
     <main class="profile-main">
       <section class="profile-header">
         <div class="profile-cover">

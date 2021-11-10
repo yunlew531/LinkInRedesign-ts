@@ -34,12 +34,15 @@ const showConfirmModal = (friend: ConnectUser) => {
   confirmModalEl.value!.showModal(content);
 };
 
+const emits = defineEmits(['refreshUser']);
+
 const handleRemoveConnected = async () => {
   if (!tempFriendUid.value) return;
 
   try {
     await removeConnected(tempFriendUid.value);
     confirmModalEl.value!.hideModal();
+    emits('refreshUser');
   } catch (err) { console.dir(err); }
 };
 
