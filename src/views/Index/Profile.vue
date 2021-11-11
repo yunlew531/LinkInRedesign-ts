@@ -21,34 +21,6 @@ const user = computed(() => state.value.user);
 const bgCover = computed(() =>
   `url(${user.value.background_cover || getImageUrl('Rectangle 3')})`);
 
-const visitors = ref([
-  {
-    name: 'Darlene Black',
-    fileName: 'visitor-1',
-    description: 'HR-manager, 10 000 connec...',
-  },
-  {
-    name: 'Theresa Steward',
-    fileName: 'visitor-2',
-    description: 'iOS developer',
-  },
-  {
-    name: 'Brandon Wilson',
-    fileName: 'visitor-3',
-    description: 'Senior UX designer',
-  },
-  {
-    name: 'Kyle Fisher',
-    fileName: 'visitor-4',
-    description: 'Product designer at Com...',
-  },
-  {
-    name: 'Audrey Alexander',
-    fileName: 'visitor-5',
-    description: 'Team lead at Google',
-  },
-]);
-
 const courses = ref([
   {
     title: 'UX Foundations: Prototyping',
@@ -178,19 +150,23 @@ const showConnectionsModal = () => {
     <aside class="aside">
       <ul>
         <li class="aside-card">
-          <MiniDashboard :profileViews="user.profile_views" />
+          <MiniDashboard :views="user.views" />
         </li>
         <li class="aside-card">
           <AsideCard title="visitors" :headLink="{ title: 'view all', path: '/' }">
             <template v-slot:card-body>
-              <ul class="visitor-cards-list">
-                <li v-for="visitor in visitors" :key="visitor.fileName" class="visitor-card">
-                  <router-link to="/">
-                    <img :src="getImageUrl(visitor.fileName)" :alt="visitor.name" class="visitor-img">
-                    <p>{{ visitor.description }}</p>
+               <ul v-if="user?.views?.profile_views?.length" class="visitor-cards-list">
+                <li v-for="visitor in user?.views?.profile_views" :key="visitor.uid" class="visitor-card">
+                  <router-link :to="`/@${visitor.uid}`">
+                    <img :src="visitor.photo || getImageUrl(visitor.name)" :alt="visitor.name" class="visitor-img">
+                    <p>{{ visitor.name }}</p>
+                    <p v-if="visitor.job">{{ visitor.job }}</p>
                   </router-link>
                 </li>
               </ul>
+              <div v-else class="visitor-empty">
+                <span>no visitor</span>
+              </div>
             </template>
           </AsideCard>
         </li>
@@ -484,7 +460,17 @@ const showConnectionsModal = () => {
   }
 }
 .visitor-img {
+  width: 52px;
+  height: 52px;
+  border-radius: 100%;
   margin-right: 15px;
+}
+.visitor-empty {
+  height: 100px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: rgba($gray-100, 0.8);
 }
 .course-cards-list {
   margin-bottom: -15px;

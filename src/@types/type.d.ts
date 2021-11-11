@@ -29,6 +29,18 @@ interface State {
   articles: Article[];
 }
 
+interface ViewsUser {
+  uid: string;
+  name: string;
+  job: string;
+  photo: string;
+}
+
+interface Views {
+  profile_views_total?: number;
+  profile_views?: ViewsUser[];
+}
+
 interface User {
   uid?: string;
   name?: string;
@@ -42,7 +54,7 @@ interface User {
   projects?: Project[];
   experience?: Experience[];
   profile_views_today?: number;
-  profile_views?: number;
+  views?: Views;
   connections_qty?: number;
   education?: Education;
   connections?: Connections;

@@ -1,16 +1,15 @@
 <script lang="ts" setup>
+import { PropType } from 'vue';
+
 defineProps({
   title: {
     type: String,
     default: 'your dashboard',
   },
-  profileViews: {
-    type: Number,
-    default: 0,
-  },
-  postsViews: {
-    type: Number,
-    default: 0,
+  views: {
+    type: Object as PropType<Views>,
+    default: () => ({}),
+    required: true,
   },
   seachAppereances: {
     type: Number,
@@ -25,9 +24,9 @@ defineProps({
       <h3 class="aside-card-title">{{ title }}</h3>
       <router-link to="/stats" class="head-link">go to stats</router-link>
     </div>
-    <span class="dashboard-num">{{ profileViews }}</span>
+    <span class="dashboard-num">{{ views.profile_views_total || 0 }}</span>
     <h4 class="dashboard-title">profile views</h4>
-    <span class="dashboard-num">{{ postsViews }}</span>
+    <span class="dashboard-num">{{ 13 }}</span>
     <h4 class="dashboard-title">articles likes</h4>
   </div>
 </template>

@@ -19,14 +19,25 @@ const ownConnections = computed(() => state.value.user.connections);
 const uid = computed(() => route.params.uid);
 const ownUid = computed(() => state.value.user.uid);
 const isLogin = computed(() => state.value.isLogin);
+const viewsUser = JSON.parse(localStorage.getItem('views') || '{}');
 
 const user = ref<User>();
 provide(orderSideUserSymbol, user);
 
+const handleLocalStorage = () => {
+  viewsUser[uid.value as string] = uid.value;
+  localStorage.setItem('views', JSON.stringify(viewsUser));
+};
+
 const getUser = async (uid: string) => {
+  const isUserInLocalStorage = Object.values(viewsUser).includes(uid);
+  const isSelf = uid === ownUid.value;
+  const addView = !isUserInLocalStorage && !isSelf;
+
   try {
-    const { data } = await apiGetUser(uid);
+    const { data } = await apiGetUser(uid, addView);
     user.value = data.user;
+    handleLocalStorage();
   } catch (err) { 
     console.dir(err);
     alert('not found');
@@ -36,34 +47,6 @@ const getUser = async (uid: string) => {
 
 const bgCover = computed(() =>
   `url(${user.value?.background_cover || getImageUrl('Rectangle 3')})`);
-
-const visitors = ref([
-  {
-    name: 'Darlene Black',
-    fileName: 'visitor-1',
-    description: 'HR-manager, 10 000 connec...',
-  },
-  {
-    name: 'Theresa Steward',
-    fileName: 'visitor-2',
-    description: 'iOS developer',
-  },
-  {
-    name: 'Brandon Wilson',
-    fileName: 'visitor-3',
-    description: 'Senior UX designer',
-  },
-  {
-    name: 'Kyle Fisher',
-    fileName: 'visitor-4',
-    description: 'Product designer at Com...',
-  },
-  {
-    name: 'Audrey Alexander',
-    fileName: 'visitor-5',
-    description: 'Team lead at Google',
-  },
-]);
 
 const courses = ref([
   {
@@ -184,19 +167,23 @@ onBeforeRouteLeave((to, from, next) => {
     <aside class="aside">
       <ul>
         <li class="aside-card">
-          <MiniDashboard :profileViews="user?.profile_views" />
+          <MiniDashboard :views="user?.views" />
         </li>
         <li class="aside-card">
           <AsideCard title="visitors" :headLink="{ title: 'view all', path: '/' }">
             <template v-slot:card-body>
-              <ul class="visitor-cards-list">
-                <li v-for="visitor in visitors" :key="visitor.fileName" class="visitor-card">
-                  <router-link to="/">
-                    <img :src="getImageUrl(visitor.fileName)" :alt="visitor.name" class="visitor-img">
-                    <p>{{ visitor.description }}</p>
+              <ul v-if="user?.views?.profile_views?.length" class="visitor-cards-list">
+                <li v-for="visitor in user?.views?.profile_views" :key="visitor.uid" class="visitor-card">
+                  <router-link :to="`/@${visitor.uid}`">
+                    <img :src="visitor.photo || getImageUrl(visitor.name)" :alt="visitor.name" class="visitor-img">
+                    <p>{{ visitor.name }}</p>
+                    <p v-if="visitor.job">{{ visitor.job }}</p>
                   </router-link>
                 </li>
               </ul>
+              <div v-else class="visitor-empty">
+                <span>no visitor</span>
+              </div>
             </template>
           </AsideCard>
         </li>
@@ -410,10 +397,23 @@ onBeforeRouteLeave((to, from, next) => {
       color: $blue-400;
       transform: translateX(3px);
     }
+    p {
+      margin: 5px 0;
+    }
   }
 }
 .visitor-img {
+  width: 52px;
+  height: 52px;
+  border-radius: 100%;
   margin-right: 15px;
+}
+.visitor-empty {
+  height: 100px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: rgba($gray-100, 0.8);
 }
 .course-cards-list {
   margin-bottom: -15px;
