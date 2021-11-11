@@ -4,7 +4,9 @@ import { useRoute, useRouter, onBeforeRouteLeave } from 'vue-router';
 import { apiGetUser } from '@/api';
 import { removeSentConnect, submitConnect, acceptConnect, removeConnected } from '@/mixins/handleConnections';
 import getImageUrl from '@/mixins/getImageUrl';
-import { stateSymbol, orderSideUserSymbol } from '@/Symbol';
+import { stateSymbol, orderSideUserSymbol, orderSideArticles } from '@/Symbol';
+import { apiGetUserArticles } from '@/api';
+import createArticles from '@/composition/createArticles';
 
 const ProfileNav = defineAsyncComponent(() => import('@/components/Index/User/ProfileNav.vue'));
 const MiniDashboard = defineAsyncComponent(() => import('@/components/Index/MiniDashboard.vue'));
@@ -16,10 +18,17 @@ const route = useRoute();
 const router = useRouter();
 const state: Ref<State> = inject(stateSymbol)!;
 const ownConnections = computed(() => state.value.user.connections);
-const uid = computed(() => route.params.uid);
+const uid = computed(() => <string>route.params.uid);
 const ownUid = computed(() => state.value.user.uid);
 const isLogin = computed(() => state.value.isLogin);
 const viewsUser = JSON.parse(localStorage.getItem('views') || '{}');
+
+const articles = createArticles(apiGetUserArticles);
+
+const init = () => articles.getArticles(uid.value);
+init();
+
+provide(orderSideArticles, articles);
 
 const user = ref<User>();
 provide(orderSideUserSymbol, user);
@@ -65,6 +74,15 @@ const courses = ref([
     viewers: '13858',
   },
 ]);
+
+const calcArticleLikes = computed(() => {
+  const articlesData = articles.articles.value;
+
+  return articlesData.reduce((accumulator, current) => {
+    const likesQty = current.likes?.length || 0;
+    return accumulator + likesQty;
+  }, 0);
+});
 
 const confirmModalEl = ref<DefineComponent>();
 const showConfirmModal = () => {
@@ -167,7 +185,7 @@ onBeforeRouteLeave((to, from, next) => {
     <aside class="aside">
       <ul>
         <li class="aside-card">
-          <MiniDashboard :views="user?.views" />
+          <MiniDashboard :views="user?.views" :articlesLikes="calcArticleLikes" />
         </li>
         <li class="aside-card">
           <AsideCard title="visitors" :headLink="{ title: 'view all', path: '/' }">

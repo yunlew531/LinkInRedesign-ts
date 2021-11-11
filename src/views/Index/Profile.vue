@@ -1,9 +1,11 @@
 <script lang="ts" setup>
-import { ref, inject, computed, Ref, defineAsyncComponent, DefineComponent } from 'vue';
+import { ref, inject, computed, Ref, defineAsyncComponent, DefineComponent, provide } from 'vue';
 import { apiUploadPhoto, apiUploadBackgroundImg, apiUpdateDescription } from '@/api';
 import store from '@/composition/store';
 import getImageUrl from '@/mixins/getImageUrl';
-import { stateSymbol } from '@/Symbol';
+import createArticles from '@/composition/createArticles';
+import { apiGetOwnArticle } from '@/api';
+import { ownArticles, stateSymbol } from '@/Symbol';
 
 const ProfileNav = defineAsyncComponent(() => import('@/components/Index/Profile/ProfileNav.vue'));
 const MiniDashboard = defineAsyncComponent(() => import('@/components/Index/MiniDashboard.vue'));
@@ -14,7 +16,14 @@ const ConnectionsModal = defineAsyncComponent(() => import('@/components/Index/C
 const { getProfile, updateUserProfile } = store;
 const state: Ref<State> = inject(stateSymbol)!;
 
-const init = () => getProfile();
+const articles = createArticles(apiGetOwnArticle);
+
+provide(ownArticles, articles);
+
+const init = () => {
+  getProfile();
+  articles.getArticles();
+};
 init();
 
 const user = computed(() => state.value.user);
@@ -38,6 +47,15 @@ const courses = ref([
     viewers: '13858',
   },
 ]);
+
+const calcArticleLikes = computed(() => {
+  const articlesData = articles.articles.value;
+
+  return articlesData.reduce((accumulator, current) => {
+    const likesQty = current.likes?.length || 0;
+    return accumulator + likesQty;
+  }, 0);
+});
 
 const editorEl = ref<DefineComponent>();
 const editorOptions = ref({
@@ -150,7 +168,7 @@ const showConnectionsModal = () => {
     <aside class="aside">
       <ul>
         <li class="aside-card">
-          <MiniDashboard :views="user.views" />
+          <MiniDashboard :views="user.views" :articlesLikes="calcArticleLikes" />
         </li>
         <li class="aside-card">
           <AsideCard title="visitors" :headLink="{ title: 'view all', path: '/' }">

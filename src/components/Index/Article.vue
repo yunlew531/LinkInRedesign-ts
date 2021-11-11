@@ -8,7 +8,7 @@ import { stateSymbol } from '@/Symbol';
 
 defineProps({
   article: {
-    type: Object as PropType<Readonly<Article>>,
+    type: Object as PropType<Article>,
     default: () => ({}),
     required: true,
   },

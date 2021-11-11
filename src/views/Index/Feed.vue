@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { ref, defineAsyncComponent, DefineComponent } from 'vue';
 import { apiGetArticles, apiCreateArticle } from '@/api';
-import handleArticles from '@/composition/handleArticles';
+import createArticles from '@/composition/createArticles';
 import store from '@/composition/store';
 
 const FeedAside = defineAsyncComponent(() => import('@/components/Index/Feed/FeedAside.vue'));
@@ -9,13 +9,11 @@ const Editor = defineAsyncComponent(() => import('@/components/Editor.vue'));
 const Article = defineAsyncComponent(() => import('@/components/Index/Article.vue'));
 
 const { getProfile } = store;
-const { articles, getArticles, thumbsUpArticle, removeThumbsUpArticle, deleteArticle, postComment,
-  deleteComment, addArticleFavorite, removeArticleFavorite, setArticles
-} = handleArticles(apiGetArticles);
+const articles = createArticles(apiGetArticles);
 
 const init = () => {
   getProfile();
-  getArticles();
+  articles.getArticles();
 };
 init();
 
@@ -32,7 +30,7 @@ const editorOptions = {
 
 const editorEl = ref<DefineComponent>();
 
-const createArticle = async () => {
+const postArticle = async () => {
   const empty = editorEl.value!.checkEmpty();
   if (empty) {
     alert('content required');
@@ -45,8 +43,8 @@ const createArticle = async () => {
   
   try {
     const { data } = await apiCreateArticle(article);
-    const { articles } = data;
-    setArticles(articles);
+    const { articles: articlesData } = data;
+    articles.setArticles(articlesData);
     editorEl.value!.setText();
   } catch (err) { console.dir(err); }
 };
@@ -59,10 +57,12 @@ const handlePostComment = async (emitData: EmitSubmitCommentData) => {
   const { articleIdx } = emitData;
 
   try {
-    await postComment(emitData);
+    await articles.postComment(emitData);
     articleRefs.value[articleIdx].resetCommentInput(articleIdx);
   } catch (err) { console.log(err); }
 };
+
+const handleDeleteComment = (emitData: EmitDeleteCommentData) => articles.deleteComment(emitData);
 </script>
 
 <template>
@@ -71,7 +71,7 @@ const handlePostComment = async (emitData: EmitSubmitCommentData) => {
       <section class="new-post">
         <div class="new-post-header">
           <h3>new post</h3>
-          <button type="button" class="new-post-submit-btn" @click="createArticle">
+          <button type="button" class="new-post-submit-btn" @click="postArticle">
             <img src="@/assets/images/Vector-white.png" alt="submit button">
           </button>
         </div>
@@ -85,15 +85,15 @@ const handlePostComment = async (emitData: EmitSubmitCommentData) => {
         </span>
       </div>
       <ul class="feeds-list">
-        <li v-for="(article, index) in articles" :key="article.id">
+        <li v-for="(article, index) in articles.articles.value" :key="article.id">
           <Article :ref="(el: any) => articleRefs[index] = el" :article="article" :index="index"
-            @thumbsUp="thumbsUpArticle(article, index)" 
-            @removeThumbsUp="removeThumbsUpArticle(article, index)"
-            @deleteArticle="deleteArticle(article.id!)" 
+            @thumbsUp="articles.thumbsUpArticle(article, index)" 
+            @removeThumbsUp="articles.removeThumbsUpArticle(article, index)"
+            @deleteArticle="articles.deleteArticle(article.id!)" 
             @postComment="handlePostComment"
-            @deleteComment="deleteComment"
-            @addArticleFavorite="addArticleFavorite(article, index)"
-            @removeArticleFavorite="removeArticleFavorite(article, index)"
+            @deleteComment="handleDeleteComment"
+            @addArticleFavorite="articles.addArticleFavorite(article, index)"
+            @removeArticleFavorite="articles.removeArticleFavorite(article, index)"
           />
         </li>
       </ul>

@@ -1,12 +1,12 @@
 <script lang="ts" setup>
 import { defineAsyncComponent, ref, watch, DefineComponent } from 'vue';
 import { apiGetOwnArticle, apiGetFavoritesArticles } from '@/api';
-import handleArticles from '@/composition/handleArticles';
+import createArticles from '@/composition/createArticles';
 
 const Article = defineAsyncComponent(() => import('@/components/Index/Article.vue'));
 
-const ownArticles = handleArticles(apiGetOwnArticle);
-const favoriteArticles = handleArticles(apiGetFavoritesArticles);
+const ownArticles = createArticles(apiGetOwnArticle);
+const favoriteArticles = createArticles(apiGetFavoritesArticles);
 
 type CurrentDisplay = 'post' | 'favorites';
 const currentDisplay = ref<CurrentDisplay>('post');
@@ -45,6 +45,11 @@ const handleRemoveArticleFavorite = async (article: Article, index: number) => {
     favoriteArticles.getArticles();
   } catch (err) { console.dir(err); }
 };
+
+const handleDeleteOwnArticleComment = (emitData: EmitDeleteCommentData) =>
+  ownArticles.deleteComment(emitData);
+const handleDeleteFavoArticleComment = (emitData: EmitDeleteCommentData) =>
+  favoriteArticles.deleteComment(emitData);
 </script>
 
 <template>
@@ -71,7 +76,7 @@ const handleRemoveArticleFavorite = async (article: Article, index: number) => {
           @removeThumbsUp="ownArticles.removeThumbsUpArticle(article, index)"
           @deleteArticle="ownArticles.deleteArticle(article.id!)" 
           @postComment="handleOwnArticlesPostComment"
-          @deleteComment="ownArticles.deleteComment"
+          @deleteComment="handleDeleteOwnArticleComment"
           @addArticleFavorite="ownArticles.addArticleFavorite(article, index)"
           @removeArticleFavorite="ownArticles.removeArticleFavorite(article, index)"
         />
@@ -84,7 +89,7 @@ const handleRemoveArticleFavorite = async (article: Article, index: number) => {
           @removeThumbsUp="favoriteArticles.removeThumbsUpArticle(article, index)"
           @deleteArticle="favoriteArticles.deleteArticle(article.id!)" 
           @postComment="handleFavoArticlesPostComment"
-          @deleteComment="favoriteArticles.deleteComment"
+          @deleteComment="handleDeleteFavoArticleComment"
           @addArticleFavorite="favoriteArticles.addArticleFavorite(article, index)"
           @removeArticleFavorite="handleRemoveArticleFavorite(article, index)"
         />

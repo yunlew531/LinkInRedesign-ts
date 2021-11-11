@@ -15,6 +15,11 @@ defineProps({
     type: Number,
     default: 0,
   },
+  articlesLikes: {
+    type: Number,
+    default: 0,
+    required: true,
+  },
 });
 </script>
 
@@ -26,7 +31,7 @@ defineProps({
     </div>
     <span class="dashboard-num">{{ views.profile_views_total || 0 }}</span>
     <h4 class="dashboard-title">profile views</h4>
-    <span class="dashboard-num">{{ 13 }}</span>
+    <span class="dashboard-num">{{ articlesLikes }}</span>
     <h4 class="dashboard-title">articles likes</h4>
   </div>
 </template>
