@@ -11,6 +11,7 @@ import { getProfile, createProject, updateProject, deleteProject, getPhoto, uplo
 import { addArticleFavorite, removeArticleFavorite, deleteArticle } from './Index/feed';
 import { sentConnect, removeSentConnect, removeConnected, getUserArticles } from './Index/user';
 import { acceptConnect, refuseConnect, getFavoritesArticles } from './Index/network';
+import { getNotice } from './Index/notice';
 
 // normal
 export const apiGetUser = getUser;
@@ -51,3 +52,4 @@ export const apiAcceptConnect = acceptConnect;
 export const apiRemoveConnected = removeConnected;
 export const apiRefuseConnect = refuseConnect;
 export const apiGetFavoritesArticles = getFavoritesArticles;
+export const apiGetNotice = getNotice;

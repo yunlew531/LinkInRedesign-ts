@@ -25,9 +25,6 @@ const viewsUser = JSON.parse(localStorage.getItem('views') || '{}');
 
 const articles = createArticles(apiGetUserArticles);
 
-const init = () => articles.getArticles(uid.value);
-init();
-
 provide(orderSideArticles, articles);
 
 const user = ref<User>();
@@ -115,14 +112,17 @@ const showConnectionsModal = () => {
   connectionsModalEl.value!.showModal();
 };
 
-watch(() => route.params.uid, (v) => {
+watch(uid, (v) => {
   const inUserRoute = route.meta.othersProfile;
 
   if (connectionsModalEl.value?.isModalShow) {
     connectionsModalEl.value.hideModal();
   }
   
-  if (inUserRoute) getUser(<string>v);
+  if (inUserRoute) {
+    getUser(<string>v)
+    articles.getArticles(v)
+  };
 }, { immediate: true });
 
 onBeforeRouteLeave((to, from, next) => {

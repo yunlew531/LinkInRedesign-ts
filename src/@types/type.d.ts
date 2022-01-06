@@ -41,6 +41,15 @@ interface Views {
   profile_views?: ViewsUser[];
 }
 
+interface Notice {
+  timestamp: number;
+  name: string;
+  uid: string;
+  id: string;
+  type: 'connect' | 'articleLike' | 'articleFavorite' | 'articleComment';
+  article_id: string;
+}
+
 interface User {
   uid?: string;
   name?: string;
@@ -58,6 +67,7 @@ interface User {
   connections_qty?: number;
   education?: Education;
   connections?: Connections;
+  notices?: { 'key': Notice }
 }
 
 interface Education {

@@ -1,5 +1,5 @@
 import { ref, readonly, Ref } from 'vue';
-import { apiGetProfile, apiGetArticles } from '@/api';
+import { apiGetProfile, apiGetArticles, apiGetNotice } from '@/api';
 
 const state = ref<State>({
   isLogin: false,
@@ -23,6 +23,12 @@ const getArticles = async () => {
   } catch (err) {}
 };
 
+const getNotice = async () => {
+  const { data } = await apiGetNotice()
+  const { notices } = data
+  updateUserProfile({ notices })
+};
+
 const setOffcanvasDisplay = (boolean = true) => state.value.isOffcanvasShow = boolean;
 const setLogin = (boolean = true) => state.value.isLogin = boolean;
 const setUserProfile = (payload: User) => state.value.user = payload;
@@ -40,6 +46,7 @@ const updateUserProfile = (options: User) => {
 export default {
   state: readonly(state) as Ref<State>,
   getProfile,
+  getNotice,
   setOffcanvasDisplay,
   setLogin,
   setUserProfile,

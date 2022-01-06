@@ -1,40 +1,49 @@
 <script lang="ts" setup>
-import { ref } from 'vue';
+import { ref, inject, Ref, computed } from 'vue';
 import getImageUrl from '@/mixins/getImageUrl';
+import store from '@/composition/store';
+import { stateSymbol } from '@/Symbol';
+import dayjs from '@/mixins/dayjs';
 
-const recentNotices = ref([
-  {
-    title: 'You appeared in 9 searches this week',
-    time: '3 hours',
-    imgs: ['Rectangle 2.2-1', 'Rectangle 2.2', 'Group'],
-    id: 'aryhgrsthjrtd',
-  },
-  {
-    title: 'new notice',
-    time: '10 hours',
-    imgs: ['Rectangle 2.2-1', 'Rectangle 2.2', 'Group'],
-    id: 'egf3rhg654r5t',
-  },
-]);
+const { getNotice } = store;
+const state: Ref<State> = inject(stateSymbol)!;
+const notices = computed(() => {
+  if(!state.value.user.notices) return;
+  const notices = Object.values(state.value.user.notices);
+  return notices.sort((a, b) => b.timestamp - a.timestamp);
+});
 
-const earlierNotices = ref([
-  {
-    title: 'You appeared in 9 searches this week',
-    time: '3 hours',
-    imgs: ['Rectangle 2.2-1', 'Rectangle 2.2', 'Group'],
-    id: 'g8e41gh3e5rhb',
-  },
-  {
-    title: 'new notice',
-    time: '10 hours',
-    imgs: ['Rectangle 2.2-1', 'Rectangle 2.2', 'Group'],
-    id: 'qwfrg5t1hn1bt',
-  },
-]);
+getNotice();
 
-const openSearchHistory = () => {
-  console.log('open history');
-};
+// const recentNotices = ref([
+//   {
+//     title: 'You appeared in 9 searches this week',
+//     time: '3 hours',
+//     imgs: ['Rectangle 2.2-1', 'Rectangle 2.2', 'Group'],
+//     id: 'aryhgrsthjrtd',
+//   },
+//   {
+//     title: 'new notice',
+//     time: '10 hours',
+//     imgs: ['Rectangle 2.2-1', 'Rectangle 2.2', 'Group'],
+//     id: 'egf3rhg654r5t',
+//   },
+// ]);
+
+// const earlierNotices = ref([
+//   {
+//     title: 'You appeared in 9 searches this week',
+//     time: '3 hours',
+//     imgs: ['Rectangle 2.2-1', 'Rectangle 2.2', 'Group'],
+//     id: 'g8e41gh3e5rhb',
+//   },
+//   {
+//     title: 'new notice',
+//     time: '10 hours',
+//     imgs: ['Rectangle 2.2-1', 'Rectangle 2.2', 'Group'],
+//     id: 'qwfrg5t1hn1bt',
+//   },
+// ]);
 
 const activeBtnsList = ref<string[]>([]);
 const showBtnsList = (noticeId: string, event: Event) => {
@@ -53,32 +62,54 @@ const showBtnsList = (noticeId: string, event: Event) => {
     <h3>recent</h3>
   </div>
   <ul>
-    <li v-for="notice in recentNotices" :key="notice.id" class="notice">
-      <ul class="notice-imgs">
-        <li v-for="(img, idx) in notice.imgs" :key="img + idx">
-          <img :src="getImageUrl(img)" :alt="img" class="notice-img">
-        </li>
-      </ul>
-      <div class="notice-content">
-        <h2 class="notice-title">
-          <button type="button" @click="openSearchHistory">
-            {{ notice.title }}</button>
-        </h2>
-        <span class="notice-time">{{ notice.time }}</span>
+    <li v-for="notice in notices" :key="notice.id" class="notice">
+      <div v-if="notice.type === 'connect'">
+        <span class="material-icons notice-icon">handshake</span>
+        <div class="notice-content">
+          <h2 class="notice-title">
+              received a connect from 
+              <router-link :to="`/@${notice.uid}`" class="notice-link">{{ notice.name }}</router-link>
+          </h2>
+          <span class="notice-time">{{ dayjs(notice.timestamp * 1000).fromNow() }}</span>
+        </div>
+        <div class="more-btns-group" :class="{ show: activeBtnsList.includes(notice.id) }"
+          @mouseenter="showBtnsList(notice.id, $event)" @mouseleave="showBtnsList(notice.id, $event)">
+          <button type="button" class="notice-more-btn">
+            <img v-show="!activeBtnsList.includes(notice.id)"
+              :src="getImageUrl('Other')" alt="more options in the notice">
+            <img v-show="activeBtnsList.includes(notice.id)"
+              :src="getImageUrl('chevron-down')" alt="more options in the notice">
+          </button>
+          <ul class="more-btns-list">
+            <li class="more-btn-item">
+              <button type="button" class="notice-delete-btn">Delete</button>
+            </li>
+          </ul>
+        </div>
       </div>
-      <div class="more-btns-group" :class="{ show: activeBtnsList.includes(notice.id) }"
-        @mouseenter="showBtnsList(notice.id, $event)" @mouseleave="showBtnsList(notice.id, $event)">
-        <button type="button" class="notice-more-btn">
-          <img v-show="!activeBtnsList.includes(notice.id)"
-            :src="getImageUrl('Other')" alt="more options in the notice">
-          <img v-show="activeBtnsList.includes(notice.id)"
-            :src="getImageUrl('chevron-down')" alt="more options in the notice">
-        </button>
-        <ul class="more-btns-list">
-          <li class="more-btn-item">
-            <button type="button" class="notice-delete-btn">Delete</button>
-          </li>
-        </ul>
+      <div v-if="notice.type === 'articleLike'">
+        <span class="material-icons notice-icon">thumb_up</span>
+        <div class="notice-content">
+          <h2 class="notice-title">
+              {{ notice.name }} thumbs up your
+              <router-link :to="`/article/${notice.article_id}`" class="notice-link">Article</router-link>
+          </h2>
+          <span class="notice-time">{{ dayjs(notice.timestamp * 1000).fromNow() }}</span>
+        </div>
+        <div class="more-btns-group" :class="{ show: activeBtnsList.includes(notice.id) }"
+          @mouseenter="showBtnsList(notice.id, $event)" @mouseleave="showBtnsList(notice.id, $event)">
+          <button type="button" class="notice-more-btn">
+            <img v-show="!activeBtnsList.includes(notice.id)"
+              :src="getImageUrl('Other')" alt="more options in the notice">
+            <img v-show="activeBtnsList.includes(notice.id)"
+              :src="getImageUrl('chevron-down')" alt="more options in the notice">
+          </button>
+          <ul class="more-btns-list">
+            <li class="more-btn-item">
+              <button type="button" class="notice-delete-btn">Delete</button>
+            </li>
+          </ul>
+        </div>
       </div>
     </li>
   </ul>
@@ -86,7 +117,7 @@ const showBtnsList = (noticeId: string, event: Event) => {
     <h3>Earlier</h3>
   </div>
   <ul class="earlier-notices-list">
-    <li v-for="notice in earlierNotices" :key="notice.id" class="notice">
+    <!-- <li v-for="notice in earlierNotices" :key="notice.id" class="notice">
       <ul class="notice-imgs">
         <li v-for="(img, idx) in notice.imgs" :key="img + idx">
           <img :src="getImageUrl(img)" :alt="img" class="notice-img">
@@ -113,7 +144,7 @@ const showBtnsList = (noticeId: string, event: Event) => {
           </li>
         </ul>
       </div>
-    </li>
+    </li> -->
   </ul>
 </template>
 
@@ -141,41 +172,21 @@ const showBtnsList = (noticeId: string, event: Event) => {
   }
 }
 .notice {
-  display: flex;
   align-items: center;
   padding: 20px 30px;
   background: $white;
   border-radius: 4px;
   box-shadow: 0px 20px 60px $gray-200;
   margin-bottom: 10px;
-}
-.notice-imgs {
-  display: flex;
-  > li {
-    transition: transform 0.2s;
-  }
-  &:hover {
-    @for $i from 1 through 3 {
-      li:nth-child(#{$i}) {
-        transform: translateX($i * 5px - 5px);
-      }
-    }
+  > div {
+    display:flex;
+    align-items: center;
   }
 }
-.notice-img {
-  width: 32px;
-  height: 32px;
-  cursor: pointer;
-  transition: transform 0.2s;
-  &:hover {
-    filter: brightness(0.9);
-  }
-}
-@for $i from 1 through 3 { 
-  .notice-imgs li:nth-child(#{$i}) {
-    transform: translateX(-16px * $i + 16px);
-    z-index: calc(1 * $i);
-  }
+.notice-icon {
+  font-size: 30px;
+  margin-right: 10px;
+  color: $blue-200;
 }
 .notice-content {
   flex-grow: 1;
@@ -194,6 +205,12 @@ const showBtnsList = (noticeId: string, event: Event) => {
     }
   }
   margin-bottom: 5px;
+}
+.notice-link {
+  color: $blue-200;
+  &:hover {
+    filter: brightness(0.8);
+  }
 }
 .notice-time {
   font-weight: lighter;
