@@ -110,6 +110,29 @@ const showBtnsList = (noticeId: string, event: Event) => {
             </li>
           </ul>
         </div>
+      </div><div v-if="notice.type === 'articleComment'">
+        <span class="material-icons notice-icon">chat</span>
+        <div class="notice-content">
+          <h2 class="notice-title">
+              {{ notice.name }} commented your
+              <router-link :to="`/article/${notice.article_id}`" class="notice-link">Article</router-link>
+          </h2>
+          <span class="notice-time">{{ dayjs(notice.timestamp * 1000).fromNow() }}</span>
+        </div>
+        <div class="more-btns-group" :class="{ show: activeBtnsList.includes(notice.id) }"
+          @mouseenter="showBtnsList(notice.id, $event)" @mouseleave="showBtnsList(notice.id, $event)">
+          <button type="button" class="notice-more-btn">
+            <img v-show="!activeBtnsList.includes(notice.id)"
+              :src="getImageUrl('Other')" alt="more options in the notice">
+            <img v-show="activeBtnsList.includes(notice.id)"
+              :src="getImageUrl('chevron-down')" alt="more options in the notice">
+          </button>
+          <ul class="more-btns-list">
+            <li class="more-btn-item">
+              <button type="button" class="notice-delete-btn">Delete</button>
+            </li>
+          </ul>
+        </div>
       </div>
     </li>
   </ul>
