@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { ref, inject, computed, Ref } from 'vue';
 import store from '@/composition/store';
-import { apiGetPhoto } from '@/api';
+import { apiGetPhoto, apiGetNotice } from '@/api';
 import getImageUrl from '@/mixins/getImageUrl';
 import { stateSymbol } from '@/Symbol';
 
@@ -9,6 +9,13 @@ const state: Ref<State> = inject(stateSymbol)!;
 const { setOffcanvasDisplay, updateUserProfile } = store;
 
 const isLogin = computed(() => state.value.isLogin);
+const noticesQty = computed(() => {
+  if (state.value.user.notices) {
+    const notices = Object.values(state.value.user.notices);
+    const activeNotices = notices.filter((notice) => notice.status);
+    return activeNotices.length;
+  } else return 0;
+});
 
 const navList = ref([
   {
@@ -48,7 +55,17 @@ const getPhoto = async () => {
     updateUserProfile({ photo, name, connections });
   } catch (err) {}
 };
-getPhoto();
+const getNotices = async () => {
+  const { data } = await apiGetNotice();
+  const { notices } = data;
+  
+  updateUserProfile({ notices });
+}
+const init = () => {
+  getPhoto();
+  getNotices();
+}
+init();
 </script>
 
 <template>
@@ -65,6 +82,7 @@ getPhoto();
             <img :src="getImageUrl(`${link.fileName}${isActive ? '-active' : ''}`)"
               :alt="link.title">
             <span>{{ link.title }}</span>
+            <span v-if="link.title === 'NOTICES' && noticesQty !== 0" class="nav-notice">{{ noticesQty }}</span>
           </router-link>
         </li>
       </ul>
@@ -141,6 +159,7 @@ getPhoto();
   justify-content: center;
   width: 90px;
   > a {
+    position: relative;
     height: 100%;
     display: flex;
     justify-content: center;
@@ -163,6 +182,18 @@ getPhoto();
       color: $blue-300;
     }
   }
+}
+.nav-notice {
+  position: absolute;
+  text-align: center;
+  top: 10px;
+  right: 10px;
+  background: $blue-300;
+  color: $white;
+  padding: 5px;
+  min-width: 24px;
+  min-height: 24px;
+  border-radius: 100%;
 }
 .search-panel {
   flex-grow: 1;

@@ -48,6 +48,7 @@ interface Notice {
   id: string;
   type: 'connect' | 'articleLike' | 'articleFavorite' | 'articleComment';
   article_id: string;
+  status: boolean;
 }
 
 interface User {
