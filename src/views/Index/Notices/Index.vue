@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { ref, inject, Ref, computed } from 'vue';
+import { ref, inject, Ref, computed, watch } from 'vue';
 import getImageUrl from '@/mixins/getImageUrl';
 import store from '@/composition/store';
 import { stateSymbol } from '@/Symbol';
@@ -7,43 +7,28 @@ import dayjs from '@/mixins/dayjs';
 
 const { getNotice } = store;
 const state: Ref<State> = inject(stateSymbol)!;
-const notices = computed(() => {
-  if(!state.value.user.notices) return;
-  const notices = Object.values(state.value.user.notices);
-  return notices.sort((a, b) => b.timestamp - a.timestamp);
+
+const newNotices = ref<Notice[]>([]);
+const oldNotices = ref<Notice[]>([]);
+watch(() => state.value.user.notices!, (v: { [key: string]: Notice }) => {
+  if (v) {
+    newNotices.value = []
+    oldNotices.value = []
+    const notices = Object.values(v);
+    notices.sort((a, b) => b.timestamp - a.timestamp);
+    const currentTime = Math.floor(Date.now() / 1000);
+    notices.forEach((notice) => {
+      const sevenDays = 7 * 60 * 60 * 24;
+      if (currentTime - notice.timestamp < sevenDays) {
+        newNotices.value.push(notice);
+      } else {
+        oldNotices.value.push(notice);
+      }
+    });
+  }
 });
 
 getNotice();
-
-// const recentNotices = ref([
-//   {
-//     title: 'You appeared in 9 searches this week',
-//     time: '3 hours',
-//     imgs: ['Rectangle 2.2-1', 'Rectangle 2.2', 'Group'],
-//     id: 'aryhgrsthjrtd',
-//   },
-//   {
-//     title: 'new notice',
-//     time: '10 hours',
-//     imgs: ['Rectangle 2.2-1', 'Rectangle 2.2', 'Group'],
-//     id: 'egf3rhg654r5t',
-//   },
-// ]);
-
-// const earlierNotices = ref([
-//   {
-//     title: 'You appeared in 9 searches this week',
-//     time: '3 hours',
-//     imgs: ['Rectangle 2.2-1', 'Rectangle 2.2', 'Group'],
-//     id: 'g8e41gh3e5rhb',
-//   },
-//   {
-//     title: 'new notice',
-//     time: '10 hours',
-//     imgs: ['Rectangle 2.2-1', 'Rectangle 2.2', 'Group'],
-//     id: 'qwfrg5t1hn1bt',
-//   },
-// ]);
 
 const activeBtnsList = ref<string[]>([]);
 const showBtnsList = (noticeId: string, event: Event) => {
@@ -62,7 +47,10 @@ const showBtnsList = (noticeId: string, event: Event) => {
     <h3>recent</h3>
   </div>
   <ul>
-    <li v-for="notice in notices" :key="notice.id" class="notice">
+    <li v-if="newNotices.length === 0" class="notice empty">
+      empty
+    </li>
+    <li v-for="notice in newNotices" :key="notice.id" class="notice">
       <div v-if="notice.type === 'connect'">
         <span class="material-icons notice-icon">handshake</span>
         <div class="notice-content">
@@ -140,34 +128,82 @@ const showBtnsList = (noticeId: string, event: Event) => {
     <h3>Earlier</h3>
   </div>
   <ul class="earlier-notices-list">
-    <!-- <li v-for="notice in earlierNotices" :key="notice.id" class="notice">
-      <ul class="notice-imgs">
-        <li v-for="(img, idx) in notice.imgs" :key="img + idx">
-          <img :src="getImageUrl(img)" :alt="img" class="notice-img">
-        </li>
-      </ul>
-      <div class="notice-content">
-        <h2 class="notice-title">
-          <button type="button" @click="openSearchHistory">
-            {{ notice.title }}</button>
-        </h2>
-        <span class="notice-time">{{ notice.time }}</span>
+    <li v-if="oldNotices.length === 0" class="notice empty">
+      empty
+    </li>
+    <li v-for="notice in oldNotices" :key="notice.id" class="notice">
+      <div v-if="notice.type === 'connect'">
+        <span class="material-icons notice-icon">handshake</span>
+        <div class="notice-content">
+          <h2 class="notice-title">
+              received a connect from 
+              <router-link :to="`/@${notice.uid}`" class="notice-link">{{ notice.name }}</router-link>
+          </h2>
+          <span class="notice-time">{{ dayjs(notice.timestamp * 1000).fromNow() }}</span>
+        </div>
+        <div class="more-btns-group" :class="{ show: activeBtnsList.includes(notice.id) }"
+          @mouseenter="showBtnsList(notice.id, $event)" @mouseleave="showBtnsList(notice.id, $event)">
+          <button type="button" class="notice-more-btn">
+            <img v-show="!activeBtnsList.includes(notice.id)"
+              :src="getImageUrl('Other')" alt="more options in the notice">
+            <img v-show="activeBtnsList.includes(notice.id)"
+              :src="getImageUrl('chevron-down')" alt="more options in the notice">
+          </button>
+          <ul class="more-btns-list">
+            <li class="more-btn-item">
+              <button type="button" class="notice-delete-btn">Delete</button>
+            </li>
+          </ul>
+        </div>
       </div>
-      <div class="more-btns-group" :class="{ show: activeBtnsList.includes(notice.id) }"
-        @mouseenter="showBtnsList(notice.id, $event)" @mouseleave="showBtnsList(notice.id, $event)">
-        <button type="button" class="notice-more-btn">
-          <img v-show="!activeBtnsList.includes(notice.id)"
-            :src="getImageUrl('Other')" alt="more options in the notice">
-          <img v-show="activeBtnsList.includes(notice.id)"
-            :src="getImageUrl('chevron-down')" alt="more options in the notice">
-        </button>
-        <ul class="more-btns-list">
-          <li class="more-btn-item">
-            <button type="button" class="notice-delete-btn">Delete</button>
-          </li>
-        </ul>
+      <div v-if="notice.type === 'articleLike'">
+        <span class="material-icons notice-icon">thumb_up</span>
+        <div class="notice-content">
+          <h2 class="notice-title">
+              {{ notice.name }} thumbs up your
+              <router-link :to="`/article/${notice.article_id}`" class="notice-link">Article</router-link>
+          </h2>
+          <span class="notice-time">{{ dayjs(notice.timestamp * 1000).fromNow() }}</span>
+        </div>
+        <div class="more-btns-group" :class="{ show: activeBtnsList.includes(notice.id) }"
+          @mouseenter="showBtnsList(notice.id, $event)" @mouseleave="showBtnsList(notice.id, $event)">
+          <button type="button" class="notice-more-btn">
+            <img v-show="!activeBtnsList.includes(notice.id)"
+              :src="getImageUrl('Other')" alt="more options in the notice">
+            <img v-show="activeBtnsList.includes(notice.id)"
+              :src="getImageUrl('chevron-down')" alt="more options in the notice">
+          </button>
+          <ul class="more-btns-list">
+            <li class="more-btn-item">
+              <button type="button" class="notice-delete-btn">Delete</button>
+            </li>
+          </ul>
+        </div>
+      </div><div v-if="notice.type === 'articleComment'">
+        <span class="material-icons notice-icon">chat</span>
+        <div class="notice-content">
+          <h2 class="notice-title">
+              {{ notice.name }} commented your
+              <router-link :to="`/article/${notice.article_id}`" class="notice-link">Article</router-link>
+          </h2>
+          <span class="notice-time">{{ dayjs(notice.timestamp * 1000).fromNow() }}</span>
+        </div>
+        <div class="more-btns-group" :class="{ show: activeBtnsList.includes(notice.id) }"
+          @mouseenter="showBtnsList(notice.id, $event)" @mouseleave="showBtnsList(notice.id, $event)">
+          <button type="button" class="notice-more-btn">
+            <img v-show="!activeBtnsList.includes(notice.id)"
+              :src="getImageUrl('Other')" alt="more options in the notice">
+            <img v-show="activeBtnsList.includes(notice.id)"
+              :src="getImageUrl('chevron-down')" alt="more options in the notice">
+          </button>
+          <ul class="more-btns-list">
+            <li class="more-btn-item">
+              <button type="button" class="notice-delete-btn">Delete</button>
+            </li>
+          </ul>
+        </div>
       </div>
-    </li> -->
+    </li>
   </ul>
 </template>
 
@@ -204,6 +240,10 @@ const showBtnsList = (noticeId: string, event: Event) => {
   > div {
     display:flex;
     align-items: center;
+  }
+  &.empty {
+    text-align: center;
+    color: $gray-400;
   }
 }
 .notice-icon {
